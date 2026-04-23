@@ -91,6 +91,11 @@ void loop() {
     Serial.println(F("Env      : unavailable"));
   }
 
+  Serial.print(F("AUX      : GPIO0(MAG_OUT) "));
+  Serial.print(digitalRead(raven::PIN_AUX_GPIO0) == HIGH ? F("HIGH") : F("LOW"));
+  Serial.print(F("  |  GPIO1 "));
+  Serial.println(digitalRead(raven::PIN_AUX_GPIO1) == HIGH ? F("HIGH") : F("LOW"));
+
   Serial.print(F("Magnet   : "));
   Serial.print(magHigh ? F("HIGH") : F("LOW"));
   Serial.print(F("  | ulp edges "));
