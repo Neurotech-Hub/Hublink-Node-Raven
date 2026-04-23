@@ -1,0 +1,9368 @@
+(export
+	(version "E")
+	(design
+		(source "/Users/gaidica/Library/CloudStorage/Box-Box/Neurotech Hub/Projects/Hublink/KiCad/HublinkNode_v1-1/HublinkNode_v1-1.kicad_sch")
+		(date "2026-04-10T09:07:40")
+		(tool "Eeschema 10.0.0")
+		(sheet
+			(number "1")
+			(name "/")
+			(tstamps "/")
+			(title_block
+				(title)
+				(company)
+				(rev)
+				(date)
+				(source "HublinkNode_v1-1.kicad_sch")
+				(comment
+					(number "1")
+					(value "")
+				)
+				(comment
+					(number "2")
+					(value "")
+				)
+				(comment
+					(number "3")
+					(value "")
+				)
+				(comment
+					(number "4")
+					(value "")
+				)
+				(comment
+					(number "5")
+					(value "")
+				)
+				(comment
+					(number "6")
+					(value "")
+				)
+				(comment
+					(number "7")
+					(value "")
+				)
+				(comment
+					(number "8")
+					(value "")
+				)
+				(comment
+					(number "9")
+					(value "")
+				)
+			)
+		)
+	)
+	(components
+		(comp
+			(ref "A1")
+			(value "Adafruit_Feather_ESP32-S3")
+			(footprint "0_NeurotechHub:Adafruit_Feather_Hublink_Node")
+			(datasheet "https://cdn-learn.adafruit.com/downloads/pdf/adafruit-feather.pdf")
+			(description "Adafruit Feather ESP32-S3")
+			(fields
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "0_NeurotechHub:Adafruit_Feather_Hublink_Node")
+				(field
+					(name "Datasheet") "https://cdn-learn.adafruit.com/downloads/pdf/adafruit-feather.pdf")
+				(field
+					(name "Description") "Adafruit Feather ESP32-S3")
+			)
+			(libsource
+				(lib "0_NeurotechHub")
+				(part "Adafruit_Feather_ESP32-S3")
+				(description "Adafruit Feather ESP32-S3")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "Adafruit feather microcontroller module")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Adafruit*Feather*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "fa1a4f3b-cf66-4807-9e35-0803ee14b1ed")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "19")
+						)
+						(pin
+							(num "20")
+						)
+						(pin
+							(num "21")
+						)
+						(pin
+							(num "22")
+						)
+						(pin
+							(num "23")
+						)
+						(pin
+							(num "24")
+						)
+						(pin
+							(num "25")
+						)
+						(pin
+							(num "11")
+						)
+						(pin
+							(num "12")
+						)
+						(pin
+							(num "13")
+						)
+						(pin
+							(num "14")
+						)
+						(pin
+							(num "15")
+						)
+						(pin
+							(num "16")
+						)
+						(pin
+							(num "17")
+						)
+						(pin
+							(num "18")
+						)
+						(pin
+							(num "28")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "26")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "27")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "7")
+						)
+						(pin
+							(num "8")
+						)
+						(pin
+							(num "9")
+						)
+						(pin
+							(num "10")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "BT1")
+			(value "Battery_927_SMD")
+			(footprint "0_NeurotechHub:BAT-SMD_MY-927-02")
+			(description "Single-cell battery")
+			(fields
+				(field
+					(name "DigiKey") "36-3030CT-ND")
+				(field
+					(name "LCSC") "C2902336")
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "0_NeurotechHub:BAT-SMD_MY-927-02")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Single-cell battery")
+			)
+			(libsource
+				(lib "0_NeurotechHub")
+				(part "Battery_927_SMD")
+				(description "Single-cell battery")
+			)
+			(property
+				(name "DigiKey")
+				(value "36-3030CT-ND")
+			)
+			(property
+				(name "LCSC")
+				(value "C2902336")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "battery cell")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "a050d266-a8ad-430c-b672-7695045f7b27")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C1")
+			(value "0.1uF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "DigiKey")
+				)
+				(field
+					(name "LCSC") "C1525")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "DigiKey")
+				(value "")
+			)
+			(property
+				(name "LCSC")
+				(value "C1525")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "211cc3f3-7770-49b6-82f9-dd0601e05ab2")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C2")
+			(value "0.1uF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "DigiKey")
+				)
+				(field
+					(name "LCSC") "C1525")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "DigiKey")
+				(value "")
+			)
+			(property
+				(name "LCSC")
+				(value "C1525")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "3c3c7068-343b-452f-8450-35f45411a009")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C3")
+			(value "100uF")
+			(footprint "Capacitor_SMD:C_1206_3216Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "DigiKey")
+				)
+				(field
+					(name "LCSC") "C15008")
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Capacitor_SMD:C_1206_3216Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "DigiKey")
+				(value "")
+			)
+			(property
+				(name "LCSC")
+				(value "C15008")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "10e3875b-d30d-4459-9a08-ad351e305565")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C6")
+			(value "0.1uF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "DigiKey")
+				)
+				(field
+					(name "LCSC") "C1525")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "DigiKey")
+				(value "")
+			)
+			(property
+				(name "LCSC")
+				(value "C1525")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "8fc96774-42d1-40b5-8fdd-b51380a3a462")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C14")
+			(value "0.1uF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "DigiKey")
+				)
+				(field
+					(name "LCSC") "C1525")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "DigiKey")
+				(value "")
+			)
+			(property
+				(name "LCSC")
+				(value "C1525")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "ab13ced2-79c3-4bac-aa0b-f258f270ec3b")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C18")
+			(value "10uF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "DigiKey")
+				)
+				(field
+					(name "LCSC") "C19702")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "DigiKey")
+				(value "")
+			)
+			(property
+				(name "LCSC")
+				(value "C19702")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "d004fea0-4153-43e0-bf86-21064eead351")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C21")
+			(value "10uF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "DigiKey")
+				)
+				(field
+					(name "LCSC") "C19702")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "DigiKey")
+				(value "")
+			)
+			(property
+				(name "LCSC")
+				(value "C19702")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "c6da1845-7cb9-4422-821f-eec13462bb1d")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C22")
+			(value "10uF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "DigiKey")
+				)
+				(field
+					(name "LCSC") "C19702")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "DigiKey")
+				(value "")
+			)
+			(property
+				(name "LCSC")
+				(value "C19702")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "5d40999c-c344-48ed-b9c4-6f91fd3d005e")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C23")
+			(value "10uF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "DigiKey")
+				)
+				(field
+					(name "LCSC") "C19702")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "DigiKey")
+				(value "")
+			)
+			(property
+				(name "LCSC")
+				(value "C19702")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "464edb8c-9f09-4d00-a0de-0973de9eb8d2")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C24")
+			(value "10uF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "DigiKey")
+				)
+				(field
+					(name "LCSC") "C19702")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "DigiKey")
+				(value "")
+			)
+			(property
+				(name "LCSC")
+				(value "C19702")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "703f48c4-b6ec-48f9-8834-8a79d70a36ad")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C25")
+			(value "0.1uF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "DigiKey")
+				)
+				(field
+					(name "LCSC") "C1525")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "DigiKey")
+				(value "")
+			)
+			(property
+				(name "LCSC")
+				(value "C1525")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "f3ec6e62-e210-4328-8e09-b931a32e0edc")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C26")
+			(value "10uF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "DigiKey")
+				)
+				(field
+					(name "LCSC") "C19702")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "DigiKey")
+				(value "")
+			)
+			(property
+				(name "LCSC")
+				(value "C19702")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "4eb274df-1c8a-430b-a07f-32781cab29a1")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C27")
+			(value "10uF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "DigiKey")
+				)
+				(field
+					(name "LCSC") "C19702")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "DigiKey")
+				(value "")
+			)
+			(property
+				(name "LCSC")
+				(value "C19702")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "2171ced7-5916-4d15-a1c5-8e2373062bb1")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C28")
+			(value "0.1uF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "DigiKey")
+				)
+				(field
+					(name "LCSC") "C1525")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "DigiKey")
+				(value "")
+			)
+			(property
+				(name "LCSC")
+				(value "C1525")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "7400c8cc-b289-4bb7-81bc-07ed53d55258")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C29")
+			(value "0.1uF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "DigiKey")
+				)
+				(field
+					(name "LCSC") "C1525")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "DigiKey")
+				(value "")
+			)
+			(property
+				(name "LCSC")
+				(value "C1525")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "11e0a8f1-a284-490e-ba6b-c72b3f56831f")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C30")
+			(value "1uF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "DigiKey")
+				)
+				(field
+					(name "LCSC") "0402")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "DigiKey")
+				(value "")
+			)
+			(property
+				(name "LCSC")
+				(value "0402")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "8465e957-01b5-4de3-b99e-211a7a32d3a3")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "CARD1")
+			(value "~")
+			(footprint "0_NeurotechHub:MicroSD_Hinge_TF-002-H18_C125814")
+			(datasheet "https://atta.szlcsc.com/upload/public/pdf/source/20200313/C125814_E45762AFA89F96AEF2D8FC2220BDEE92.pdf")
+			(description "Card Connection Mode:Flip type Card Type:MicroSD card (TF card) Connector Type:Card Slot Height Above Board:1.8mm Operating Temperature:-35°C~+85°C Operating Temperature:-35°C~+85°C")
+			(fields
+				(field
+					(name "Manufacturer Part") "TF-002X-H18")
+				(field
+					(name "Manufacturer") "SOFNG(硕方)")
+				(field
+					(name "Supplier Part") "C125814")
+				(field
+					(name "Supplier") "LCSC")
+				(field
+					(name "LCSC") "C125814")
+				(field
+					(name "DigiKey") "WM19081CT-ND")
+				(field
+					(name "Alt Molex") "5009010801")
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "0_NeurotechHub:MicroSD_Hinge_TF-002-H18_C125814")
+				(field
+					(name "Datasheet") "https://atta.szlcsc.com/upload/public/pdf/source/20200313/C125814_E45762AFA89F96AEF2D8FC2220BDEE92.pdf")
+				(field
+					(name "Description") "Card Connection Mode:Flip type Card Type:MicroSD card (TF card) Connector Type:Card Slot Height Above Board:1.8mm Operating Temperature:-35°C~+85°C Operating Temperature:-35°C~+85°C")
+			)
+			(libsource
+				(lib "0_NeurotechHub")
+				(part "MicroSD_Hinge_TF-002-H18_C125814")
+				(description "Card Connection Mode:Flip type Card Type:MicroSD card (TF card) Connector Type:Card Slot Height Above Board:1.8mm Operating Temperature:-35°C~+85°C Operating Temperature:-35°C~+85°C")
+			)
+			(property
+				(name "Manufacturer Part")
+				(value "TF-002X-H18")
+			)
+			(property
+				(name "Manufacturer")
+				(value "SOFNG(硕方)")
+			)
+			(property
+				(name "Supplier Part")
+				(value "C125814")
+			)
+			(property
+				(name "Supplier")
+				(value "LCSC")
+			)
+			(property
+				(name "LCSC")
+				(value "C125814")
+			)
+			(property
+				(name "DigiKey")
+				(value "WM19081CT-ND")
+			)
+			(property
+				(name "Alt Molex")
+				(value "5009010801")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "fa85f42b-684d-4d11-95f3-b53bf850beb2")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "7")
+						)
+						(pin
+							(num "8")
+						)
+						(pin
+							(num "9")
+						)
+						(pin
+							(num "10")
+						)
+						(pin
+							(num "11")
+						)
+						(pin
+							(num "12")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "D5")
+			(value "LED_B")
+			(footprint "LED_SMD:LED_0603_1608Metric")
+			(description "Light emitting diode")
+			(fields
+				(field
+					(name "DigiKey")
+				)
+				(field
+					(name "LCSC") "C965807")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "LED_SMD:LED_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Light emitting diode")
+			)
+			(libsource
+				(lib "Device")
+				(part "LED")
+				(description "Light emitting diode")
+			)
+			(property
+				(name "DigiKey")
+				(value "")
+			)
+			(property
+				(name "LCSC")
+				(value "C965807")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "LED diode")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "LED* LED_SMD:* LED_THT:*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "3a0d5bcd-692b-4fc4-8472-518efb9e2da2")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "D7")
+			(value "LED_G")
+			(footprint "LED_SMD:LED_0603_1608Metric")
+			(description "Light emitting diode")
+			(fields
+				(field
+					(name "DigiKey")
+				)
+				(field
+					(name "LCSC") "C19171301")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "LED_SMD:LED_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Light emitting diode")
+			)
+			(libsource
+				(lib "Device")
+				(part "LED")
+				(description "Light emitting diode")
+			)
+			(property
+				(name "DigiKey")
+				(value "")
+			)
+			(property
+				(name "LCSC")
+				(value "C19171301")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "LED diode")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "LED* LED_SMD:* LED_THT:*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "9d09bfaf-41ed-429b-b83d-e7af30cd8531")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "D8")
+			(value "SK54A-LTP")
+			(footprint "Diode_SMD:D_SMA")
+			(datasheet "https://www.mccsemi.com/pdf/Products/SK52A-L_SK5200A-L(SMA).pdf")
+			(description "Schottky diode")
+			(fields
+				(field
+					(name "DigiKey") "SK5200AFL-TPMSCT-ND")
+				(field
+					(name "LCSC") "C669017")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Diode_SMD:D_SMA")
+				(field
+					(name "Datasheet") "https://www.mccsemi.com/pdf/Products/SK52A-L_SK5200A-L(SMA).pdf")
+				(field
+					(name "Description") "Schottky diode")
+			)
+			(libsource
+				(lib "Device")
+				(part "D_Schottky")
+				(description "Schottky diode")
+			)
+			(property
+				(name "DigiKey")
+				(value "SK5200AFL-TPMSCT-ND")
+			)
+			(property
+				(name "LCSC")
+				(value "C669017")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "diode Schottky")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "TO-???* *_Diode_* *SingleDiode* D_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "b7062ea7-0d04-4957-8b57-8a630db7e1d3")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "D9")
+			(value "LED_R")
+			(footprint "LED_SMD:LED_0603_1608Metric")
+			(description "Light emitting diode")
+			(fields
+				(field
+					(name "DigiKey")
+				)
+				(field
+					(name "LCSC") "C965799")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "LED_SMD:LED_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Light emitting diode")
+			)
+			(libsource
+				(lib "Device")
+				(part "LED")
+				(description "Light emitting diode")
+			)
+			(property
+				(name "DigiKey")
+				(value "")
+			)
+			(property
+				(name "LCSC")
+				(value "C965799")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "LED diode")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "LED* LED_SMD:* LED_THT:*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "95cc583e-6463-4a73-bd9a-0018510ff92c")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "J1")
+			(value "TYPE-USB-C-31-M-12")
+			(footprint "0_NeurotechHub:HRO_TYPE-USB-C-31-M-12")
+			(fields
+				(field
+					(name "MF") "HRO Electronics Co., Ltd.")
+				(field
+					(name "MAXIMUM_PACKAGE_HEIGHT") "3.26 mm")
+				(field
+					(name "Package") "Package")
+				(field
+					(name "Price") "None")
+				(field
+					(name "Check_prices") "https://www.snapeda.com/parts/TYPE-C-31-M-12/HRO+Electronics+Co.%252C+Ltd./view-part/?ref=eda")
+				(field
+					(name "STANDARD") "Manufacturer Recommendations")
+				(field
+					(name "PARTREV") "2020.12.08")
+				(field
+					(name "SnapEDA_Link") "https://www.snapeda.com/parts/TYPE-C-31-M-12/HRO+Electronics+Co.%252C+Ltd./view-part/?ref=snap")
+				(field
+					(name "MP") "TYPE-C-31-M-12")
+				(field
+					(name "Description_1") "\n                        \n                            USB Connectors 24 Receptacle 1 8.94*7.3mm RoHS\n                        \n")
+				(field
+					(name "SNAPEDA_PN") "TYPE-C-31-M-12")
+				(field
+					(name "Availability") "Not in stock")
+				(field
+					(name "MANUFACTURER") "HRO Electronics Co., Ltd.")
+				(field
+					(name "DigiKey") "670-DX07S016JA3R1500CT-ND")
+				(field
+					(name "LCSC") "C165948")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "0_NeurotechHub:HRO_TYPE-USB-C-31-M-12")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "0_NeurotechHub")
+				(part "TYPE-USB-C-31-M-12")
+				(description "")
+			)
+			(property
+				(name "MF")
+				(value "HRO Electronics Co., Ltd.")
+			)
+			(property
+				(name "MAXIMUM_PACKAGE_HEIGHT")
+				(value "3.26 mm")
+			)
+			(property
+				(name "Package")
+				(value "Package")
+			)
+			(property
+				(name "Price")
+				(value "None")
+			)
+			(property
+				(name "Check_prices")
+				(value "https://www.snapeda.com/parts/TYPE-C-31-M-12/HRO+Electronics+Co.%252C+Ltd./view-part/?ref=eda")
+			)
+			(property
+				(name "STANDARD")
+				(value "Manufacturer Recommendations")
+			)
+			(property
+				(name "PARTREV")
+				(value "2020.12.08")
+			)
+			(property
+				(name "SnapEDA_Link")
+				(value "https://www.snapeda.com/parts/TYPE-C-31-M-12/HRO+Electronics+Co.%252C+Ltd./view-part/?ref=snap")
+			)
+			(property
+				(name "MP")
+				(value "TYPE-C-31-M-12")
+			)
+			(property
+				(name "Description_1")
+				(value "\n                        \n                            USB Connectors 24 Receptacle 1 8.94*7.3mm RoHS\n                        \n")
+			)
+			(property
+				(name "SNAPEDA_PN")
+				(value "TYPE-C-31-M-12")
+			)
+			(property
+				(name "Availability")
+				(value "Not in stock")
+			)
+			(property
+				(name "MANUFACTURER")
+				(value "HRO Electronics Co., Ltd.")
+			)
+			(property
+				(name "DigiKey")
+				(value "670-DX07S016JA3R1500CT-ND")
+			)
+			(property
+				(name "LCSC")
+				(value "C165948")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "500dc7fb-f08b-4899-a89d-37cdb9ddeb2c")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "A5")
+						)
+						(pin
+							(num "A6")
+						)
+						(pin
+							(num "A7")
+						)
+						(pin
+							(num "A8")
+						)
+						(pin
+							(num "A4_B9")
+						)
+						(pin
+							(num "B4_A9")
+						)
+						(pin
+							(num "B8")
+						)
+						(pin
+							(num "B7")
+						)
+						(pin
+							(num "B6")
+						)
+						(pin
+							(num "B5")
+						)
+						(pin
+							(num "S1")
+						)
+						(pin
+							(num "S2")
+						)
+						(pin
+							(num "S3")
+						)
+						(pin
+							(num "S4")
+						)
+						(pin
+							(num "A1_B12")
+						)
+						(pin
+							(num "B1_A12")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "J3")
+			(value "Conn_01x04_Socket")
+			(footprint "0_NeurotechHub:BM04B-SRSS-TB_JST-SH-STEMMA-QT")
+			(description "Generic connector, single row, 01x04, script generated")
+			(fields
+				(field
+					(name "DigiKey") "455-BM04B-SRSS-TBCT-ND")
+				(field
+					(name "LCSC") "C160390")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "0_NeurotechHub:BM04B-SRSS-TB_JST-SH-STEMMA-QT")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Generic connector, single row, 01x04, script generated")
+			)
+			(libsource
+				(lib "Connector")
+				(part "Conn_01x04_Socket")
+				(description "Generic connector, single row, 01x04, script generated")
+			)
+			(property
+				(name "DigiKey")
+				(value "455-BM04B-SRSS-TBCT-ND")
+			)
+			(property
+				(name "LCSC")
+				(value "C160390")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "connector")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Connector*:*_1x??_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "2eef28f7-923e-4e5c-974c-9e3f92c464ef")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "J4")
+			(value "Conn_01x04_Socket")
+			(footprint "0_NeurotechHub:BM04B-SRSS-TB_JST-SH-STEMMA-QT")
+			(description "Generic connector, single row, 01x04, script generated")
+			(fields
+				(field
+					(name "DigiKey") "455-BM04B-SRSS-TBCT-ND")
+				(field
+					(name "LCSC") "C160390")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "0_NeurotechHub:BM04B-SRSS-TB_JST-SH-STEMMA-QT")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Generic connector, single row, 01x04, script generated")
+			)
+			(libsource
+				(lib "Connector")
+				(part "Conn_01x04_Socket")
+				(description "Generic connector, single row, 01x04, script generated")
+			)
+			(property
+				(name "DigiKey")
+				(value "455-BM04B-SRSS-TBCT-ND")
+			)
+			(property
+				(name "LCSC")
+				(value "C160390")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "connector")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Connector*:*_1x??_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "2965b676-48d1-44ce-98fd-f3b42464845d")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "P1")
+			(value "JST-S2B-PH-SM4-TB")
+			(footprint "0_NeurotechHub:JST_S2B-PH-SM4-TB")
+			(fields
+				(field
+					(name "DigiKey") "455-S2B-PH-SM4-TBCT-ND")
+				(field
+					(name "Label") " battery")
+				(field
+					(name "LCSC") "C295747")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "0_NeurotechHub:JST_S2B-PH-SM4-TB")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "0_NeurotechHub")
+				(part "JST-S2B-PH-SM4-TB")
+				(description "")
+			)
+			(property
+				(name "DigiKey")
+				(value "455-S2B-PH-SM4-TBCT-ND")
+			)
+			(property
+				(name "Label")
+				(value " battery")
+			)
+			(property
+				(name "LCSC")
+				(value "C295747")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "efecf604-9de2-443f-a062-535d90b0564b")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "Q1")
+			(value "DMP2045UQ-7")
+			(footprint "Package_TO_SOT_SMD:SOT-23")
+			(fields
+				(field
+					(name "DigiKey") "31-DMP2045UQ-7CT-ND")
+				(field
+					(name "LCSC") "C150470")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-23")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Transistor_FET")
+				(part "AO3401A")
+				(description "-4.0A Id, -30V Vds, P-Channel MOSFET, SOT-23")
+			)
+			(property
+				(name "DigiKey")
+				(value "31-DMP2045UQ-7CT-ND")
+			)
+			(property
+				(name "LCSC")
+				(value "C150470")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "P-Channel MOSFET")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "SOT?23*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "b56e7d26-9cc4-4516-b82f-f0cf04ca84e9")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "Q3")
+			(value "DMN2041L-7")
+			(footprint "Package_TO_SOT_SMD:SOT-23")
+			(datasheet "https://www.diodes.com/assets/Datasheets/products_inactive_data/DMN2041L.pdf")
+			(fields
+				(field
+					(name "DigiKey") "DMN2041L-7DICT-ND")
+				(field
+					(name "LCSC") "C154903")
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-23")
+				(field
+					(name "Datasheet") "https://www.diodes.com/assets/Datasheets/products_inactive_data/DMN2041L.pdf")
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Transistor_FET")
+				(part "2N7002")
+				(description "0.115A Id, 60V Vds, N-Channel MOSFET, SOT-23")
+			)
+			(property
+				(name "DigiKey")
+				(value "DMN2041L-7DICT-ND")
+			)
+			(property
+				(name "LCSC")
+				(value "C154903")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "N-Channel Switching MOSFET")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "SOT?23*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "8d28110d-e649-4220-b469-f9bbd450f957")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R1")
+			(value "5.1k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "DigiKey") "P5.1KDCCT-ND")
+				(field
+					(name "LCSC") "C25941")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "DigiKey")
+				(value "P5.1KDCCT-ND")
+			)
+			(property
+				(name "LCSC")
+				(value "C25941")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "d913b010-6964-4448-8e9f-924e3c9a74ba")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R3")
+			(value "1M")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "LCSC") "C26083")
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "LCSC")
+				(value "C26083")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "f2913c01-0950-4d15-be50-9d5093f8d36a")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R6")
+			(value "5.1k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "DigiKey") "P5.1KDCCT-ND")
+				(field
+					(name "LCSC") "C25941")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "DigiKey")
+				(value "P5.1KDCCT-ND")
+			)
+			(property
+				(name "LCSC")
+				(value "C25941")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "5113dff9-9cc4-4a7f-9db2-a579a7bcd5b5")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R7")
+			(value "5.1k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "DigiKey") "P5.1KDCCT-ND")
+				(field
+					(name "LCSC") "C25941")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "DigiKey")
+				(value "P5.1KDCCT-ND")
+			)
+			(property
+				(name "LCSC")
+				(value "C25941")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "8dd020cf-4320-446a-aa16-8835a35e80ae")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R22")
+			(value "5.1k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "DigiKey") "P5.1KDCCT-ND")
+				(field
+					(name "LCSC") "C25941")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "DigiKey")
+				(value "P5.1KDCCT-ND")
+			)
+			(property
+				(name "LCSC")
+				(value "C25941")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "a1d46be5-19e9-4aeb-bd63-d9e3ca46e463")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R23")
+			(value "100k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "DigiKey") "311-100KLRCT-ND")
+				(field
+					(name "LCSC") "C102750")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "DigiKey")
+				(value "311-100KLRCT-ND")
+			)
+			(property
+				(name "LCSC")
+				(value "C102750")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "0a1a61b6-179d-46e0-ab90-0f3e7be076ae")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R26")
+			(value "10k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "DigiKey") "311-10KJRCT-ND")
+				(field
+					(name "LCSC") "C25531")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "DigiKey")
+				(value "311-10KJRCT-ND")
+			)
+			(property
+				(name "LCSC")
+				(value "C25531")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "0ea40254-ba7c-4331-b0ff-dd922148e87b")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R27")
+			(value "5.1k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "DigiKey") "P5.1KDCCT-ND")
+				(field
+					(name "LCSC") "C25941")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "DigiKey")
+				(value "P5.1KDCCT-ND")
+			)
+			(property
+				(name "LCSC")
+				(value "C25941")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "ad85c0ad-d4c5-4b3f-b4a3-9e822f11aba0")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R28")
+			(value "10k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "DigiKey") "311-10KJRCT-ND")
+				(field
+					(name "LCSC") "C25531")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "DigiKey")
+				(value "311-10KJRCT-ND")
+			)
+			(property
+				(name "LCSC")
+				(value "C25531")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "bd8dc635-8e47-4294-b92d-01fde3381cc8")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R29")
+			(value "5.1k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "DigiKey") "P5.1KDCCT-ND")
+				(field
+					(name "LCSC") "C25941")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "DigiKey")
+				(value "P5.1KDCCT-ND")
+			)
+			(property
+				(name "LCSC")
+				(value "C25941")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "c3d85ce6-0b3b-4ae0-9b9e-f488cae866de")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R30")
+			(value "1k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "DigiKey")
+				)
+				(field
+					(name "LCSC") "C11702")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "DigiKey")
+				(value "")
+			)
+			(property
+				(name "LCSC")
+				(value "C11702")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "35efe9bb-7bab-4ae7-9145-1266d4cb11eb")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R35")
+			(value "5.1k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "DigiKey") "P5.1KDCCT-ND")
+				(field
+					(name "LCSC") "C25941")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "DigiKey")
+				(value "P5.1KDCCT-ND")
+			)
+			(property
+				(name "LCSC")
+				(value "C25941")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "33d7a134-509a-4d1f-a875-a9da880dad7c")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "SW1")
+			(value "SW_Push_Shielded")
+			(footprint "Button_Switch_SMD:SW_Push_1P1T-SH_NO_CK_KMR2xxG")
+			(description "Generic push-button switch, two contact pins and shield pin(s)")
+			(fields
+				(field
+					(name "DigiKey") "401-1428-1-ND")
+				(field
+					(name "LCSC") "C221678")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Button_Switch_SMD:SW_Push_1P1T-SH_NO_CK_KMR2xxG")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Generic push-button switch, two contact pins and shield pin(s)")
+			)
+			(libsource
+				(lib "Switch")
+				(part "SW_Push_Shielded")
+				(description "Generic push-button switch, two contact pins and shield pin(s)")
+			)
+			(property
+				(name "DigiKey")
+				(value "401-1428-1-ND")
+			)
+			(property
+				(name "LCSC")
+				(value "C221678")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "switch normally-open pushbutton momentary")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "0aeaf3c0-b404-43e1-a62c-f585df243a2e")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "SH")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "SW2")
+			(value "SW_Push_Shielded")
+			(footprint "Button_Switch_SMD:SW_Push_1P1T-SH_NO_CK_KMR2xxG")
+			(description "Generic push-button switch, two contact pins and shield pin(s)")
+			(fields
+				(field
+					(name "DigiKey") "401-1428-1-ND")
+				(field
+					(name "LCSC") "C221678")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Button_Switch_SMD:SW_Push_1P1T-SH_NO_CK_KMR2xxG")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Generic push-button switch, two contact pins and shield pin(s)")
+			)
+			(libsource
+				(lib "Switch")
+				(part "SW_Push_Shielded")
+				(description "Generic push-button switch, two contact pins and shield pin(s)")
+			)
+			(property
+				(name "DigiKey")
+				(value "401-1428-1-ND")
+			)
+			(property
+				(name "LCSC")
+				(value "C221678")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "switch normally-open pushbutton momentary")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "615b6b42-8edf-4f72-83ae-4561fdda76b0")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "SH")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "SW4")
+			(value "C2681570")
+			(footprint "0_NeurotechHub:SwitchMini_JLCPCB-C2681570_MSK12CO2")
+			(datasheet "https://atta.szlcsc.com/upload/public/pdf/source/20210224/C2681570_D263F9C605E4588A4AE6114B72AE4C72.pdf")
+			(description "Circuit:SPDT Actuator Style:- Pin Style:SMDSplicing Switch Length:5mm Switch Width:2.75mm Switch Height:1.4mm Mounting Style:卧贴 Actuator Color:- Current Rating (DC):50mA Voltage Rating (DC):12V Current Rating (AC):- Voltage Rating (AC):- Mechanical Life:1")
+			(fields
+				(field
+					(name "Manufacturer Part") "MINI MSK12CO2")
+				(field
+					(name "Manufacturer") "SHOU HAN(首韩)")
+				(field
+					(name "Supplier Part") "C2681570")
+				(field
+					(name "Supplier") "LCSC")
+				(field
+					(name "LCSC") "C2681570")
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "0_NeurotechHub:SwitchMini_JLCPCB-C2681570_MSK12CO2")
+				(field
+					(name "Datasheet") "https://atta.szlcsc.com/upload/public/pdf/source/20210224/C2681570_D263F9C605E4588A4AE6114B72AE4C72.pdf")
+				(field
+					(name "Description") "Circuit:SPDT Actuator Style:- Pin Style:SMDSplicing Switch Length:5mm Switch Width:2.75mm Switch Height:1.4mm Mounting Style:卧贴 Actuator Color:- Current Rating (DC):50mA Voltage Rating (DC):12V Current Rating (AC):- Voltage Rating (AC):- Mechanical Life:1")
+			)
+			(libsource
+				(lib "0_NeurotechHub")
+				(part "MINI MSK12CO2")
+				(description "Circuit:SPDT Actuator Style:- Pin Style:SMDSplicing Switch Length:5mm Switch Width:2.75mm Switch Height:1.4mm Mounting Style:卧贴 Actuator Color:- Current Rating (DC):50mA Voltage Rating (DC):12V Current Rating (AC):- Voltage Rating (AC):- Mechanical Life:1")
+			)
+			(property
+				(name "Manufacturer Part")
+				(value "MINI MSK12CO2")
+			)
+			(property
+				(name "Manufacturer")
+				(value "SHOU HAN(首韩)")
+			)
+			(property
+				(name "Supplier Part")
+				(value "C2681570")
+			)
+			(property
+				(name "Supplier")
+				(value "LCSC")
+			)
+			(property
+				(name "LCSC")
+				(value "C2681570")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "0f18ca40-874a-4818-a914-9b948c935f95")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "5")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "TP1")
+			(value "TestPoint")
+			(footprint "TestPoint:TestPoint_Pad_D1.0mm")
+			(description "test point")
+			(fields
+				(field
+					(name "DigiKey")
+				)
+				(field
+					(name "LCSC")
+				)
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "test point")
+			)
+			(libsource
+				(lib "Connector")
+				(part "TestPoint")
+				(description "test point")
+			)
+			(property
+				(name "DigiKey")
+				(value "")
+			)
+			(property
+				(name "LCSC")
+				(value "")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "test point tp")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Pin* Test*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "2b65b61c-445b-4f41-9687-f2f9f9e5af42")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "TP5")
+			(value "TestPoint")
+			(footprint "TestPoint:TestPoint_Pad_D1.0mm")
+			(description "test point")
+			(fields
+				(field
+					(name "DigiKey")
+				)
+				(field
+					(name "LCSC")
+				)
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "test point")
+			)
+			(libsource
+				(lib "Connector")
+				(part "TestPoint")
+				(description "test point")
+			)
+			(property
+				(name "DigiKey")
+				(value "")
+			)
+			(property
+				(name "LCSC")
+				(value "")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "test point tp")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Pin* Test*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "c5ff8717-bca1-47ea-a5e8-e8eb51db79d0")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "TP6")
+			(value "TestPoint")
+			(footprint "TestPoint:TestPoint_Pad_D1.0mm")
+			(description "test point")
+			(fields
+				(field
+					(name "DigiKey")
+				)
+				(field
+					(name "LCSC")
+				)
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "test point")
+			)
+			(libsource
+				(lib "Connector")
+				(part "TestPoint")
+				(description "test point")
+			)
+			(property
+				(name "DigiKey")
+				(value "")
+			)
+			(property
+				(name "LCSC")
+				(value "")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "test point tp")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Pin* Test*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "fae0cddf-705f-4978-a2c8-f52499765ba7")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U1")
+			(value "DS3231MZ")
+			(footprint "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm")
+			(datasheet "http://datasheets.maximintegrated.com/en/ds/DS3231M.pdf")
+			(description "±5ppm, I2C Real-Time Clock SOIC-8")
+			(fields
+				(field
+					(name "LCSC") "C107410")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm")
+				(field
+					(name "Datasheet") "http://datasheets.maximintegrated.com/en/ds/DS3231M.pdf")
+				(field
+					(name "Description") "±5ppm, I2C Real-Time Clock SOIC-8")
+			)
+			(libsource
+				(lib "Timer_RTC")
+				(part "DS3231MZ")
+				(description "±5ppm, I2C Real-Time Clock SOIC-8")
+			)
+			(property
+				(name "LCSC")
+				(value "C107410")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "RTC TCXO Realtime Time Clock MEMS I2C")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "SOIC*3.9x4.9mm*P1.27mm*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "4e86cfe4-b257-4b6b-bdc3-305a618cde5c")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "8")
+						)
+						(pin
+							(num "7")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "3")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U2")
+			(value "BME280")
+			(footprint "Package_LGA:Bosch_LGA-8_2.5x2.5mm_P0.65mm_ClockwisePinNumbering")
+			(datasheet "https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf")
+			(description "3-in-1 sensor, humidity, pressure, temperature, I2C and SPI interface, 1.71-3.6V, LGA-8")
+			(fields
+				(field
+					(name "LCSC") "C92489")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Package_LGA:Bosch_LGA-8_2.5x2.5mm_P0.65mm_ClockwisePinNumbering")
+				(field
+					(name "Datasheet") "https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf")
+				(field
+					(name "Description") "3-in-1 sensor, humidity, pressure, temperature, I2C and SPI interface, 1.71-3.6V, LGA-8")
+			)
+			(libsource
+				(lib "Sensor")
+				(part "BME280")
+				(description "3-in-1 sensor, humidity, pressure, temperature, I2C and SPI interface, 1.71-3.6V, LGA-8")
+			)
+			(property
+				(name "LCSC")
+				(value "C92489")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "Bosch pressure humidity temperature environment environmental measurement digital")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "*LGA*2.5x2.5mm*P0.65mm*Clockwise*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "07a0f54b-492d-46bf-ae9f-aad77b74b1b4")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "8")
+						)
+						(pin
+							(num "7")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U3")
+			(value "BH1750FVI-TR")
+			(footprint "0_NeurotechHub:XDCR_BH1750FVI-TR")
+			(datasheet "https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/6165/bh1750fvi-e.pdf")
+			(fields
+				(field
+					(name "LCSC") "C78960")
+				(field
+					(name "DigiKey") "BH1750FVICT-ND")
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "0_NeurotechHub:XDCR_BH1750FVI-TR")
+				(field
+					(name "Datasheet") "https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/6165/bh1750fvi-e.pdf")
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "0_NeurotechHub")
+				(part "BH1750FVI-TR")
+				(description "")
+			)
+			(property
+				(name "LCSC")
+				(value "C78960")
+			)
+			(property
+				(name "DigiKey")
+				(value "BH1750FVICT-ND")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "91efcccd-6b03-4069-bcfc-b5f648e99779")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "3")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U5")
+			(value "74AUP1G08")
+			(footprint "Package_TO_SOT_SMD:SOT-23-5")
+			(datasheet "https://www.ti.com/lit/ds/symlink/sn74aup1g08.pdf")
+			(description "Single AND Gate, Low-Voltage CMOS")
+			(fields
+				(field
+					(name "DigiKey") "296-11601-1-ND")
+				(field
+					(name "LCSC") "C7666")
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-23-5")
+				(field
+					(name "Datasheet") "https://www.ti.com/lit/ds/symlink/sn74aup1g08.pdf")
+				(field
+					(name "Description") "Single AND Gate, Low-Voltage CMOS")
+			)
+			(libsource
+				(lib "74xGxx")
+				(part "74AUP1G08")
+				(description "Single AND Gate, Low-Voltage CMOS")
+			)
+			(property
+				(name "DigiKey")
+				(value "296-11601-1-ND")
+			)
+			(property
+				(name "LCSC")
+				(value "C7666")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "Single Gate AND LVC CMOS")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "SOT?23* Texas?R-PDSO-G5?DCK* Texas?R-PDSO-N5?DRL* Texas?X2SON*0.8x0.8mm*P0.48mm*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "6e2c980b-a599-476a-954a-9ec8bc745d79")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U7")
+			(value "APS11753_Magnet_Switch")
+			(footprint "Package_TO_SOT_SMD:SOT-23")
+			(datasheet "https://www.allegromicro.com/-/media/files/datasheets/aps11753-datasheet.pdf?sc_lang=en")
+			(fields
+				(field
+					(name "DigiKey")
+				)
+				(field
+					(name "LCSC")
+				)
+				(field
+					(name "Mouser") "250-APS11753KMD-3PL1")
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-23")
+				(field
+					(name "Datasheet") "https://www.allegromicro.com/-/media/files/datasheets/aps11753-datasheet.pdf?sc_lang=en")
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "0_NeurotechHub")
+				(part "APS11753_Magnet_Switch")
+				(description "")
+			)
+			(property
+				(name "DigiKey")
+				(value "")
+			)
+			(property
+				(name "LCSC")
+				(value "")
+			)
+			(property
+				(name "Mouser")
+				(value "250-APS11753KMD-3PL1")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "DRV5032FADBZR")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "DBZ0003A-IPC_A DBZ0003A-IPC_B DBZ0003A-IPC_C DBZ0003A-MFG")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "9fdf9426-3272-459d-9f81-5ef234af1801")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U9")
+			(value "MCP73831-2-OT")
+			(footprint "Package_TO_SOT_SMD:SOT-23-5")
+			(datasheet "http://ww1.microchip.com/downloads/en/DeviceDoc/20001984g.pdf")
+			(description "Single cell, Li-Ion/Li-Po charge management controller, 4.20V, Tri-State Status Output, in SOT23-5 package")
+			(fields
+				(field
+					(name "Label") "charge")
+				(field
+					(name "DigiKey") "MCP73831T-2ACI/OTCT-ND")
+				(field
+					(name "LCSC") "C424093")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-23-5")
+				(field
+					(name "Datasheet") "http://ww1.microchip.com/downloads/en/DeviceDoc/20001984g.pdf")
+				(field
+					(name "Description") "Single cell, Li-Ion/Li-Po charge management controller, 4.20V, Tri-State Status Output, in SOT23-5 package")
+			)
+			(libsource
+				(lib "Battery_Management")
+				(part "MCP73831-2-OT")
+				(description "Single cell, Li-Ion/Li-Po charge management controller, 4.20V, Tri-State Status Output, in SOT23-5 package")
+			)
+			(property
+				(name "Label")
+				(value "charge")
+			)
+			(property
+				(name "DigiKey")
+				(value "MCP73831T-2ACI/OTCT-ND")
+			)
+			(property
+				(name "LCSC")
+				(value "C424093")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "battery charger lithium")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "SOT?23*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "a7aaa2cd-4e05-4e6a-8546-befa645a895f")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U18")
+			(value "RT9080-XXGJ5")
+			(footprint "Package_TO_SOT_SMD:TSOT-23-5")
+			(datasheet "https://www.richtek.com/Products/Linear%20Regulator/Single%20Output%20Linear%20Regulator/RT9080?sc_lang=en")
+			(fields
+				(field
+					(name "DigiKey") "1028-1509-1-ND")
+				(field
+					(name "LCSC") "C841192")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Package_TO_SOT_SMD:TSOT-23-5")
+				(field
+					(name "Datasheet") "https://www.richtek.com/Products/Linear%20Regulator/Single%20Output%20Linear%20Regulator/RT9080?sc_lang=en")
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "0_NeurotechHub")
+				(part "RT9080-XXGJ5")
+				(description "")
+			)
+			(property
+				(name "DigiKey")
+				(value "1028-1509-1-ND")
+			)
+			(property
+				(name "LCSC")
+				(value "C841192")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "3347c23a-8428-485f-8907-f9b0fe7af14f")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U19")
+			(value "RT9080-XXGJ5")
+			(footprint "Package_TO_SOT_SMD:TSOT-23-5")
+			(datasheet "https://www.richtek.com/Products/Linear%20Regulator/Single%20Output%20Linear%20Regulator/RT9080?sc_lang=en")
+			(fields
+				(field
+					(name "DigiKey") "1028-1509-1-ND")
+				(field
+					(name "LCSC") "C841192")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Package_TO_SOT_SMD:TSOT-23-5")
+				(field
+					(name "Datasheet") "https://www.richtek.com/Products/Linear%20Regulator/Single%20Output%20Linear%20Regulator/RT9080?sc_lang=en")
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "0_NeurotechHub")
+				(part "RT9080-XXGJ5")
+				(description "")
+			)
+			(property
+				(name "DigiKey")
+				(value "1028-1509-1-ND")
+			)
+			(property
+				(name "LCSC")
+				(value "C841192")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "60046730-4d2f-49a9-a138-fff5c07cfe94")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U20")
+			(value "MAX17048G_T10")
+			(footprint "0_NeurotechHub:MAX17048G")
+			(datasheet "https://www.analog.com/media/en/technical-documentation/data-sheets/max17048-max17049.pdf")
+			(fields
+				(field
+					(name "DigiKey") "MAX17048G+T10CT-ND")
+				(field
+					(name "LCSC") "C2682616")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "0_NeurotechHub:MAX17048G")
+				(field
+					(name "Datasheet") "https://www.analog.com/media/en/technical-documentation/data-sheets/max17048-max17049.pdf")
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "0_NeurotechHub")
+				(part "MAX17048G_T10")
+				(description "")
+			)
+			(property
+				(name "DigiKey")
+				(value "MAX17048G+T10CT-ND")
+			)
+			(property
+				(name "LCSC")
+				(value "C2682616")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "543fa65e-3336-4181-84c2-865fe0345171")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "8")
+						)
+						(pin
+							(num "7")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "9")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U21")
+			(value "ESP32-S3-MINI-1")
+			(footprint "PCM_Espressif:ESP32-S3-MINI-1")
+			(datasheet "https://www.espressif.com/sites/default/files/documentation/esp32-s3-mini-1_mini-1u_datasheet_en.pdf")
+			(description "Smallsized module supporting 2.4 GHz WiFi (802.11 b/g/n) and Bluetooth ® 5 (LE) Built around ESP32S3 series of SoCs, Xtensa ® dualcore 32bit LX7 microprocessor Flash up to 8 MB, optional 2 MB PSRAM in chip package 39 GPIOs, rich set of peripherals Onboard PCB antenna or external antenna connector")
+			(fields
+				(field
+					(name "LCSC") "C2913202")
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "PCM_Espressif:ESP32-S3-MINI-1")
+				(field
+					(name "Datasheet") "https://www.espressif.com/sites/default/files/documentation/esp32-s3-mini-1_mini-1u_datasheet_en.pdf")
+				(field
+					(name "Description") "Smallsized module supporting 2.4 GHz WiFi (802.11 b/g/n) and Bluetooth ® 5 (LE) Built around ESP32S3 series of SoCs, Xtensa ® dualcore 32bit LX7 microprocessor Flash up to 8 MB, optional 2 MB PSRAM in chip package 39 GPIOs, rich set of peripherals Onboard PCB antenna or external antenna connector")
+			)
+			(libsource
+				(lib "PCM_Espressif")
+				(part "ESP32-S3-MINI-1")
+				(description "Smallsized module supporting 2.4 GHz WiFi (802.11 b/g/n) and Bluetooth ® 5 (LE) Built around ESP32S3 series of SoCs, Xtensa ® dualcore 32bit LX7 microprocessor Flash up to 8 MB, optional 2 MB PSRAM in chip package 39 GPIOs, rich set of peripherals Onboard PCB antenna or external antenna connector")
+			)
+			(property
+				(name "LCSC")
+				(value "C2913202")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "b6473733-98ab-4ee9-8434-ff9e18aa99fd")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "45")
+						)
+						(pin
+							(num "19")
+						)
+						(pin
+							(num "20")
+						)
+						(pin
+							(num "35")
+						)
+						(pin
+							(num "36")
+						)
+						(pin
+							(num "37")
+						)
+						(pin
+							(num "38")
+						)
+						(pin
+							(num "26")
+						)
+						(pin
+							(num "28")
+						)
+						(pin
+							(num "29")
+						)
+						(pin
+							(num "31")
+						)
+						(pin
+							(num "32")
+						)
+						(pin
+							(num "33")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "65")
+						)
+						(pin
+							(num "64")
+						)
+						(pin
+							(num "63")
+						)
+						(pin
+							(num "53")
+						)
+						(pin
+							(num "52")
+						)
+						(pin
+							(num "62")
+						)
+						(pin
+							(num "61")
+						)
+						(pin
+							(num "51")
+						)
+						(pin
+							(num "50")
+						)
+						(pin
+							(num "60")
+						)
+						(pin
+							(num "49")
+						)
+						(pin
+							(num "59")
+						)
+						(pin
+							(num "48")
+						)
+						(pin
+							(num "47")
+						)
+						(pin
+							(num "58")
+						)
+						(pin
+							(num "46")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "56")
+						)
+						(pin
+							(num "57")
+						)
+						(pin
+							(num "55")
+						)
+						(pin
+							(num "43")
+						)
+						(pin
+							(num "42")
+						)
+						(pin
+							(num "54")
+						)
+						(pin
+							(num "39")
+						)
+						(pin
+							(num "40")
+						)
+						(pin
+							(num "24")
+						)
+						(pin
+							(num "23")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "7")
+						)
+						(pin
+							(num "8")
+						)
+						(pin
+							(num "9")
+						)
+						(pin
+							(num "10")
+						)
+						(pin
+							(num "11")
+						)
+						(pin
+							(num "12")
+						)
+						(pin
+							(num "13")
+						)
+						(pin
+							(num "14")
+						)
+						(pin
+							(num "15")
+						)
+						(pin
+							(num "16")
+						)
+						(pin
+							(num "17")
+						)
+						(pin
+							(num "18")
+						)
+						(pin
+							(num "21")
+						)
+						(pin
+							(num "22")
+						)
+						(pin
+							(num "25")
+						)
+						(pin
+							(num "34")
+						)
+						(pin
+							(num "41")
+						)
+						(pin
+							(num "44")
+						)
+						(pin
+							(num "27")
+						)
+						(pin
+							(num "30")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U22")
+			(value "RT9080-XXGJ5")
+			(footprint "Package_TO_SOT_SMD:TSOT-23-5")
+			(datasheet "https://www.richtek.com/Products/Linear%20Regulator/Single%20Output%20Linear%20Regulator/RT9080?sc_lang=en")
+			(fields
+				(field
+					(name "DigiKey") "1028-1509-1-ND")
+				(field
+					(name "LCSC") "C841192")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "Package_TO_SOT_SMD:TSOT-23-5")
+				(field
+					(name "Datasheet") "https://www.richtek.com/Products/Linear%20Regulator/Single%20Output%20Linear%20Regulator/RT9080?sc_lang=en")
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "0_NeurotechHub")
+				(part "RT9080-XXGJ5")
+				(description "")
+			)
+			(property
+				(name "DigiKey")
+				(value "1028-1509-1-ND")
+			)
+			(property
+				(name "LCSC")
+				(value "C841192")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "b68e55cb-fa7b-4fa0-b82f-d97de5becf01")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U24")
+			(value "TPD2E001DRLR")
+			(footprint "0_NeurotechHub:TPD2E001DRLR")
+			(datasheet "https://www.ti.com/lit/ds/symlink/tpd2e001.pdf?HQS=dis-dk-null-digikeymode-dsf-pf-null-wwe&ts=1728235608557")
+			(fields
+				(field
+					(name "DigiKey") "296-21883-1-ND")
+				(field
+					(name "Label") "input Protection")
+				(field
+					(name "LCSC") "C150526")
+				(field
+					(name "Mouser")
+				)
+				(field
+					(name "Sim.Pins")
+				)
+				(field
+					(name "JLCPCB")
+				)
+				(field
+					(name "Footprint") "0_NeurotechHub:TPD2E001DRLR")
+				(field
+					(name "Datasheet") "https://www.ti.com/lit/ds/symlink/tpd2e001.pdf?HQS=dis-dk-null-digikeymode-dsf-pf-null-wwe&ts=1728235608557")
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "0_NeurotechHub")
+				(part "TPD2E001")
+				(description "")
+			)
+			(property
+				(name "DigiKey")
+				(value "296-21883-1-ND")
+			)
+			(property
+				(name "Label")
+				(value "input Protection")
+			)
+			(property
+				(name "LCSC")
+				(value "C150526")
+			)
+			(property
+				(name "Mouser")
+				(value "")
+			)
+			(property
+				(name "Sim.Pins")
+				(value "")
+			)
+			(property
+				(name "JLCPCB")
+				(value "")
+			)
+			(property
+				(name "Sheetname")
+				(value "HublinkNode_v1-1")
+			)
+			(property
+				(name "Sheetfile")
+				(value "HublinkNode_v1-1.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "72122625-3311-4f0b-902e-71f4a5dc00d5")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "5")
+						)
+					)
+				)
+			)
+		)
+	)
+	(groups)
+	(variants)
+	(libparts
+		(libpart
+			(lib "0_NeurotechHub")
+			(part "APS11753_Magnet_Switch")
+			(docs "https://www.allegromicro.com/-/media/files/datasheets/aps11753-datasheet.pdf?sc_lang=en")
+			(footprints
+				(fp "DBZ0003A-IPC_A")
+				(fp "DBZ0003A-IPC_B")
+				(fp "DBZ0003A-IPC_C")
+				(fp "DBZ0003A-MFG")
+			)
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "APS11753_Magnet_Switch")
+				(field
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-23")
+				(field
+					(name "Datasheet") "https://www.allegromicro.com/-/media/files/datasheets/aps11753-datasheet.pdf?sc_lang=en")
+				(field
+					(name "Description")
+				)
+				(field
+					(name "DigiKey")
+				)
+				(field
+					(name "LCSC")
+				)
+				(field
+					(name "Mouser") "250-APS11753KMD-3PL1")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "VCC")
+					(type "power_in")
+				)
+				(pin
+					(num "2")
+					(name "OUT")
+					(type "open_collector")
+				)
+				(pin
+					(num "3")
+					(name "GND")
+					(type "power_in")
+				)
+			)
+		)
+		(libpart
+			(lib "0_NeurotechHub")
+			(part "Adafruit_Feather_ESP32-S3")
+			(description "Adafruit Feather ESP32-S3")
+			(docs "https://cdn-learn.adafruit.com/downloads/pdf/adafruit-feather.pdf")
+			(footprints
+				(fp "Adafruit*Feather*")
+			)
+			(fields
+				(field
+					(name "Reference") "A")
+				(field
+					(name "Value") "Adafruit_Feather_ESP32-S3")
+				(field
+					(name "Footprint") "0_NeurotechHub:Adafruit_Feather_ESP32-S3")
+				(field
+					(name "Datasheet") "https://cdn-learn.adafruit.com/downloads/pdf/adafruit-feather.pdf")
+				(field
+					(name "Description") "Adafruit Feather ESP32-S3")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "~{RESET}")
+					(type "input")
+				)
+				(pin
+					(num "2")
+					(name "3V3")
+					(type "power_in")
+				)
+				(pin
+					(num "3")
+					(name "3V3")
+					(type "input")
+				)
+				(pin
+					(num "4")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "5")
+					(name "A0/18")
+					(type "bidirectional")
+				)
+				(pin
+					(num "6")
+					(name "A1/17")
+					(type "bidirectional")
+				)
+				(pin
+					(num "7")
+					(name "A2/16")
+					(type "bidirectional")
+				)
+				(pin
+					(num "8")
+					(name "A3/15")
+					(type "bidirectional")
+				)
+				(pin
+					(num "9")
+					(name "A4/14")
+					(type "bidirectional")
+				)
+				(pin
+					(num "10")
+					(name "A5/8")
+					(type "bidirectional")
+				)
+				(pin
+					(num "11")
+					(name "SCK/36")
+					(type "bidirectional")
+				)
+				(pin
+					(num "12")
+					(name "MOSI/35")
+					(type "bidirectional")
+				)
+				(pin
+					(num "13")
+					(name "MISO/37")
+					(type "bidirectional")
+				)
+				(pin
+					(num "14")
+					(name "RX/38")
+					(type "bidirectional")
+				)
+				(pin
+					(num "15")
+					(name "TX/39")
+					(type "bidirectional")
+				)
+				(pin
+					(num "16")
+					(name "TXDO")
+					(type "bidirectional")
+				)
+				(pin
+					(num "17")
+					(name "SDA/3")
+					(type "bidirectional")
+				)
+				(pin
+					(num "18")
+					(name "SCL/4")
+					(type "bidirectional")
+				)
+				(pin
+					(num "19")
+					(name "5")
+					(type "bidirectional")
+				)
+				(pin
+					(num "20")
+					(name "6")
+					(type "bidirectional")
+				)
+				(pin
+					(num "21")
+					(name "9")
+					(type "bidirectional")
+				)
+				(pin
+					(num "22")
+					(name "10")
+					(type "bidirectional")
+				)
+				(pin
+					(num "23")
+					(name "11")
+					(type "bidirectional")
+				)
+				(pin
+					(num "24")
+					(name "12")
+					(type "bidirectional")
+				)
+				(pin
+					(num "25")
+					(name "13")
+					(type "bidirectional")
+				)
+				(pin
+					(num "26")
+					(name "VBUS")
+					(type "power_in")
+				)
+				(pin
+					(num "27")
+					(name "EN")
+					(type "input")
+				)
+				(pin
+					(num "28")
+					(name "VBAT")
+					(type "power_in")
+				)
+			)
+		)
+		(libpart
+			(lib "0_NeurotechHub")
+			(part "BH1750FVI-TR")
+			(docs "https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/6165/bh1750fvi-e.pdf")
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "BH1750FVI-TR")
+				(field
+					(name "Footprint") "0_NeurotechHub:XDCR_BH1750FVI-TR")
+				(field
+					(name "Datasheet") "https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/6165/bh1750fvi-e.pdf")
+				(field
+					(name "Description")
+				)
+				(field
+					(name "LCSC") "C78960")
+				(field
+					(name "DigiKey") "BH1750FVICT-ND")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "VCC")
+					(type "power_in")
+				)
+				(pin
+					(num "2")
+					(name "ADDR")
+					(type "input")
+				)
+				(pin
+					(num "3")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "4")
+					(name "SDA")
+					(type "bidirectional")
+				)
+				(pin
+					(num "5")
+					(name "DVI")
+					(type "input")
+				)
+				(pin
+					(num "6")
+					(name "SCL")
+					(type "input")
+				)
+			)
+		)
+		(libpart
+			(lib "0_NeurotechHub")
+			(part "Battery_927_SMD")
+			(description "Single-cell battery")
+			(fields
+				(field
+					(name "Reference") "BT")
+				(field
+					(name "Value") "Battery_927_SMD")
+				(field
+					(name "Footprint") "0_NeurotechHub:BAT-SMD_MY-927-02")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Single-cell battery")
+				(field
+					(name "DigiKey") "36-3030CT-ND")
+				(field
+					(name "LCSC") "C2902336")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "+")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "-")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "0_NeurotechHub")
+			(part "JST-S2B-PH-SM4-TB")
+			(fields
+				(field
+					(name "Reference") "P")
+				(field
+					(name "Value") "JST-S2B-PH-SM4-TB")
+				(field
+					(name "Footprint") "0_NeurotechHub:JST_S2B-PH-SM4-TB")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+				(field
+					(name "DigiKey") "455-S2B-PH-SM4-TBCT-ND")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "2")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "0_NeurotechHub")
+			(part "MAX17048G_T10")
+			(docs "https://www.analog.com/media/en/technical-documentation/data-sheets/max17048-max17049.pdf")
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "MAX17048G_T10")
+				(field
+					(name "Footprint") "0_NeurotechHub:MAX17048G")
+				(field
+					(name "Datasheet") "https://www.analog.com/media/en/technical-documentation/data-sheets/max17048-max17049.pdf")
+				(field
+					(name "Description")
+				)
+				(field
+					(name "DigiKey") "MAX17048G+T10CT-ND")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "CTG")
+					(type "power_in")
+				)
+				(pin
+					(num "2")
+					(name "CELL")
+					(type "power_in")
+				)
+				(pin
+					(num "3")
+					(name "VDD")
+					(type "power_in")
+				)
+				(pin
+					(num "4")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "5")
+					(name "~{ALERT}")
+					(type "output")
+				)
+				(pin
+					(num "6")
+					(name "QSTRT")
+					(type "input")
+				)
+				(pin
+					(num "7")
+					(name "SCL")
+					(type "input")
+				)
+				(pin
+					(num "8")
+					(name "SDA")
+					(type "bidirectional")
+				)
+				(pin
+					(num "9")
+					(name "EP")
+					(type "power_in")
+				)
+			)
+		)
+		(libpart
+			(lib "0_NeurotechHub")
+			(part "MINI MSK12CO2")
+			(description "Circuit:SPDT Actuator Style:- Pin Style:SMDSplicing Switch Length:5mm Switch Width:2.75mm Switch Height:1.4mm Mounting Style:卧贴 Actuator Color:- Current Rating (DC):50mA Voltage Rating (DC):12V Current Rating (AC):- Voltage Rating (AC):- Mechanical Life:1")
+			(docs "https://atta.szlcsc.com/upload/public/pdf/source/20210224/C2681570_D263F9C605E4588A4AE6114B72AE4C72.pdf")
+			(fields
+				(field
+					(name "Reference") "SW")
+				(field
+					(name "Value") "C2681570")
+				(field
+					(name "Footprint") "0_NeurotechHub:SwitchMini_LCSC-C2681570_MSK12CO2")
+				(field
+					(name "Datasheet") "https://atta.szlcsc.com/upload/public/pdf/source/20210224/C2681570_D263F9C605E4588A4AE6114B72AE4C72.pdf")
+				(field
+					(name "Description") "Circuit:SPDT Actuator Style:- Pin Style:SMDSplicing Switch Length:5mm Switch Width:2.75mm Switch Height:1.4mm Mounting Style:卧贴 Actuator Color:- Current Rating (DC):50mA Voltage Rating (DC):12V Current Rating (AC):- Voltage Rating (AC):- Mechanical Life:1")
+				(field
+					(name "Manufacturer Part") "MINI MSK12CO2")
+				(field
+					(name "Manufacturer") "SHOU HAN(首韩)")
+				(field
+					(name "Supplier Part") "C2681570")
+				(field
+					(name "LCSC") "C2681570")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "1")
+					(type "unspecified")
+				)
+				(pin
+					(num "2")
+					(name "2")
+					(type "unspecified")
+				)
+				(pin
+					(num "3")
+					(name "3")
+					(type "unspecified")
+				)
+				(pin
+					(num "4")
+					(name "4")
+					(type "unspecified")
+				)
+				(pin
+					(num "5")
+					(name "5")
+					(type "unspecified")
+				)
+			)
+		)
+		(libpart
+			(lib "0_NeurotechHub")
+			(part "MicroSD_Hinge_TF-002-H18_C125814")
+			(description "Card Connection Mode:Flip type Card Type:MicroSD card (TF card) Connector Type:Card Slot Height Above Board:1.8mm Operating Temperature:-35°C~+85°C Operating Temperature:-35°C~+85°C")
+			(docs "https://atta.szlcsc.com/upload/public/pdf/source/20200313/C125814_E45762AFA89F96AEF2D8FC2220BDEE92.pdf")
+			(fields
+				(field
+					(name "Reference") "CARD")
+				(field
+					(name "Value")
+				)
+				(field
+					(name "Footprint") "0_NeurotechHub:MicroSD_Hinge_TF-002-H18_C125814")
+				(field
+					(name "Datasheet") "https://atta.szlcsc.com/upload/public/pdf/source/20200313/C125814_E45762AFA89F96AEF2D8FC2220BDEE92.pdf")
+				(field
+					(name "Description") "Card Connection Mode:Flip type Card Type:MicroSD card (TF card) Connector Type:Card Slot Height Above Board:1.8mm Operating Temperature:-35°C~+85°C Operating Temperature:-35°C~+85°C")
+				(field
+					(name "Manufacturer Part") "TF-002X-H18")
+				(field
+					(name "Manufacturer") "SOFNG(硕方)")
+				(field
+					(name "Supplier Part") "C125814")
+				(field
+					(name "LCSC") "C125814")
+				(field
+					(name "DigiKey") "WM19081CT-ND")
+				(field
+					(name "Alt Molex") "5009010801")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "DAT2")
+					(type "unspecified")
+				)
+				(pin
+					(num "2")
+					(name "CS/DAT3")
+					(type "unspecified")
+				)
+				(pin
+					(num "3")
+					(name "MOSI/CMD")
+					(type "unspecified")
+				)
+				(pin
+					(num "4")
+					(name "VDD")
+					(type "unspecified")
+				)
+				(pin
+					(num "5")
+					(name "CLK")
+					(type "unspecified")
+				)
+				(pin
+					(num "6")
+					(name "VSS")
+					(type "unspecified")
+				)
+				(pin
+					(num "7")
+					(name "MISO/DAT0")
+					(type "unspecified")
+				)
+				(pin
+					(num "8")
+					(name "DAT1")
+					(type "unspecified")
+				)
+				(pin
+					(num "9")
+					(name "S")
+					(type "unspecified")
+				)
+				(pin
+					(num "10")
+					(name "S")
+					(type "unspecified")
+				)
+				(pin
+					(num "11")
+					(name "S")
+					(type "unspecified")
+				)
+				(pin
+					(num "12")
+					(name "S")
+					(type "unspecified")
+				)
+			)
+		)
+		(libpart
+			(lib "0_NeurotechHub")
+			(part "RT9080-XXGJ5")
+			(docs "https://www.richtek.com/Products/Linear%20Regulator/Single%20Output%20Linear%20Regulator/RT9080?sc_lang=en")
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "RT9080-XXGJ5")
+				(field
+					(name "Footprint") "Package_TO_SOT_SMD:TSOT-23-5")
+				(field
+					(name "Datasheet") "https://www.richtek.com/Products/Linear%20Regulator/Single%20Output%20Linear%20Regulator/RT9080?sc_lang=en")
+				(field
+					(name "Description")
+				)
+				(field
+					(name "DigiKey") "1028-1509-1-ND")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "VIN")
+					(type "input")
+				)
+				(pin
+					(num "2")
+					(name "GND")
+					(type "input")
+				)
+				(pin
+					(num "3")
+					(name "EN")
+					(type "input")
+				)
+				(pin
+					(num "4")
+					(name "NC")
+					(type "input")
+				)
+				(pin
+					(num "5")
+					(name "VOUT")
+					(type "input")
+				)
+			)
+		)
+		(libpart
+			(lib "0_NeurotechHub")
+			(part "TPD2E001")
+			(docs "https://www.ti.com/lit/ds/symlink/tpd2e001.pdf?HQS=dis-dk-null-digikeymode-dsf-pf-null-wwe&ts=1728235608557")
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "TPD2E001DRLR")
+				(field
+					(name "Footprint") "0_NeurotechHub:TPD2E001DRLR")
+				(field
+					(name "Datasheet") "https://www.ti.com/lit/ds/symlink/tpd2e001.pdf?HQS=dis-dk-null-digikeymode-dsf-pf-null-wwe&ts=1728235608557")
+				(field
+					(name "Description")
+				)
+				(field
+					(name "DigiKey") "296-21883-1-ND")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "VCC")
+					(type "input")
+				)
+				(pin
+					(num "2")
+					(name "NC")
+					(type "input")
+				)
+				(pin
+					(num "3")
+					(name "IO1")
+					(type "input")
+				)
+				(pin
+					(num "4")
+					(name "GND")
+					(type "input")
+				)
+				(pin
+					(num "5")
+					(name "IO2")
+					(type "input")
+				)
+			)
+		)
+		(libpart
+			(lib "0_NeurotechHub")
+			(part "TYPE-USB-C-31-M-12")
+			(fields
+				(field
+					(name "Reference") "J")
+				(field
+					(name "Value") "TYPE-USB-C-31-M-12")
+				(field
+					(name "Footprint") "0_NeurotechHub:HRO_TYPE-USB-C-31-M-12")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+				(field
+					(name "MF") "HRO Electronics Co., Ltd.")
+				(field
+					(name "MAXIMUM_PACKAGE_HEIGHT") "3.26 mm")
+				(field
+					(name "Package") "Package")
+				(field
+					(name "Price") "None")
+				(field
+					(name "Check_prices") "https://www.snapeda.com/parts/TYPE-C-31-M-12/HRO+Electronics+Co.%252C+Ltd./view-part/?ref=eda")
+				(field
+					(name "STANDARD") "Manufacturer Recommendations")
+				(field
+					(name "PARTREV") "2020.12.08")
+				(field
+					(name "SnapEDA_Link") "https://www.snapeda.com/parts/TYPE-C-31-M-12/HRO+Electronics+Co.%252C+Ltd./view-part/?ref=snap")
+				(field
+					(name "MP") "TYPE-C-31-M-12")
+				(field
+					(name "Description_1") "\n                        \n                            USB Connectors 24 Receptacle 1 8.94*7.3mm RoHS\n                        \n")
+				(field
+					(name "SNAPEDA_PN") "TYPE-C-31-M-12")
+				(field
+					(name "Availability") "Not in stock")
+				(field
+					(name "MANUFACTURER") "HRO Electronics Co., Ltd.")
+				(field
+					(name "DigiKey") "670-DX07S016JA3R1500CT-ND")
+				(field
+					(name "LCSC") "C165948")
+			)
+			(pins
+				(pin
+					(num "A1_B12")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "A4_B9")
+					(name "VBUS")
+					(type "power_in")
+				)
+				(pin
+					(num "A5")
+					(name "CC1")
+					(type "bidirectional")
+				)
+				(pin
+					(num "A6")
+					(name "DP1")
+					(type "bidirectional")
+				)
+				(pin
+					(num "A7")
+					(name "DN1")
+					(type "bidirectional")
+				)
+				(pin
+					(num "A8")
+					(name "SBU1")
+					(type "bidirectional")
+				)
+				(pin
+					(num "B1_A12")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "B4_A9")
+					(name "VBUS")
+					(type "power_in")
+				)
+				(pin
+					(num "B5")
+					(name "CC2")
+					(type "bidirectional")
+				)
+				(pin
+					(num "B6")
+					(name "DP2")
+					(type "bidirectional")
+				)
+				(pin
+					(num "B7")
+					(name "DN2")
+					(type "bidirectional")
+				)
+				(pin
+					(num "B8")
+					(name "SBU2")
+					(type "bidirectional")
+				)
+				(pin
+					(num "S1")
+					(name "SHIELD")
+					(type "passive")
+				)
+				(pin
+					(num "S2")
+					(name "SHIELD")
+					(type "passive")
+				)
+				(pin
+					(num "S3")
+					(name "SHIELD")
+					(type "passive")
+				)
+				(pin
+					(num "S4")
+					(name "SHIELD")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "74xGxx")
+			(part "74AUP1G08")
+			(description "Single AND Gate, Low-Voltage CMOS")
+			(docs "https://www.ti.com/lit/ds/symlink/sn74aup1g08.pdf")
+			(footprints
+				(fp "SOT?23*")
+				(fp "Texas?R-PDSO-G5?DCK*")
+				(fp "Texas?R-PDSO-N5?DRL*")
+				(fp "Texas?X2SON*0.8x0.8mm*P0.48mm*")
+			)
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "74AUP1G08")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet") "https://www.ti.com/lit/ds/symlink/sn74aup1g08.pdf")
+				(field
+					(name "Description") "Single AND Gate, Low-Voltage CMOS")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "input")
+				)
+				(pin
+					(num "2")
+					(name "")
+					(type "input")
+				)
+				(pin
+					(num "3")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "4")
+					(name "")
+					(type "output")
+				)
+				(pin
+					(num "5")
+					(name "VCC")
+					(type "power_in")
+				)
+			)
+		)
+		(libpart
+			(lib "Battery_Management")
+			(part "MCP73831-2-OT")
+			(description "Single cell, Li-Ion/Li-Po charge management controller, 4.20V, Tri-State Status Output, in SOT23-5 package")
+			(docs "http://ww1.microchip.com/downloads/en/DeviceDoc/20001984g.pdf")
+			(footprints
+				(fp "SOT?23*")
+			)
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "MCP73831-2-OT")
+				(field
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-23-5")
+				(field
+					(name "Datasheet") "http://ww1.microchip.com/downloads/en/DeviceDoc/20001984g.pdf")
+				(field
+					(name "Description") "Single cell, Li-Ion/Li-Po charge management controller, 4.20V, Tri-State Status Output, in SOT23-5 package")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "STAT")
+					(type "tri_state")
+				)
+				(pin
+					(num "2")
+					(name "V_{SS}")
+					(type "power_in")
+				)
+				(pin
+					(num "3")
+					(name "V_{BAT}")
+					(type "power_out")
+				)
+				(pin
+					(num "4")
+					(name "V_{DD}")
+					(type "power_in")
+				)
+				(pin
+					(num "5")
+					(name "PROG")
+					(type "input")
+				)
+			)
+		)
+		(libpart
+			(lib "Connector")
+			(part "Conn_01x04_Socket")
+			(description "Generic connector, single row, 01x04, script generated")
+			(footprints
+				(fp "Connector*:*_1x??_*")
+			)
+			(fields
+				(field
+					(name "Reference") "J")
+				(field
+					(name "Value") "Conn_01x04_Socket")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Generic connector, single row, 01x04, script generated")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "Pin_1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "Pin_2")
+					(type "passive")
+				)
+				(pin
+					(num "3")
+					(name "Pin_3")
+					(type "passive")
+				)
+				(pin
+					(num "4")
+					(name "Pin_4")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Connector")
+			(part "TestPoint")
+			(description "test point")
+			(footprints
+				(fp "Pin*")
+				(fp "Test*")
+			)
+			(fields
+				(field
+					(name "Reference") "TP")
+				(field
+					(name "Value") "TestPoint")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "test point")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "1")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "Antenna")
+			(description "Antenna")
+			(fields
+				(field
+					(name "Reference") "AE")
+				(field
+					(name "Value") "Antenna")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Antenna")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "A")
+					(type "input")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "C")
+			(description "Unpolarized capacitor")
+			(footprints
+				(fp "C_*")
+			)
+			(fields
+				(field
+					(name "Reference") "C")
+				(field
+					(name "Value") "C")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "D_Schottky")
+			(description "Schottky diode")
+			(footprints
+				(fp "TO-???*")
+				(fp "*_Diode_*")
+				(fp "*SingleDiode*")
+				(fp "D_*")
+			)
+			(fields
+				(field
+					(name "Reference") "D")
+				(field
+					(name "Value") "D_Schottky")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Schottky diode")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "K")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "A")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "LED")
+			(description "Light emitting diode")
+			(footprints
+				(fp "LED*")
+				(fp "LED_SMD:*")
+				(fp "LED_THT:*")
+			)
+			(fields
+				(field
+					(name "Reference") "D")
+				(field
+					(name "Value") "LED")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Light emitting diode")
+				(field
+					(name "Sim.Pins") "1=K 2=A")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "K")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "A")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "R")
+			(description "Resistor")
+			(footprints
+				(fp "R_*")
+			)
+			(fields
+				(field
+					(name "Reference") "R")
+				(field
+					(name "Value") "R")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "PCM_Espressif")
+			(part "ESP32-S3-MINI-1")
+			(description "Smallsized module supporting 2.4 GHz WiFi (802.11 b/g/n) and Bluetooth ® 5 (LE) Built around ESP32S3 series of SoCs, Xtensa ® dualcore 32bit LX7 microprocessor Flash up to 8 MB, optional 2 MB PSRAM in chip package 39 GPIOs, rich set of peripherals Onboard PCB antenna or external antenna connector")
+			(docs "https://www.espressif.com/sites/default/files/documentation/esp32-s3-mini-1_mini-1u_datasheet_en.pdf")
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "ESP32-S3-MINI-1")
+				(field
+					(name "Footprint") "PCM_Espressif:ESP32-S3-MINI-1")
+				(field
+					(name "Datasheet") "https://www.espressif.com/sites/default/files/documentation/esp32-s3-mini-1_mini-1u_datasheet_en.pdf")
+				(field
+					(name "Description") "Smallsized module supporting 2.4 GHz WiFi (802.11 b/g/n) and Bluetooth ® 5 (LE) Built around ESP32S3 series of SoCs, Xtensa ® dualcore 32bit LX7 microprocessor Flash up to 8 MB, optional 2 MB PSRAM in chip package 39 GPIOs, rich set of peripherals Onboard PCB antenna or external antenna connector")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "2")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "3")
+					(name "3V3")
+					(type "power_in")
+				)
+				(pin
+					(num "4")
+					(name "GPIO0/BOOT")
+					(type "bidirectional")
+				)
+				(pin
+					(num "5")
+					(name "GPIO1/TOUCH1/ADC1_CH0")
+					(type "bidirectional")
+				)
+				(pin
+					(num "6")
+					(name "GPIO2/TOUCH2/ADC1_CH1")
+					(type "bidirectional")
+				)
+				(pin
+					(num "7")
+					(name "GPIO3/TOUCH3/ADC1_CH2")
+					(type "bidirectional")
+				)
+				(pin
+					(num "8")
+					(name "GPIO4/TOUCH4/ADC1_CH3")
+					(type "bidirectional")
+				)
+				(pin
+					(num "9")
+					(name "GPIO5/TOUCH5/ADC1_CH4")
+					(type "bidirectional")
+				)
+				(pin
+					(num "10")
+					(name "GPIO6/TOUCH6/ADC1_CH5")
+					(type "bidirectional")
+				)
+				(pin
+					(num "11")
+					(name "GPIO7/TOUCH7/ADC1_CH6")
+					(type "bidirectional")
+				)
+				(pin
+					(num "12")
+					(name "GPIO8/TOUCH8/ADC1_CH7/SUBSPICS1")
+					(type "bidirectional")
+				)
+				(pin
+					(num "13")
+					(name "GPIO9/TOUCH9/ADC1_CH8/FSPIHD/SUBSPIHD")
+					(type "bidirectional")
+				)
+				(pin
+					(num "14")
+					(name "GPIO10/TOUCH10/ADC1_CH9/FSPICS0/FSPIIO4/SUBSPICS0")
+					(type "bidirectional")
+				)
+				(pin
+					(num "15")
+					(name "GPIO11/TOUCH11/ADC2_CH0/FSPID/FSPIIO5/SUBSPID")
+					(type "bidirectional")
+				)
+				(pin
+					(num "16")
+					(name "GPIO12/TOUCH12/ADC2_CH1/FSPICLK/FSPIIO6/SUBSPICLK")
+					(type "bidirectional")
+				)
+				(pin
+					(num "17")
+					(name "GPIO13/TOUCH13/ADC2_CH2/FSPIQ/FSPIIO7/SUBSPIQ")
+					(type "bidirectional")
+				)
+				(pin
+					(num "18")
+					(name "GPIO14/TOUCH14/ADC2_CH3/FSPIWP/FSPIDQS/SUBSPIWP")
+					(type "bidirectional")
+				)
+				(pin
+					(num "19")
+					(name "GPIO15/U0RTS/ADC2_CH4/XTAL_32K_P")
+					(type "bidirectional")
+				)
+				(pin
+					(num "20")
+					(name "GPIO16/U0CTS/ADC2_CH5/XTAL_32K_N")
+					(type "bidirectional")
+				)
+				(pin
+					(num "21")
+					(name "GPIO17/U1TXD/ADC2_CH6")
+					(type "bidirectional")
+				)
+				(pin
+					(num "22")
+					(name "GPIO18/U1RXD/ADC2_CH7/CLK_OUT3")
+					(type "bidirectional")
+				)
+				(pin
+					(num "23")
+					(name "GPIO19/U1RTS/ADC2_CH8/CLK_OUT2/USB_D-")
+					(type "bidirectional")
+				)
+				(pin
+					(num "24")
+					(name "GPIO20/U1CTS/ADC2_CH9/CLK_OUT1/USB_D+")
+					(type "bidirectional")
+				)
+				(pin
+					(num "25")
+					(name "GPIO21")
+					(type "bidirectional")
+				)
+				(pin
+					(num "26")
+					(name "GPIO26")
+					(type "bidirectional")
+				)
+				(pin
+					(num "27")
+					(name "GPIO47/SPICLK_P/SUBSPICLK_P_DIFF")
+					(type "bidirectional")
+				)
+				(pin
+					(num "28")
+					(name "SPIIO4/GPIO33/FSPIHD/SUBSPIHD")
+					(type "bidirectional")
+				)
+				(pin
+					(num "29")
+					(name "SPIIO5/GPIO34/FSPICS0/SUBSPICS0")
+					(type "bidirectional")
+				)
+				(pin
+					(num "30")
+					(name "GPIO48/SPICLK_N/SUBSPICLK_N_DIFF")
+					(type "bidirectional")
+				)
+				(pin
+					(num "31")
+					(name "SPIIO6/GPIO35/FSPID/SUBSPID")
+					(type "bidirectional")
+				)
+				(pin
+					(num "32")
+					(name "SPIIO7/GPIO36/FSPICLK/SUBSPICLK")
+					(type "bidirectional")
+				)
+				(pin
+					(num "33")
+					(name "SPIDQS/GPIO37/FSPIQ/SUBSPIQ")
+					(type "bidirectional")
+				)
+				(pin
+					(num "34")
+					(name "GPIO38/FSPIWP/SUBSPIWP")
+					(type "bidirectional")
+				)
+				(pin
+					(num "35")
+					(name "MTCK/GPIO39/CLK_OUT3/SUBSPICS1")
+					(type "bidirectional")
+				)
+				(pin
+					(num "36")
+					(name "MTDO/GPIO40/CLK_OUT2")
+					(type "bidirectional")
+				)
+				(pin
+					(num "37")
+					(name "MTDI/GPIO41/CLK_OUT1")
+					(type "bidirectional")
+				)
+				(pin
+					(num "38")
+					(name "MTMS/GPIO42")
+					(type "bidirectional")
+				)
+				(pin
+					(num "39")
+					(name "U0TXD/GPIO43/CLK_OUT1")
+					(type "bidirectional")
+				)
+				(pin
+					(num "40")
+					(name "U0RXD/GPIO44/CLK_OUT2")
+					(type "bidirectional")
+				)
+				(pin
+					(num "41")
+					(name "GPIO45")
+					(type "bidirectional")
+				)
+				(pin
+					(num "42")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "43")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "44")
+					(name "GPIO46")
+					(type "bidirectional")
+				)
+				(pin
+					(num "45")
+					(name "EN")
+					(type "input")
+				)
+				(pin
+					(num "46")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "47")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "48")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "49")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "50")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "51")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "52")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "53")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "54")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "55")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "56")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "57")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "58")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "59")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "60")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "61")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "62")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "63")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "64")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "65")
+					(name "GND")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Sensor")
+			(part "BME280")
+			(description "3-in-1 sensor, humidity, pressure, temperature, I2C and SPI interface, 1.71-3.6V, LGA-8")
+			(docs "https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf")
+			(footprints
+				(fp "*LGA*2.5x2.5mm*P0.65mm*Clockwise*")
+			)
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "BME280")
+				(field
+					(name "Footprint") "Package_LGA:Bosch_LGA-8_2.5x2.5mm_P0.65mm_ClockwisePinNumbering")
+				(field
+					(name "Datasheet") "https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf")
+				(field
+					(name "Description") "3-in-1 sensor, humidity, pressure, temperature, I2C and SPI interface, 1.71-3.6V, LGA-8")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "2")
+					(name "CSB")
+					(type "input")
+				)
+				(pin
+					(num "3")
+					(name "SDI")
+					(type "bidirectional")
+				)
+				(pin
+					(num "4")
+					(name "SCK")
+					(type "input")
+				)
+				(pin
+					(num "5")
+					(name "SDO")
+					(type "bidirectional")
+				)
+				(pin
+					(num "6")
+					(name "VDDIO")
+					(type "power_in")
+				)
+				(pin
+					(num "7")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "8")
+					(name "VDD")
+					(type "power_in")
+				)
+			)
+		)
+		(libpart
+			(lib "Switch")
+			(part "SW_Push_Shielded")
+			(description "Generic push-button switch, two contact pins and shield pin(s)")
+			(fields
+				(field
+					(name "Reference") "SW")
+				(field
+					(name "Value") "SW_Push_Shielded")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Generic push-button switch, two contact pins and shield pin(s)")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "2")
+					(type "passive")
+				)
+				(pin
+					(num "SH")
+					(name "B")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Timer_RTC")
+			(part "DS3231MZ")
+			(description "±5ppm, I2C Real-Time Clock SOIC-8")
+			(docs "http://datasheets.maximintegrated.com/en/ds/DS3231M.pdf")
+			(footprints
+				(fp "SOIC*3.9x4.9mm*P1.27mm*")
+			)
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "DS3231MZ")
+				(field
+					(name "Footprint") "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm")
+				(field
+					(name "Datasheet") "http://datasheets.maximintegrated.com/en/ds/DS3231M.pdf")
+				(field
+					(name "Description") "±5ppm, I2C Real-Time Clock SOIC-8")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "32KHZ")
+					(type "open_collector")
+				)
+				(pin
+					(num "2")
+					(name "VCC")
+					(type "power_in")
+				)
+				(pin
+					(num "3")
+					(name "~{INT}/SQW")
+					(type "open_collector")
+				)
+				(pin
+					(num "4")
+					(name "~{RST}")
+					(type "bidirectional")
+				)
+				(pin
+					(num "5")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "6")
+					(name "VBAT")
+					(type "power_in")
+				)
+				(pin
+					(num "7")
+					(name "SDA")
+					(type "bidirectional")
+				)
+				(pin
+					(num "8")
+					(name "SCL")
+					(type "input")
+				)
+			)
+		)
+		(libpart
+			(lib "Transistor_FET")
+			(part "2N7002")
+			(description "0.115A Id, 60V Vds, N-Channel MOSFET, SOT-23")
+			(docs "https://www.onsemi.com/pub/Collateral/NDS7002A-D.PDF")
+			(footprints
+				(fp "SOT?23*")
+			)
+			(fields
+				(field
+					(name "Reference") "Q")
+				(field
+					(name "Value") "2N7002")
+				(field
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-23")
+				(field
+					(name "Datasheet") "https://www.onsemi.com/pub/Collateral/NDS7002A-D.PDF")
+				(field
+					(name "Description") "0.115A Id, 60V Vds, N-Channel MOSFET, SOT-23")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "G")
+					(type "input")
+				)
+				(pin
+					(num "2")
+					(name "S")
+					(type "passive")
+				)
+				(pin
+					(num "3")
+					(name "D")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Transistor_FET")
+			(part "AO3401A")
+			(description "-4.0A Id, -30V Vds, P-Channel MOSFET, SOT-23")
+			(docs "http://www.aosmd.com/pdfs/datasheet/AO3401A.pdf")
+			(footprints
+				(fp "SOT?23*")
+			)
+			(fields
+				(field
+					(name "Reference") "Q")
+				(field
+					(name "Value") "AO3401A")
+				(field
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-23")
+				(field
+					(name "Datasheet") "http://www.aosmd.com/pdfs/datasheet/AO3401A.pdf")
+				(field
+					(name "Description") "-4.0A Id, -30V Vds, P-Channel MOSFET, SOT-23")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "G")
+					(type "input")
+				)
+				(pin
+					(num "2")
+					(name "S")
+					(type "passive")
+				)
+				(pin
+					(num "3")
+					(name "D")
+					(type "passive")
+				)
+			)
+		)
+	)
+	(libraries
+		(library
+			(logical "0_NeurotechHub")
+			(uri "/Users/gaidica/Library/CloudStorage/Box-Box/Neurotech Hub/KiCad/Library/NeurotechHub.kicad_sym")
+		)
+		(library
+			(logical "74xGxx")
+			(uri "${KICAD10_SYMBOL_DIR}/74xGxx.kicad_sym")
+		)
+		(library
+			(logical "Battery_Management")
+			(uri "${KICAD10_SYMBOL_DIR}/Battery_Management.kicad_sym")
+		)
+		(library
+			(logical "Connector")
+			(uri "${KICAD10_SYMBOL_DIR}/Connector.kicad_sym")
+		)
+		(library
+			(logical "Device")
+			(uri "${KICAD10_SYMBOL_DIR}/Device.kicad_sym")
+		)
+		(library
+			(logical "PCM_Espressif")
+			(uri "${KICAD10_3RD_PARTY}/symbols/com_github_espressif_kicad-libraries/Espressif.kicad_sym")
+		)
+		(library
+			(logical "Sensor")
+			(uri "${KICAD10_SYMBOL_DIR}/Sensor.kicad_sym")
+		)
+		(library
+			(logical "Switch")
+			(uri "${KICAD10_SYMBOL_DIR}/Switch.kicad_sym")
+		)
+		(library
+			(logical "Timer_RTC")
+			(uri "${KICAD10_SYMBOL_DIR}/Timer_RTC.kicad_sym")
+		)
+		(library
+			(logical "Transistor_FET")
+			(uri "${KICAD10_SYMBOL_DIR}/Transistor_FET.kicad_sym")
+		)
+	)
+	(nets
+		(net
+			(code "1")
+			(name "+3.3V")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "2")
+				(pinfunction "3V3_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "A1")
+				(pin "3")
+				(pinfunction "3V3_3")
+				(pintype "input")
+			)
+			(node
+				(ref "C2")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C22")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C23")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C24")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C25")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C6")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "J4")
+				(pin "2")
+				(pinfunction "Pin_2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R28")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R29")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R30")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R35")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "TP5")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U18")
+				(pin "5")
+				(pinfunction "VOUT_5")
+				(pintype "input")
+			)
+			(node
+				(ref "U2")
+				(pin "2")
+				(pinfunction "CSB_2")
+				(pintype "input")
+			)
+			(node
+				(ref "U2")
+				(pin "5")
+				(pinfunction "SDO_5")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U2")
+				(pin "6")
+				(pinfunction "VDDIO_6")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U2")
+				(pin "8")
+				(pinfunction "VDD_8")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U21")
+				(pin "3")
+				(pinfunction "3V3_3")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U3")
+				(pin "1")
+				(pinfunction "VCC_1")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U5")
+				(pin "5")
+				(pinfunction "VCC_5")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U7")
+				(pin "1")
+				(pinfunction "VCC_1")
+				(pintype "power_in")
+			)
+		)
+		(net
+			(code "2")
+			(name "+BATT")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "28")
+				(pinfunction "VBAT_28")
+				(pintype "power_in")
+			)
+			(node
+				(ref "C18")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C28")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "P1")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "Q1")
+				(pin "3")
+				(pinfunction "D_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "U20")
+				(pin "2")
+				(pinfunction "CELL_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U20")
+				(pin "3")
+				(pinfunction "VDD_3")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U9")
+				(pin "3")
+				(pinfunction "V_{BAT}_3")
+				(pintype "power_out")
+			)
+		)
+		(net
+			(code "3")
+			(name "5")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "19")
+				(pinfunction "5_19")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U21")
+				(pin "9")
+				(pinfunction "GPIO5/TOUCH5/ADC1_CH4_9")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "4")
+			(name "6")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "20")
+				(pinfunction "6_20")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U21")
+				(pin "10")
+				(pinfunction "GPIO6/TOUCH6/ADC1_CH5_10")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "5")
+			(name "9")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "21")
+				(pinfunction "9_21")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U21")
+				(pin "13")
+				(pinfunction "GPIO9/TOUCH9/ADC1_CH8/FSPIHD/SUBSPIHD_13")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "6")
+			(name "10")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "22")
+				(pinfunction "10_22")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U21")
+				(pin "14")
+				(pinfunction "GPIO10/TOUCH10/ADC1_CH9/FSPICS0/FSPIIO4/SUBSPICS0_14")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "7")
+			(name "11")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "23")
+				(pinfunction "11_23")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U21")
+				(pin "15")
+				(pinfunction "GPIO11/TOUCH11/ADC2_CH0/FSPID/FSPIIO5/SUBSPID_15")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "8")
+			(name "12")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "24")
+				(pinfunction "12_24")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U21")
+				(pin "16")
+				(pinfunction "GPIO12/TOUCH12/ADC2_CH1/FSPICLK/FSPIIO6/SUBSPICLK_16")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "9")
+			(name "13")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "25")
+				(pinfunction "13_25")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "R6")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "17")
+				(pinfunction "GPIO13/TOUCH13/ADC2_CH2/FSPIQ/FSPIIO7/SUBSPIQ_17")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "10")
+			(name "A0")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "5")
+				(pinfunction "A0/18_5")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U21")
+				(pin "22")
+				(pinfunction "GPIO18/U1RXD/ADC2_CH7/CLK_OUT3_22")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "11")
+			(name "A1")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "6")
+				(pinfunction "A1/17_6")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U21")
+				(pin "21")
+				(pinfunction "GPIO17/U1TXD/ADC2_CH6_21")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "12")
+			(name "A2")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "7")
+				(pinfunction "A2/16_7")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U21")
+				(pin "20")
+				(pinfunction "GPIO16/U0CTS/ADC2_CH5/XTAL_32K_N_20")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "13")
+			(name "A3")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "8")
+				(pinfunction "A3/15_8")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U21")
+				(pin "19")
+				(pinfunction "GPIO15/U0RTS/ADC2_CH4/XTAL_32K_P_19")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "14")
+			(name "A4")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "9")
+				(pinfunction "A4/14_9")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U21")
+				(pin "18")
+				(pinfunction "GPIO14/TOUCH14/ADC2_CH3/FSPIWP/FSPIDQS/SUBSPIWP_18")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "15")
+			(name "A5")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "10")
+				(pinfunction "A5/8_10")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U21")
+				(pin "12")
+				(pinfunction "GPIO8/TOUCH8/ADC1_CH7/SUBSPICS1_12")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "16")
+			(name "AUX_GPIO0")
+			(class "Default")
+			(node
+				(ref "J4")
+				(pin "4")
+				(pinfunction "Pin_4_4")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "5")
+				(pinfunction "GPIO1/TOUCH1/ADC1_CH0_5")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U7")
+				(pin "2")
+				(pinfunction "OUT_2")
+				(pintype "open_collector")
+			)
+		)
+		(net
+			(code "17")
+			(name "AUX_GPIO1")
+			(class "Default")
+			(node
+				(ref "J4")
+				(pin "3")
+				(pinfunction "Pin_3_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "6")
+				(pinfunction "GPIO2/TOUCH2/ADC1_CH1_6")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "18")
+			(name "BOOT")
+			(class "Default")
+			(node
+				(ref "SW2")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "4")
+				(pinfunction "GPIO0/BOOT_4")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "19")
+			(name "D+")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "A6")
+				(pinfunction "DP1_A6")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "J1")
+				(pin "B6")
+				(pinfunction "DP2_B6")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U21")
+				(pin "24")
+				(pinfunction "GPIO20/U1CTS/ADC2_CH9/CLK_OUT1/USB_D+_24")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U24")
+				(pin "5")
+				(pinfunction "IO2_5")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "20")
+			(name "D-")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "A7")
+				(pinfunction "DN1_A7")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "J1")
+				(pin "B7")
+				(pinfunction "DN2_B7")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U21")
+				(pin "23")
+				(pinfunction "GPIO19/U1RTS/ADC2_CH8/CLK_OUT2/USB_D-_23")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U24")
+				(pin "3")
+				(pinfunction "IO1_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "21")
+			(name "EN")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "27")
+				(pinfunction "EN_27")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "22")
+			(name "FUEL_~{ALERT}")
+			(class "Default")
+			(node
+				(ref "U20")
+				(pin "5")
+				(pinfunction "~{ALERT}_5")
+				(pintype "output")
+			)
+			(node
+				(ref "U5")
+				(pin "2")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "23")
+			(name "GND")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "4")
+				(pinfunction "GND_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "BT1")
+				(pin "2")
+				(pinfunction "-_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C1")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C14")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C18")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C2")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C21")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C22")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C23")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C24")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C25")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C26")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C27")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C28")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C29")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C3")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C30")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C6")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "CARD1")
+				(pin "10")
+				(pinfunction "S_10")
+				(pintype "unspecified")
+			)
+			(node
+				(ref "CARD1")
+				(pin "11")
+				(pinfunction "S_11")
+				(pintype "unspecified")
+			)
+			(node
+				(ref "CARD1")
+				(pin "12")
+				(pinfunction "S_12")
+				(pintype "unspecified")
+			)
+			(node
+				(ref "CARD1")
+				(pin "6")
+				(pinfunction "VSS_6")
+				(pintype "unspecified")
+			)
+			(node
+				(ref "CARD1")
+				(pin "9")
+				(pinfunction "S_9")
+				(pintype "unspecified")
+			)
+			(node
+				(ref "D5")
+				(pin "1")
+				(pinfunction "K_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "D9")
+				(pin "1")
+				(pinfunction "K_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J1")
+				(pin "A1_B12")
+				(pinfunction "GND_A1_B12")
+				(pintype "power_in")
+			)
+			(node
+				(ref "J1")
+				(pin "B1_A12")
+				(pinfunction "GND_B1_A12")
+				(pintype "power_in")
+			)
+			(node
+				(ref "J1")
+				(pin "S1")
+				(pinfunction "SHIELD_S1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J1")
+				(pin "S2")
+				(pinfunction "SHIELD_S2")
+				(pintype "passive")
+			)
+			(node
+				(ref "J1")
+				(pin "S3")
+				(pinfunction "SHIELD_S3")
+				(pintype "passive")
+			)
+			(node
+				(ref "J1")
+				(pin "S4")
+				(pinfunction "SHIELD_S4")
+				(pintype "passive")
+			)
+			(node
+				(ref "J3")
+				(pin "1")
+				(pinfunction "Pin_1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J4")
+				(pin "1")
+				(pinfunction "Pin_1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "P1")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "Q3")
+				(pin "2")
+				(pinfunction "S_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R22")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R23")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R26")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R27")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "SW1")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "SW1")
+				(pin "SH")
+				(pinfunction "B_SH")
+				(pintype "passive")
+			)
+			(node
+				(ref "SW2")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "SW2")
+				(pin "SH")
+				(pinfunction "B_SH")
+				(pintype "passive")
+			)
+			(node
+				(ref "SW4")
+				(pin "3")
+				(pinfunction "3_3")
+				(pintype "unspecified")
+			)
+			(node
+				(ref "TP1")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "5")
+				(pinfunction "GND_5")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U18")
+				(pin "2")
+				(pinfunction "GND_2")
+				(pintype "input")
+			)
+			(node
+				(ref "U19")
+				(pin "2")
+				(pinfunction "GND_2")
+				(pintype "input")
+			)
+			(node
+				(ref "U2")
+				(pin "1")
+				(pinfunction "GND_1")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U2")
+				(pin "7")
+				(pinfunction "GND_7")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U20")
+				(pin "1")
+				(pinfunction "CTG_1")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U20")
+				(pin "4")
+				(pinfunction "GND_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U20")
+				(pin "6")
+				(pinfunction "QSTRT_6")
+				(pintype "input")
+			)
+			(node
+				(ref "U20")
+				(pin "9")
+				(pinfunction "EP_9")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U21")
+				(pin "1")
+				(pinfunction "GND_1")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U21")
+				(pin "2")
+				(pinfunction "GND_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "30")
+				(pinfunction "GPIO48/SPICLK_N/SUBSPICLK_N_DIFF_30")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U21")
+				(pin "42")
+				(pinfunction "GND_42")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "43")
+				(pinfunction "GND_43")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "46")
+				(pinfunction "GND_46")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "47")
+				(pinfunction "GND_47")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "48")
+				(pinfunction "GND_48")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "49")
+				(pinfunction "GND_49")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "50")
+				(pinfunction "GND_50")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "51")
+				(pinfunction "GND_51")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "52")
+				(pinfunction "GND_52")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "53")
+				(pinfunction "GND_53")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "54")
+				(pinfunction "GND_54")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "55")
+				(pinfunction "GND_55")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "56")
+				(pinfunction "GND_56")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "57")
+				(pinfunction "GND_57")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "58")
+				(pinfunction "GND_58")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "59")
+				(pinfunction "GND_59")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "60")
+				(pinfunction "GND_60")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "61")
+				(pinfunction "GND_61")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "62")
+				(pinfunction "GND_62")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "63")
+				(pinfunction "GND_63")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "64")
+				(pinfunction "GND_64")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "65")
+				(pinfunction "GND_65")
+				(pintype "passive")
+			)
+			(node
+				(ref "U22")
+				(pin "2")
+				(pinfunction "GND_2")
+				(pintype "input")
+			)
+			(node
+				(ref "U24")
+				(pin "4")
+				(pinfunction "GND_4")
+				(pintype "input")
+			)
+			(node
+				(ref "U3")
+				(pin "2")
+				(pinfunction "ADDR_2")
+				(pintype "input")
+			)
+			(node
+				(ref "U3")
+				(pin "3")
+				(pinfunction "GND_3")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U5")
+				(pin "3")
+				(pinfunction "GND_3")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U7")
+				(pin "3")
+				(pinfunction "GND_3")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U9")
+				(pin "2")
+				(pinfunction "V_{SS}_2")
+				(pintype "power_in")
+			)
+		)
+		(net
+			(code "24")
+			(name "I2C_EN")
+			(class "Default")
+			(node
+				(ref "U21")
+				(pin "11")
+				(pinfunction "GPIO7/TOUCH7/ADC1_CH6_11")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U22")
+				(pin "3")
+				(pinfunction "EN_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "25")
+			(name "LED_B")
+			(class "Default")
+			(node
+				(ref "R7")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "28")
+				(pinfunction "SPIIO4/GPIO33/FSPIHD/SUBSPIHD_28")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "26")
+			(name "MISO")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "13")
+				(pinfunction "MISO/37_13")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "CARD1")
+				(pin "7")
+				(pinfunction "MISO/DAT0_7")
+				(pintype "unspecified")
+			)
+			(node
+				(ref "U21")
+				(pin "33")
+				(pinfunction "SPIDQS/GPIO37/FSPIQ/SUBSPIQ_33")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "27")
+			(name "MOSI")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "12")
+				(pinfunction "MOSI/35_12")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "CARD1")
+				(pin "3")
+				(pinfunction "MOSI/CMD_3")
+				(pintype "unspecified")
+			)
+			(node
+				(ref "U21")
+				(pin "31")
+				(pinfunction "SPIIO6/GPIO35/FSPID/SUBSPID_31")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "28")
+			(name "Net-(BT1-+)")
+			(class "Default")
+			(node
+				(ref "BT1")
+				(pin "1")
+				(pinfunction "+_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "6")
+				(pinfunction "VBAT_6")
+				(pintype "power_in")
+			)
+		)
+		(net
+			(code "29")
+			(name "Net-(CARD1-VDD)")
+			(class "Default")
+			(node
+				(ref "C27")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C3")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "CARD1")
+				(pin "4")
+				(pinfunction "VDD_4")
+				(pintype "unspecified")
+			)
+			(node
+				(ref "U19")
+				(pin "5")
+				(pinfunction "VOUT_5")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "30")
+			(name "Net-(D5-A)")
+			(class "Default")
+			(node
+				(ref "D5")
+				(pin "2")
+				(pinfunction "A_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R7")
+				(pin "1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "31")
+			(name "Net-(D7-A)")
+			(class "Default")
+			(node
+				(ref "D7")
+				(pin "2")
+				(pinfunction "A_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R1")
+				(pin "2")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "32")
+			(name "Net-(D7-K)")
+			(class "Default")
+			(node
+				(ref "D7")
+				(pin "1")
+				(pinfunction "K_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "1")
+				(pinfunction "STAT_1")
+				(pintype "tri_state")
+			)
+		)
+		(net
+			(code "33")
+			(name "Net-(D9-A)")
+			(class "Default")
+			(node
+				(ref "D9")
+				(pin "2")
+				(pinfunction "A_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R6")
+				(pin "1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "34")
+			(name "Net-(J1-CC1)")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "A5")
+				(pinfunction "CC1_A5")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "R27")
+				(pin "2")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "35")
+			(name "Net-(J1-CC2)")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "B5")
+				(pinfunction "CC2_B5")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "R26")
+				(pin "1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "36")
+			(name "Net-(J3-Pin_2)")
+			(class "Default")
+			(node
+				(ref "C26")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J3")
+				(pin "2")
+				(pinfunction "Pin_2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U22")
+				(pin "5")
+				(pinfunction "VOUT_5")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "37")
+			(name "Net-(Q3-G)")
+			(class "Default")
+			(node
+				(ref "Q3")
+				(pin "1")
+				(pinfunction "G_1")
+				(pintype "input")
+			)
+			(node
+				(ref "R3")
+				(pin "2")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "38")
+			(name "Net-(U3-DVI)")
+			(class "Default")
+			(node
+				(ref "C30")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R30")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "5")
+				(pinfunction "DVI_5")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "39")
+			(name "Net-(U9-PROG)")
+			(class "Default")
+			(node
+				(ref "R22")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U9")
+				(pin "5")
+				(pinfunction "PROG_5")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "40")
+			(name "Net-(U18-EN)")
+			(class "Default")
+			(node
+				(ref "SW4")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "unspecified")
+			)
+			(node
+				(ref "U18")
+				(pin "3")
+				(pinfunction "EN_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "41")
+			(name "Net-(U21-GPIO21)")
+			(class "Default")
+			(node
+				(ref "U21")
+				(pin "25")
+				(pinfunction "GPIO21_25")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U5")
+				(pin "4")
+				(pintype "output")
+			)
+		)
+		(net
+			(code "42")
+			(name "RESET")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "1")
+				(pinfunction "~{RESET}_1")
+				(pintype "input")
+			)
+			(node
+				(ref "C29")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R28")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "SW1")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "45")
+				(pinfunction "EN_45")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "43")
+			(name "RTC_PWR")
+			(class "Default")
+			(node
+				(ref "C1")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "2")
+				(pinfunction "VCC_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U21")
+				(pin "37")
+				(pinfunction "MTDI/GPIO41/CLK_OUT1_37")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "44")
+			(name "RTC_~{INT}")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "3")
+				(pinfunction "~{INT}/SQW_3")
+				(pintype "open_collector")
+			)
+			(node
+				(ref "U5")
+				(pin "1")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "45")
+			(name "RX")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "14")
+				(pinfunction "RX/38_14")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U21")
+				(pin "34")
+				(pinfunction "GPIO38/FSPIWP/SUBSPIWP_34")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "46")
+			(name "SCK")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "11")
+				(pinfunction "SCK/36_11")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "CARD1")
+				(pin "5")
+				(pinfunction "CLK_5")
+				(pintype "unspecified")
+			)
+			(node
+				(ref "U21")
+				(pin "32")
+				(pinfunction "SPIIO7/GPIO36/FSPICLK/SUBSPICLK_32")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "47")
+			(name "SCL")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "18")
+				(pinfunction "SCL/4_18")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "J3")
+				(pin "4")
+				(pinfunction "Pin_4_4")
+				(pintype "passive")
+			)
+			(node
+				(ref "R29")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "8")
+				(pinfunction "SCL_8")
+				(pintype "input")
+			)
+			(node
+				(ref "U2")
+				(pin "4")
+				(pinfunction "SCK_4")
+				(pintype "input")
+			)
+			(node
+				(ref "U20")
+				(pin "7")
+				(pinfunction "SCL_7")
+				(pintype "input")
+			)
+			(node
+				(ref "U21")
+				(pin "8")
+				(pinfunction "GPIO4/TOUCH4/ADC1_CH3_8")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U3")
+				(pin "6")
+				(pinfunction "SCL_6")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "48")
+			(name "SDA")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "17")
+				(pinfunction "SDA/3_17")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "J3")
+				(pin "3")
+				(pinfunction "Pin_3_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "R35")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "7")
+				(pinfunction "SDA_7")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U2")
+				(pin "3")
+				(pinfunction "SDI_3")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U20")
+				(pin "8")
+				(pinfunction "SDA_8")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U21")
+				(pin "7")
+				(pinfunction "GPIO3/TOUCH3/ADC1_CH2_7")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U3")
+				(pin "4")
+				(pinfunction "SDA_4")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "49")
+			(name "SD_EN")
+			(class "Default")
+			(node
+				(ref "U19")
+				(pin "3")
+				(pinfunction "EN_3")
+				(pintype "input")
+			)
+			(node
+				(ref "U21")
+				(pin "41")
+				(pinfunction "GPIO45_41")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "50")
+			(name "SD_~{CS}")
+			(class "Default")
+			(node
+				(ref "CARD1")
+				(pin "2")
+				(pinfunction "CS/DAT3_2")
+				(pintype "unspecified")
+			)
+			(node
+				(ref "U21")
+				(pin "44")
+				(pinfunction "GPIO46_44")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "51")
+			(name "TX")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "15")
+				(pinfunction "TX/39_15")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U21")
+				(pin "35")
+				(pinfunction "MTCK/GPIO39/CLK_OUT3/SUBSPICS1_35")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "52")
+			(name "TXDO")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "16")
+				(pinfunction "TXDO_16")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U21")
+				(pin "39")
+				(pinfunction "U0TXD/GPIO43/CLK_OUT1_39")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "53")
+			(name "USB_SENSE")
+			(class "Default")
+			(node
+				(ref "Q3")
+				(pin "3")
+				(pinfunction "D_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "U21")
+				(pin "29")
+				(pinfunction "SPIIO5/GPIO34/FSPICS0/SUBSPICS0_29")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "54")
+			(name "VBUS")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "26")
+				(pinfunction "VBUS_26")
+				(pintype "power_in")
+			)
+			(node
+				(ref "C14")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "D8")
+				(pin "2")
+				(pinfunction "A_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "J1")
+				(pin "A4_B9")
+				(pinfunction "VBUS_A4_B9")
+				(pintype "power_in")
+			)
+			(node
+				(ref "J1")
+				(pin "B4_A9")
+				(pinfunction "VBUS_B4_A9")
+				(pintype "power_in")
+			)
+			(node
+				(ref "Q1")
+				(pin "1")
+				(pinfunction "G_1")
+				(pintype "input")
+			)
+			(node
+				(ref "R1")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R23")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R3")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "TP6")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U24")
+				(pin "1")
+				(pinfunction "VCC_1")
+				(pintype "input")
+			)
+			(node
+				(ref "U9")
+				(pin "4")
+				(pinfunction "V_{DD}_4")
+				(pintype "power_in")
+			)
+		)
+		(net
+			(code "55")
+			(name "VIN")
+			(class "Default")
+			(node
+				(ref "C21")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "D8")
+				(pin "1")
+				(pinfunction "K_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "Q1")
+				(pin "2")
+				(pinfunction "S_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "SW4")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "unspecified")
+			)
+			(node
+				(ref "U18")
+				(pin "1")
+				(pinfunction "VIN_1")
+				(pintype "input")
+			)
+			(node
+				(ref "U19")
+				(pin "1")
+				(pinfunction "VIN_1")
+				(pintype "input")
+			)
+			(node
+				(ref "U22")
+				(pin "1")
+				(pinfunction "VIN_1")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "57")
+			(name "unconnected-(CARD1-DAT1-Pad8)")
+			(class "Default")
+			(node
+				(ref "CARD1")
+				(pin "8")
+				(pinfunction "DAT1_8")
+				(pintype "unspecified+no_connect")
+			)
+		)
+		(net
+			(code "58")
+			(name "unconnected-(CARD1-DAT2-Pad1)")
+			(class "Default")
+			(node
+				(ref "CARD1")
+				(pin "1")
+				(pinfunction "DAT2_1")
+				(pintype "unspecified+no_connect")
+			)
+		)
+		(net
+			(code "59")
+			(name "unconnected-(J1-SBU1-PadA8)")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "A8")
+				(pinfunction "SBU1_A8")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "60")
+			(name "unconnected-(J1-SBU2-PadB8)")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "B8")
+				(pinfunction "SBU2_B8")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "61")
+			(name "unconnected-(SW4-Pad4)")
+			(class "Default")
+			(node
+				(ref "SW4")
+				(pin "4")
+				(pinfunction "4_4")
+				(pintype "unspecified+no_connect")
+			)
+		)
+		(net
+			(code "62")
+			(name "unconnected-(SW4-Pad5)")
+			(class "Default")
+			(node
+				(ref "SW4")
+				(pin "5")
+				(pinfunction "5_5")
+				(pintype "unspecified+no_connect")
+			)
+		)
+		(net
+			(code "63")
+			(name "unconnected-(U1-32KHZ-Pad1)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "1")
+				(pinfunction "32KHZ_1")
+				(pintype "open_collector+no_connect")
+			)
+		)
+		(net
+			(code "64")
+			(name "unconnected-(U1-~{RST}-Pad4)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "4")
+				(pinfunction "~{RST}_4")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "65")
+			(name "unconnected-(U18-NC-Pad4)")
+			(class "Default")
+			(node
+				(ref "U18")
+				(pin "4")
+				(pinfunction "NC_4")
+				(pintype "input+no_connect")
+			)
+		)
+		(net
+			(code "66")
+			(name "unconnected-(U19-NC-Pad4)")
+			(class "Default")
+			(node
+				(ref "U19")
+				(pin "4")
+				(pinfunction "NC_4")
+				(pintype "input+no_connect")
+			)
+		)
+		(net
+			(code "67")
+			(name "unconnected-(U21-GPIO26-Pad26)")
+			(class "Default")
+			(node
+				(ref "U21")
+				(pin "26")
+				(pinfunction "GPIO26_26")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "68")
+			(name "unconnected-(U21-GPIO47{slash}SPICLK_P{slash}SUBSPICLK_P_DIFF-Pad27)")
+			(class "Default")
+			(node
+				(ref "U21")
+				(pin "27")
+				(pinfunction "GPIO47/SPICLK_P/SUBSPICLK_P_DIFF_27")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "69")
+			(name "unconnected-(U21-MTDO{slash}GPIO40{slash}CLK_OUT2-Pad36)")
+			(class "Default")
+			(node
+				(ref "U21")
+				(pin "36")
+				(pinfunction "MTDO/GPIO40/CLK_OUT2_36")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "70")
+			(name "unconnected-(U21-MTMS{slash}GPIO42-Pad38)")
+			(class "Default")
+			(node
+				(ref "U21")
+				(pin "38")
+				(pinfunction "MTMS/GPIO42_38")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "71")
+			(name "unconnected-(U21-U0RXD{slash}GPIO44{slash}CLK_OUT2-Pad40)")
+			(class "Default")
+			(node
+				(ref "U21")
+				(pin "40")
+				(pinfunction "U0RXD/GPIO44/CLK_OUT2_40")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "72")
+			(name "unconnected-(U22-NC-Pad4)")
+			(class "Default")
+			(node
+				(ref "U22")
+				(pin "4")
+				(pinfunction "NC_4")
+				(pintype "input+no_connect")
+			)
+		)
+		(net
+			(code "73")
+			(name "unconnected-(U24-NC-Pad2)")
+			(class "Default")
+			(node
+				(ref "U24")
+				(pin "2")
+				(pinfunction "NC_2")
+				(pintype "input+no_connect")
+			)
+		)
+	)
+)
