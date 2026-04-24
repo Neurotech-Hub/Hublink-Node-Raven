@@ -78,4 +78,5 @@ void loop() {
   - `500 mAh`: ~`2119` hours (~`88` days)
   - `1000 mAh`: ~`4237` hours (~`177` days)
   - `2000 mAh`: ~`8475` hours (~`353` days)
+- Magnet sensor (Allegro Microsystems `APS11753KMDALX-3PL1`): about `56 uA` with a `1.5 ms` sampling period—a reasonable tradeoff between higher-frequency magnetic sensing and low power. The part may be removed or replaced with other common magnet sensors (including latching types); higher bandwidth and latching types often draw upwards of `1 mA` constantly.
 - Active current is workload-dependent and typically ranges from about `20-50 mA` depending on clock speed and sensor/SD card utilization.
