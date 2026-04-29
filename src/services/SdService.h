@@ -19,6 +19,7 @@ public:
   ServiceStatus appendLine(const char *path, const String &line);
   ServiceStatus readText(const char *path, String &outText);
   ServiceStatus remove(const char *path);
+  bool exists(const char *path);
 
 private:
   bool mount(uint32_t spiClockHz);

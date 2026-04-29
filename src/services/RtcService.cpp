@@ -1,4 +1,6 @@
 #include "RtcService.h"
+#include <sys/time.h>
+#include <time.h>
 
 namespace raven {
 
@@ -14,6 +16,18 @@ bool RtcService::begin(TwoWire &wire, bool setOnLostPower) {
   }
   if (setOnLostPower_ && rtc_.lostPower()) {
     rtc_.adjust(DateTime(F(__DATE__), F(__TIME__)));
+  }
+
+  // Best-effort: keep ESP system clock aligned to RTC when RTC time is valid.
+  const DateTime now = rtc_.now();
+  if (now.isValid()) {
+    const time_t epoch = static_cast<time_t>(now.unixtime());
+    if (epoch >= 1700000000 && epoch <= 2200000000) {
+      struct timeval tv = {};
+      tv.tv_sec = epoch;
+      tv.tv_usec = 0;
+      settimeofday(&tv, nullptr);
+    }
   }
 
   initialized_ = true;

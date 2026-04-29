@@ -89,4 +89,11 @@ ServiceStatus SdService::remove(const char *path) {
   return ServiceStatus::Ok;
 }
 
+bool SdService::exists(const char *path) {
+  if (!mounted_ && !begin()) {
+    return false;
+  }
+  return SD.exists(path);
+}
+
 } // namespace raven

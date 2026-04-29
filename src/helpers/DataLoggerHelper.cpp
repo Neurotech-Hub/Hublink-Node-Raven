@@ -1,6 +1,130 @@
 #include "DataLoggerHelper.h"
 
 namespace raven {
+namespace {
+
+CsvFieldMask allCsvFieldMask() {
+  return csvFields({
+      CsvField::Millis,      CsvField::UlpEdges,    CsvField::MagnetPasses,
+      CsvField::RtcUnix,     CsvField::RtcTempC,    CsvField::BattV,
+      CsvField::BattPer,     CsvField::Lux,         CsvField::Als,
+      CsvField::White,       CsvField::TempC,       CsvField::PressureHpa,
+      CsvField::HumidityPct, CsvField::GasKOhm,     CsvField::AltM,
+      CsvField::Magnet,      CsvField::UsbSense,
+  });
+}
+
+String valueForField(CsvField field, const CompositeSample &sample) {
+  switch (field) {
+  case CsvField::Millis:
+    return String(sample.millisStamp);
+  case CsvField::UlpEdges:
+    return String(sample.ulpEdgeCount);
+  case CsvField::MagnetPasses:
+    return String(sample.magnetPassCount);
+  case CsvField::RtcUnix:
+    return sample.rtc.status == ServiceStatus::Ok ? String(sample.rtc.now.unixtime()) : "";
+  case CsvField::RtcTempC:
+    return sample.rtc.status == ServiceStatus::Ok ? String(sample.rtc.temperatureC, 2) : "";
+  case CsvField::BattV:
+    return sample.battery.status == ServiceStatus::Ok ? String(sample.battery.voltageV, 3) : "";
+  case CsvField::BattPer:
+    return sample.battery.status == ServiceStatus::Ok ? String(sample.battery.stateOfChargePct, 1)
+                                                      : "";
+  case CsvField::Lux:
+    return sample.light.status == ServiceStatus::Ok ? String(sample.light.lux, 2) : "";
+  case CsvField::Als:
+    return sample.light.status == ServiceStatus::Ok ? String(sample.light.als) : "";
+  case CsvField::White:
+    return sample.light.status == ServiceStatus::Ok ? String(sample.light.white) : "";
+  case CsvField::TempC:
+    return sample.environment.status == ServiceStatus::Ok
+               ? String(sample.environment.temperatureC, 2)
+               : "";
+  case CsvField::PressureHpa:
+    return sample.environment.status == ServiceStatus::Ok
+               ? String(sample.environment.pressureHpa, 2)
+               : "";
+  case CsvField::HumidityPct:
+    return sample.environment.status == ServiceStatus::Ok
+               ? String(sample.environment.humidityPct, 2)
+               : "";
+  case CsvField::GasKOhm:
+    return sample.environment.status == ServiceStatus::Ok
+               ? String(sample.environment.gasKOhms, 2)
+               : "";
+  case CsvField::AltM:
+    return sample.environment.status == ServiceStatus::Ok
+               ? String(sample.environment.altitudeM, 2)
+               : "";
+  case CsvField::Magnet:
+    return sample.magnet ? "1" : "0";
+  case CsvField::UsbSense:
+    return sample.usbSense ? "1" : "0";
+  }
+  return "";
+}
+
+const __FlashStringHelper *nameForField(CsvField field) {
+  switch (field) {
+  case CsvField::Millis:
+    return F("millis");
+  case CsvField::UlpEdges:
+    return F("ulp_edges");
+  case CsvField::MagnetPasses:
+    return F("magnet_passes");
+  case CsvField::RtcUnix:
+    return F("rtc_unix");
+  case CsvField::RtcTempC:
+    return F("rtc_temp_c");
+  case CsvField::BattV:
+    return F("batt_v");
+  case CsvField::BattPer:
+    return F("batt_per");
+  case CsvField::Lux:
+    return F("lux");
+  case CsvField::Als:
+    return F("als");
+  case CsvField::White:
+    return F("white");
+  case CsvField::TempC:
+    return F("temp_c");
+  case CsvField::PressureHpa:
+    return F("pressure_hpa");
+  case CsvField::HumidityPct:
+    return F("humidity_pct");
+  case CsvField::GasKOhm:
+    return F("gas_kohm");
+  case CsvField::AltM:
+    return F("alt_m");
+  case CsvField::Magnet:
+    return F("magnet");
+  case CsvField::UsbSense:
+    return F("usb_sense");
+  }
+  return F("");
+}
+
+template <typename ValueBuilder>
+String buildCsv(CsvFieldMask mask, ValueBuilder valueBuilder) {
+  String line;
+  bool first = true;
+  for (uint8_t bit = 0; bit <= static_cast<uint8_t>(CsvField::UsbSense); ++bit) {
+    const CsvField field = static_cast<CsvField>(bit);
+    const CsvFieldMask bitMask = csvFieldBit(field);
+    if ((mask & bitMask) == 0) {
+      continue;
+    }
+    if (!first) {
+      line += ",";
+    }
+    line += valueBuilder(field);
+    first = false;
+  }
+  return line;
+}
+
+} // namespace
 
 bool DataLoggerHelper::begin() {
   if (!node_.beginHardware()) {
@@ -35,50 +159,41 @@ CompositeSample DataLoggerHelper::captureSample() {
 
 ServiceStatus DataLoggerHelper::appendCsvSample(const char *path,
                                                 const CompositeSample &sample) {
-  return node_.sd().appendLine(path, toCsv(sample));
+  return appendCsvSample(path, sample, allCsvFieldMask());
+}
+
+ServiceStatus DataLoggerHelper::appendCsvSample(const char *path,
+                                                const CompositeSample &sample,
+                                                CsvFieldMask mask) {
+  const CsvFieldMask selectedMask = mask & allCsvFieldMask();
+  if (selectedMask == 0) {
+    return ServiceStatus::InvalidData;
+  }
+  return node_.sd().appendLine(path, toCsv(sample, selectedMask));
 }
 
 String DataLoggerHelper::csvHeader() {
-  return String(F("millis,ulp_edges,magnet_passes,rtc_unix,rtc_temp_c,batt_v,batt_soc,lux,als,white,temp_c,pressure_hpa,humidity_pct,gas_kohm,alt_m,magnet,usb_sense"));
+  return csvHeader(allCsvFieldMask());
+}
+
+String DataLoggerHelper::csvHeader(CsvFieldMask mask) {
+  const CsvFieldMask selectedMask = mask & allCsvFieldMask();
+  if (selectedMask == 0) {
+    return "";
+  }
+  return buildCsv(selectedMask, [](CsvField field) { return String(nameForField(field)); });
 }
 
 String DataLoggerHelper::toCsv(const CompositeSample &sample) {
-  String line;
-  line.reserve(200);
-  line += String(sample.millisStamp);
-  line += ",";
-  line += String(sample.ulpEdgeCount);
-  line += ",";
-  line += String(sample.magnetPassCount);
-  line += ",";
-  line += sample.rtc.status == ServiceStatus::Ok ? String(sample.rtc.now.unixtime()) : "";
-  line += ",";
-  line += sample.rtc.status == ServiceStatus::Ok ? String(sample.rtc.temperatureC, 2) : "";
-  line += ",";
-  line += sample.battery.status == ServiceStatus::Ok ? String(sample.battery.voltageV, 3) : "";
-  line += ",";
-  line += sample.battery.status == ServiceStatus::Ok ? String(sample.battery.stateOfChargePct, 1) : "";
-  line += ",";
-  line += sample.light.status == ServiceStatus::Ok ? String(sample.light.lux, 2) : "";
-  line += ",";
-  line += sample.light.status == ServiceStatus::Ok ? String(sample.light.als) : "";
-  line += ",";
-  line += sample.light.status == ServiceStatus::Ok ? String(sample.light.white) : "";
-  line += ",";
-  line += sample.environment.status == ServiceStatus::Ok ? String(sample.environment.temperatureC, 2) : "";
-  line += ",";
-  line += sample.environment.status == ServiceStatus::Ok ? String(sample.environment.pressureHpa, 2) : "";
-  line += ",";
-  line += sample.environment.status == ServiceStatus::Ok ? String(sample.environment.humidityPct, 2) : "";
-  line += ",";
-  line += sample.environment.status == ServiceStatus::Ok ? String(sample.environment.gasKOhms, 2) : "";
-  line += ",";
-  line += sample.environment.status == ServiceStatus::Ok ? String(sample.environment.altitudeM, 2) : "";
-  line += ",";
-  line += sample.magnet ? "1" : "0";
-  line += ",";
-  line += sample.usbSense ? "1" : "0";
-  return line;
+  return toCsv(sample, allCsvFieldMask());
+}
+
+String DataLoggerHelper::toCsv(const CompositeSample &sample, CsvFieldMask mask) {
+  const CsvFieldMask selectedMask = mask & allCsvFieldMask();
+  if (selectedMask == 0) {
+    return "";
+  }
+  return buildCsv(selectedMask, [&sample](CsvField field) { return valueForField(field, sample); });
 }
 
 } // namespace raven

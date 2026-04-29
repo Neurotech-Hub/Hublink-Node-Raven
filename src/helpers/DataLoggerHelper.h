@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../HublinkNode.h"
+#include <initializer_list>
 
 namespace raven {
 
@@ -15,6 +16,41 @@ struct CompositeSample {
   bool magnet = false;
   bool usbSense = false;
 };
+using SampleFields = CompositeSample;
+
+enum class CsvField : uint8_t {
+  Millis = 0,
+  UlpEdges,
+  MagnetPasses,
+  RtcUnix,
+  RtcTempC,
+  BattV,
+  BattPer,
+  Lux,
+  Als,
+  White,
+  TempC,
+  PressureHpa,
+  HumidityPct,
+  GasKOhm,
+  AltM,
+  Magnet,
+  UsbSense,
+};
+
+using CsvFieldMask = uint32_t;
+
+constexpr CsvFieldMask csvFieldBit(CsvField field) {
+  return static_cast<CsvFieldMask>(1UL << static_cast<uint8_t>(field));
+}
+
+inline CsvFieldMask csvFields(std::initializer_list<CsvField> fields) {
+  CsvFieldMask mask = 0;
+  for (CsvField field : fields) {
+    mask |= csvFieldBit(field);
+  }
+  return mask;
+}
 
 class DataLoggerHelper {
 public:
@@ -23,8 +59,12 @@ public:
   bool begin();
   CompositeSample captureSample();
   ServiceStatus appendCsvSample(const char *path, const CompositeSample &sample);
+  ServiceStatus appendCsvSample(const char *path, const CompositeSample &sample,
+                                CsvFieldMask mask);
   static String csvHeader();
+  static String csvHeader(CsvFieldMask mask);
   static String toCsv(const CompositeSample &sample);
+  static String toCsv(const CompositeSample &sample, CsvFieldMask mask);
 
 private:
   HublinkNode &node_;
