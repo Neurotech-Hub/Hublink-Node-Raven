@@ -19,8 +19,8 @@ bool parseCsvFieldName(const String &fieldText, CsvField &outField) {
     outField = CsvField::MagnetPasses;
   } else if (field == "rtc_unix") {
     outField = CsvField::RtcUnix;
-  } else if (field == "rtc_text") {
-    outField = CsvField::RtcText;
+  } else if (field == "datetime" || field == "rtc_text") {
+    outField = CsvField::DateTime;
   } else if (field == "rtc_temp_c") {
     outField = CsvField::RtcTempC;
   } else if (field == "batt_v") {

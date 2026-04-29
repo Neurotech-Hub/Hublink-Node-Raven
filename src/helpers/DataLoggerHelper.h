@@ -23,7 +23,8 @@ enum class CsvField : uint8_t {
   UlpEdges,
   MagnetPasses,
   RtcUnix,
-  RtcText,
+  DateTime,
+  RtcText = DateTime, // Backward-compatible alias.
   RtcTempC,
   BattV,
   BattPer,

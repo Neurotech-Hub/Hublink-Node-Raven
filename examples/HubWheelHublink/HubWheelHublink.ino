@@ -31,7 +31,7 @@
 //     "log_file_mode": "daily",
 //     "log_fields": [
 //       "rtc_unix",
-//       "rtc_text",
+//       "datetime",
 //       "magnet_passes",
 //       "batt_v",
 //       "batt_per"
@@ -199,13 +199,17 @@ static void runHublinkSyncWindow() {
   // Dashboard policy for this sketch:
   // - Valid cell reading -> report actual SOC.
   // - No valid reading but USB present -> report 100% (externally powered lab setup).
-  // - No valid reading and no USB -> leave battery level unchanged.
+  // - No valid reading and no USB -> report 0% to avoid stale/null data.
+  const bool usbPresent = node.readUsbSense();
   const raven::BatteryReading battery = node.powerGauge().readSample();
-  if (battery.status == raven::ServiceStatus::Ok && battery.hasCellReading) {
+  if (battery.status == raven::ServiceStatus::Ok && battery.hasCellReading &&
+      battery.stateOfChargePct > 0.0f) {
     const int batteryPct = static_cast<int>(battery.stateOfChargePct + 0.5f);
     hublink.setBatteryLevel(static_cast<uint8_t>(constrain(batteryPct, 0, 100)));
-  } else if (node.readUsbSense()) {
+  } else if (usbPresent) {
     hublink.setBatteryLevel(100);
+  } else {
+    hublink.setBatteryLevel(0);
   }
   // Uses existing Hublink config from meta.json/hardcoded defaults.
   hublink.sync(gSyncForSeconds);

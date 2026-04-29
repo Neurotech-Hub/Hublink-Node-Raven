@@ -74,10 +74,10 @@ void loop() {
 - `DataLoggerHelper::csvHeader()` and `DataLoggerHelper::toCsv(...)` keep default full-field behavior for backward compatibility.
 - To log only selected columns, use typed masks with `CsvField` and overloads that accept `CsvFieldMask`.
 - Battery percentage is exposed as `batt_per` in CSV output.
-- `rtc_text` is formatted as `YYYY-MM-DD HH:MM:SS` for straightforward parsing in Python (`pandas.to_datetime` or `datetime.strptime`).
+- `datetime` is formatted as `YYYY-MM-DD HH:MM:SS` for straightforward parsing in Python (`pandas.to_datetime` or `datetime.strptime`).
 - Full selectable field list:
   - Runtime: `millis`, `ulp_edges`, `magnet_passes`, `magnet`, `usb_sense`
-  - RTC: `rtc_unix`, `rtc_text`, `rtc_temp_c`
+  - RTC: `rtc_unix`, `datetime`, `rtc_temp_c`
   - Battery: `batt_v`, `batt_per`
   - Light: `lux`, `als`, `white`
   - Environment: `temp_c`, `pressure_hpa`, `humidity_pct`, `gas_kohm`, `alt_m`
@@ -124,6 +124,7 @@ raven::LogFilePolicy gLogFilePolicy = {kLogBaseName, kLogFileMode, 0, false};
 - Use `examples/HubWheelMinimal/HubWheelMinimal.ino` for the Hublink-free wheel logger.
 - `HubWheelHublink.ino` keeps hardcoded defaults first, then optionally overrides them from `meta.json`.
 - The exact `meta.json` example and key details are documented inline in `HubWheelHublink.ino` so the README stays sketch-agnostic.
+- Low-power/deep-sleep sketches rely on sketch-controlled wake scheduling; they cannot rely on Hublink advertise/sync intervals while asleep. This is why wheel examples include explicit `wheel.*` timing settings in addition to `hublink.*` settings.
 
 ## Hardware Power Profile
 

@@ -6,7 +6,7 @@ namespace {
 CsvFieldMask allCsvFieldMask() {
   return csvFields({
       CsvField::Millis,      CsvField::UlpEdges,    CsvField::MagnetPasses,
-      CsvField::RtcUnix,     CsvField::RtcText,     CsvField::RtcTempC,    CsvField::BattV,
+      CsvField::RtcUnix,     CsvField::DateTime,    CsvField::RtcTempC,    CsvField::BattV,
       CsvField::BattPer,     CsvField::Lux,         CsvField::Als,
       CsvField::White,       CsvField::TempC,       CsvField::PressureHpa,
       CsvField::HumidityPct, CsvField::GasKOhm,     CsvField::AltM,
@@ -24,7 +24,7 @@ String valueForField(CsvField field, const CompositeSample &sample) {
     return String(sample.magnetPassCount);
   case CsvField::RtcUnix:
     return sample.rtc.status == ServiceStatus::Ok ? String(sample.rtc.now.unixtime()) : "";
-  case CsvField::RtcText:
+  case CsvField::DateTime:
     if (sample.rtc.status == ServiceStatus::Ok && sample.rtc.now.isValid()) {
       char datetime[20];
       snprintf(datetime, sizeof(datetime), "%04d-%02d-%02d %02d:%02d:%02d",
@@ -36,10 +36,15 @@ String valueForField(CsvField field, const CompositeSample &sample) {
   case CsvField::RtcTempC:
     return sample.rtc.status == ServiceStatus::Ok ? String(sample.rtc.temperatureC, 2) : "";
   case CsvField::BattV:
-    return sample.battery.status == ServiceStatus::Ok ? String(sample.battery.voltageV, 3) : "";
+    if (sample.battery.status == ServiceStatus::Ok && sample.battery.hasCellReading) {
+      return String(sample.battery.voltageV, 3);
+    }
+    return "0";
   case CsvField::BattPer:
-    return sample.battery.status == ServiceStatus::Ok ? String(sample.battery.stateOfChargePct, 1)
-                                                      : "";
+    if (sample.battery.status == ServiceStatus::Ok && sample.battery.hasCellReading) {
+      return String(sample.battery.stateOfChargePct, 1);
+    }
+    return "0";
   case CsvField::Lux:
     return sample.light.status == ServiceStatus::Ok ? String(sample.light.lux, 2) : "";
   case CsvField::Als:
@@ -84,8 +89,8 @@ const __FlashStringHelper *nameForField(CsvField field) {
     return F("magnet_passes");
   case CsvField::RtcUnix:
     return F("rtc_unix");
-  case CsvField::RtcText:
-    return F("rtc_text");
+  case CsvField::DateTime:
+    return F("datetime");
   case CsvField::RtcTempC:
     return F("rtc_temp_c");
   case CsvField::BattV:
