@@ -23,6 +23,7 @@ enum class CsvField : uint8_t {
   UlpEdges,
   MagnetPasses,
   RtcUnix,
+  RtcText,
   RtcTempC,
   BattV,
   BattPer,

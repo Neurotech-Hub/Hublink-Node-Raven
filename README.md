@@ -53,14 +53,15 @@ void loop() {
 - `examples/BasicHardware/BasicHardware.ino`
 - `examples/SensorSnapshot/SensorSnapshot.ino`
 - `examples/DataLogging/DataLogging.ino`
-- `examples/HubWheel/HubWheel.ino`
+- `examples/HubWheelMinimal/HubWheelMinimal.ino`
+- `examples/HubWheelHublink/HubWheelHublink.ino` (requires Hublink library)
 - `examples/AlertPinTest/AlertPinTest.ino` (DS3231 + optional MAX17048, `PIN_ALERT` exercise)
 
 ## Notes
 
 - This library intentionally targets fixed custom hardware. Runtime pin remapping is not supported.
 - Defaults are conservative for reliability (`I2C=100kHz`, SD disabled until mounted).
-- ULP magnet counting is core hardware functionality; wake cadence and logging policy remain sketch-controlled in `HubWheel.ino`.
+- ULP magnet counting is core hardware functionality; wake cadence and logging policy remain sketch-controlled in `HubWheelMinimal.ino`/`HubWheelHublink.ino`.
 - `PIN_ALERT` is a shared hardware interrupt line created by combining `~RTC_INT` and `~FUEL_ALERT` through an AND gate. Because both upstream signals are active-low, if either source asserts LOW, `PIN_ALERT` goes LOW (LOW-level interrupt behavior). This lets sketches monitor one GPIO for either source, but the library does not currently expose APIs to configure specific RTC or fuel-gauge alert thresholds/masks.
 
 ## Data Logger
@@ -73,9 +74,10 @@ void loop() {
 - `DataLoggerHelper::csvHeader()` and `DataLoggerHelper::toCsv(...)` keep default full-field behavior for backward compatibility.
 - To log only selected columns, use typed masks with `CsvField` and overloads that accept `CsvFieldMask`.
 - Battery percentage is exposed as `batt_per` in CSV output.
+- `rtc_text` is formatted as `YYYY-MM-DD HH:MM:SS` for straightforward parsing in Python (`pandas.to_datetime` or `datetime.strptime`).
 - Full selectable field list:
   - Runtime: `millis`, `ulp_edges`, `magnet_passes`, `magnet`, `usb_sense`
-  - RTC: `rtc_unix`, `rtc_temp_c`
+  - RTC: `rtc_unix`, `rtc_text`, `rtc_temp_c`
   - Battery: `batt_v`, `batt_per`
   - Light: `lux`, `als`, `white`
   - Environment: `temp_c`, `pressure_hpa`, `humidity_pct`, `gas_kohm`, `alt_m`
@@ -116,11 +118,18 @@ constexpr raven::FileNameMode kLogFileMode = raven::FileNameMode::Disabled;
 raven::LogFilePolicy gLogFilePolicy = {kLogBaseName, kLogFileMode, 0, false};
 ```
 
+### HubWheel + Hublink Example
+
+- Use `examples/HubWheelHublink/HubWheelHublink.ino` when the Hublink library is installed.
+- Use `examples/HubWheelMinimal/HubWheelMinimal.ino` for the Hublink-free wheel logger.
+- `HubWheelHublink.ino` keeps hardcoded defaults first, then optionally overrides them from `meta.json`.
+- The exact `meta.json` example and key details are documented inline in `HubWheelHublink.ino` so the README stays sketch-agnostic.
+
 ## Hardware Power Profile
 
 - Measured low-power modes on Raven:
   - Deep sleep baseline: `50 uA` (`0.05 mA`)
-  - `examples/HubWheel/HubWheel.ino` (ULP enabled): `236 uA` (`0.236 mA`)
+  - `examples/HubWheelMinimal/HubWheelMinimal.ino` (ULP enabled): `236 uA` (`0.236 mA`)
 - Estimated battery life:
 
 | Battery | Deep sleep baseline (`50 uA`) | HubWheel ULP mode (`236 uA`) |

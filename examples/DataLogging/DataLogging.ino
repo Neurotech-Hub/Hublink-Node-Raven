@@ -38,41 +38,36 @@ void setup()
     Serial.println(F("Init: logger begin failed."));
   }
 
+  Serial.println();
+  Serial.println(F("--------- DataLogging Active -----------"));
   Serial.print(F("CSV Header: "));
   Serial.println(raven::DataLoggerHelper::csvHeader());
+  Serial.println(F("----------------------------------------"));
 }
 
 void loop()
 {
-  raven::SampleFields sample = logger.captureSample();
+  Serial.println();
+  Serial.println(F("--------- DataLogging Cycle ------------"));
+  raven::SampleFields sample;
   String logPath;
-  if (raven::resolveLogFilePath(node.sd(), gLogFilePolicy, sample.rtc, logPath) !=
-      raven::ServiceStatus::Ok)
+  raven::ServiceStatus logStatus = raven::captureAndAppendManagedCsv(
+      logger, node, gLogFilePolicy, 0, sample, &logPath);
+  if (logStatus != raven::ServiceStatus::Ok)
   {
-    Serial.println(F("Log path: invalid filename policy"));
+    Serial.println(F("Log write failed"));
     delay(5000);
     return;
   }
 
   String csvLine = raven::DataLoggerHelper::toCsv(sample);
-
-  if (!node.sd().exists(logPath.c_str()))
-  {
-    if (node.sd().appendLine(logPath.c_str(), raven::DataLoggerHelper::csvHeader()) ==
-        raven::ServiceStatus::Ok)
-    {
-      Serial.print(F("Logged Header: "));
-      Serial.println(raven::DataLoggerHelper::csvHeader());
-    }
-  }
-
-  raven::ServiceStatus logStatus = node.sd().appendLine(logPath.c_str(), csvLine);
   Serial.print(F("Log write: "));
   Serial.println(raven::statusToString(logStatus));
   Serial.print(F("Log path: "));
   Serial.println(logPath);
   Serial.print(F("Logged CSV: "));
   Serial.println(csvLine);
+  Serial.println(F("----------------------------------------"));
 
   delay(5000);
 }

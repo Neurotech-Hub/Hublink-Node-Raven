@@ -38,7 +38,8 @@ void loop() {
   const uint64_t sdSize = node.sd().cardSizeBytes();
 
   Serial.println();
-  Serial.println(F("========== Raven Snapshot =========="));
+  Serial.println(F("--------- SensorSnapshot Cycle --------"));
+  Serial.println(F("========== Raven Snapshot ============="));
   if (clockReading.status == raven::ServiceStatus::Ok) {
     char datetime[24];
     snprintf(datetime, sizeof(datetime), "%04d-%02d-%02d %02d:%02d:%02d",
@@ -111,7 +112,8 @@ void loop() {
   } else {
     Serial.println(F("SD       : not present"));
   }
-  Serial.println(F("===================================="));
+  Serial.println(F("======================================"));
+  Serial.println(F("--------------------------------------"));
 
   delay(3000);
 }

@@ -16,6 +16,7 @@ void loop() {
   const uint32_t nowMs = millis();
   if (nowMs - lastPrintMs >= 100U) {
     lastPrintMs = nowMs;
+    Serial.println(F("--------- BasicHardware --------------"));
     Serial.print(F("MAG_OUT="));
     Serial.print(magnetHigh ? F("HIGH") : F("LOW"));
     Serial.print(F(" USB_SENSE="));

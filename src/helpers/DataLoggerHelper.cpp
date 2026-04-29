@@ -6,7 +6,7 @@ namespace {
 CsvFieldMask allCsvFieldMask() {
   return csvFields({
       CsvField::Millis,      CsvField::UlpEdges,    CsvField::MagnetPasses,
-      CsvField::RtcUnix,     CsvField::RtcTempC,    CsvField::BattV,
+      CsvField::RtcUnix,     CsvField::RtcText,     CsvField::RtcTempC,    CsvField::BattV,
       CsvField::BattPer,     CsvField::Lux,         CsvField::Als,
       CsvField::White,       CsvField::TempC,       CsvField::PressureHpa,
       CsvField::HumidityPct, CsvField::GasKOhm,     CsvField::AltM,
@@ -24,6 +24,15 @@ String valueForField(CsvField field, const CompositeSample &sample) {
     return String(sample.magnetPassCount);
   case CsvField::RtcUnix:
     return sample.rtc.status == ServiceStatus::Ok ? String(sample.rtc.now.unixtime()) : "";
+  case CsvField::RtcText:
+    if (sample.rtc.status == ServiceStatus::Ok && sample.rtc.now.isValid()) {
+      char datetime[20];
+      snprintf(datetime, sizeof(datetime), "%04d-%02d-%02d %02d:%02d:%02d",
+               sample.rtc.now.year(), sample.rtc.now.month(), sample.rtc.now.day(),
+               sample.rtc.now.hour(), sample.rtc.now.minute(), sample.rtc.now.second());
+      return String(datetime);
+    }
+    return "";
   case CsvField::RtcTempC:
     return sample.rtc.status == ServiceStatus::Ok ? String(sample.rtc.temperatureC, 2) : "";
   case CsvField::BattV:
@@ -75,6 +84,8 @@ const __FlashStringHelper *nameForField(CsvField field) {
     return F("magnet_passes");
   case CsvField::RtcUnix:
     return F("rtc_unix");
+  case CsvField::RtcText:
+    return F("rtc_text");
   case CsvField::RtcTempC:
     return F("rtc_temp_c");
   case CsvField::BattV:
