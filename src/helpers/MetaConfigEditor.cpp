@@ -166,6 +166,11 @@ bool MetaConfigEditor::runShell(SdService &sd, Stream &io) {
       printTopHelp(io);
       continue;
     }
+    if (line == "reboot") {
+      io.println(F("Rebooting now..."));
+      delay(100);
+      ESP.restart();
+    }
 
     const int firstSpace = line.indexOf(' ');
     const String rootCmd = firstSpace < 0 ? line : line.substring(0, firstSpace);
@@ -247,6 +252,7 @@ bool MetaConfigEditor::handleCommand(SdService &, Stream &, const String &, bool
 void MetaConfigEditor::printTopHelp(Stream &io) const {
   io.println(F("Commands:"));
   io.println(F("  help"));
+  io.println(F("  reboot"));
   io.println(F("  meta help | meta show | meta get <path>"));
   io.println(F("  meta set <path> <value>"));
   io.println(F("  meta setjson <path> <json_literal>"));

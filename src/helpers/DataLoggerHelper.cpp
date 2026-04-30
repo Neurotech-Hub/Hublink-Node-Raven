@@ -5,7 +5,7 @@ namespace {
 
 CsvFieldMask allCsvFieldMask() {
   return csvFields({
-      CsvField::Millis,      CsvField::UlpEdges,    CsvField::MagnetPasses,
+      CsvField::Millis,      CsvField::UlpEdges,    CsvField::MagnetPasses, CsvField::PassesPerMin,
       CsvField::RtcUnix,     CsvField::DateTime,    CsvField::RtcTempC,    CsvField::BattV,
       CsvField::BattPer,     CsvField::Lux,         CsvField::Als,
       CsvField::White,       CsvField::TempC,       CsvField::PressureHpa,
@@ -22,6 +22,8 @@ String valueForField(CsvField field, const CompositeSample &sample) {
     return String(sample.ulpEdgeCount);
   case CsvField::MagnetPasses:
     return String(sample.magnetPassCount);
+  case CsvField::PassesPerMin:
+    return String(sample.passesPerMin, 2);
   case CsvField::RtcUnix:
     return sample.rtc.status == ServiceStatus::Ok ? String(sample.rtc.now.unixtime()) : "";
   case CsvField::DateTime:
@@ -87,6 +89,8 @@ const __FlashStringHelper *nameForField(CsvField field) {
     return F("ulp_edges");
   case CsvField::MagnetPasses:
     return F("magnet_passes");
+  case CsvField::PassesPerMin:
+    return F("passes_min");
   case CsvField::RtcUnix:
     return F("rtc_unix");
   case CsvField::DateTime:

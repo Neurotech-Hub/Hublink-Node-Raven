@@ -7,6 +7,13 @@ bool shouldRunSyncWindow(uint32_t sleepSeconds, uint32_t syncEverySeconds, uint3
   return elapsedSeconds >= syncEverySeconds;
 }
 
+float computePassesPerMinute(uint16_t passes, uint32_t sleepSeconds) {
+  if (sleepSeconds == 0) {
+    return 0.0f;
+  }
+  return (static_cast<float>(passes) * 60.0f) / static_cast<float>(sleepSeconds);
+}
+
 bool parseCsvFieldName(const String &fieldText, CsvField &outField) {
   String field = fieldText;
   field.toLowerCase();
@@ -17,6 +24,8 @@ bool parseCsvFieldName(const String &fieldText, CsvField &outField) {
     outField = CsvField::UlpEdges;
   } else if (field == "magnet_passes") {
     outField = CsvField::MagnetPasses;
+  } else if (field == "passes_min") {
+    outField = CsvField::PassesPerMin;
   } else if (field == "rtc_unix") {
     outField = CsvField::RtcUnix;
   } else if (field == "datetime" || field == "rtc_text") {

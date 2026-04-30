@@ -33,6 +33,7 @@
 //     "log_fields": [
 //       "datetime",
 //       "magnet_passes",
+//       "passes_min",
 //       "batt_v",
 //       "batt_per",
 //      "temp_c",
@@ -66,6 +67,7 @@ const raven::CsvFieldMask kDefaultLogFields = raven::csvFields({
     raven::CsvField::RtcUnix,
     raven::CsvField::UlpEdges,
     raven::CsvField::MagnetPasses,
+    raven::CsvField::PassesPerMin,
     raven::CsvField::BattV,
     raven::CsvField::BattPer,
 });
@@ -311,13 +313,44 @@ static void runHublinkSyncWindow()
 static void appendWheelLogRow()
 {
   raven::SampleFields sample;
-  // Shared helper handles path resolution, header-on-create, and row append.
-  const raven::ServiceStatus logStatus = raven::captureAndAppendManagedCsv(
-      logger, node, gLogContext.filePolicy, gLogContext.fieldMask, sample);
-  if (logStatus != raven::ServiceStatus::Ok)
+  sample = logger.captureSample();
+  sample.passesPerMin =
+      raven::computePassesPerMinute(sample.magnetPassCount, gSleepTimeSeconds);
+
+  String logPath;
+  const raven::ServiceStatus pathStatus =
+      raven::resolveLogFilePath(node.sd(), gLogContext.filePolicy, sample.rtc, logPath);
+  if (pathStatus != raven::ServiceStatus::Ok)
   {
     Serial.print(F("HubWheelHublink: log write failed ("));
-    Serial.print(raven::statusToString(logStatus));
+    Serial.print(raven::statusToString(pathStatus));
+    Serial.println(F(")"));
+    return;
+  }
+
+  if (!node.sd().exists(logPath.c_str()))
+  {
+    const String header = gLogContext.fieldMask == 0
+                              ? raven::DataLoggerHelper::csvHeader()
+                              : raven::DataLoggerHelper::csvHeader(gLogContext.fieldMask);
+    const raven::ServiceStatus headerStatus = node.sd().appendLine(logPath.c_str(), header);
+    if (headerStatus != raven::ServiceStatus::Ok)
+    {
+      Serial.print(F("HubWheelHublink: log write failed ("));
+      Serial.print(raven::statusToString(headerStatus));
+      Serial.println(F(")"));
+      return;
+    }
+  }
+
+  const raven::ServiceStatus rowStatus = gLogContext.fieldMask == 0
+                                             ? logger.appendCsvSample(logPath.c_str(), sample)
+                                             : logger.appendCsvSample(logPath.c_str(), sample,
+                                                                      gLogContext.fieldMask);
+  if (rowStatus != raven::ServiceStatus::Ok)
+  {
+    Serial.print(F("HubWheelHublink: log write failed ("));
+    Serial.print(raven::statusToString(rowStatus));
     Serial.println(F(")"));
     return;
   }

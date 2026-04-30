@@ -8,6 +8,7 @@ namespace raven {
 
 // Generic time-based sync window check used by wake/sleep logging sketches.
 bool shouldRunSyncWindow(uint32_t sleepSeconds, uint32_t syncEverySeconds, uint32_t logCount);
+float computePassesPerMinute(uint16_t passes, uint32_t sleepSeconds);
 
 // Converts one CSV field name (e.g. "rtc_unix") into a CsvField enum value.
 bool parseCsvFieldName(const String &fieldText, CsvField &outField);

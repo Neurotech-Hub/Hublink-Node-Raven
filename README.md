@@ -75,8 +75,9 @@ void loop() {
 - To log only selected columns, use typed masks with `CsvField` and overloads that accept `CsvFieldMask`.
 - Battery percentage is exposed as `batt_per` in CSV output.
 - `datetime` is formatted as `YYYY-MM-DD HH:MM:SS` for straightforward parsing in Python (`pandas.to_datetime` or `datetime.strptime`).
+- `passes_min` is derived from wake cadence: `magnet_passes * 60 / sleep_time_seconds`.
 - Full selectable field list:
-  - Runtime: `millis`, `ulp_edges`, `magnet_passes`, `magnet`, `usb_sense`
+  - Runtime: `millis`, `ulp_edges`, `magnet_passes`, `passes_min`, `magnet`, `usb_sense`
   - RTC: `rtc_unix`, `datetime`, `rtc_temp_c`
   - Battery: `batt_v`, `batt_per`
   - Light: `lux`, `als`, `white`
@@ -87,11 +88,13 @@ constexpr raven::CsvFieldMask kLogFields = raven::csvFields({
   raven::CsvField::RtcUnix,
   raven::CsvField::UlpEdges,
   raven::CsvField::MagnetPasses,
+  raven::CsvField::PassesPerMin,
   raven::CsvField::BattV,
   raven::CsvField::BattPer
 });
 
 raven::SampleFields sample = logger.captureSample();
+sample.passesPerMin = raven::computePassesPerMinute(sample.magnetPassCount, kSleepTimeSeconds);
 String logPath;
 if (raven::resolveLogFilePath(node.sd(), gLogFilePolicy, sample.rtc, logPath) ==
     raven::ServiceStatus::Ok) {
@@ -141,7 +144,7 @@ raven::LogFilePolicy gLogFilePolicy = {
 - The exact `meta.json` example and key details are documented inline in `HubWheelHublink.ino` so the README stays sketch-agnostic.
 - Low-power/deep-sleep sketches rely on sketch-controlled wake scheduling; they cannot rely on Hublink advertise/sync intervals while asleep. This is why wheel examples include explicit `wheel.*` timing settings in addition to `hublink.*` settings.
 - `HubWheelHublink.ino` includes an optional USB Serial `meta.json` editor: press `e` during a ~5s startup hold window to enter command mode.
-- Top-level commands: `help`, `exit`
+- Top-level commands: `help`, `reboot`, `exit`
   - Meta commands: `meta show`, `meta get <path>`, `meta set <path> <value>`, `meta setjson <path> <json_literal>`, `meta del <path>`, `meta save`, `meta reload`
 - File commands (root-only): `file help`, `file list`, `file cat <name>`, `file rm <n>`, `file rm all`
   - `file rm` never allows deleting `meta.json`; saves use atomic temp-file replacement (`/meta.tmp` -> `/meta.json`).
@@ -149,7 +152,7 @@ raven::LogFilePolicy gLogFilePolicy = {
   - `meta get wheel.sleep_time_seconds`
   - `meta set wheel.sleep_time_seconds 15`
   - `meta set logger.inc_on_reboot true`
-  - `meta setjson logger.log_fields ["rtc_unix","datetime","ulp_edges","magnet_passes"]`
+  - `meta setjson logger.log_fields ["rtc_unix","datetime","ulp_edges","magnet_passes","passes_min"]`
   - `meta save`
   - `file list`
   - `file rm 2`

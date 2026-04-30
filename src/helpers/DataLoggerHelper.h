@@ -9,6 +9,7 @@ struct CompositeSample {
   uint32_t millisStamp = 0;
   uint16_t ulpEdgeCount = 0;
   uint16_t magnetPassCount = 0;
+  float passesPerMin = 0.0f;
   RtcReading rtc;
   BatteryReading battery;
   LightReading light;
@@ -22,6 +23,7 @@ enum class CsvField : uint8_t {
   Millis = 0,
   UlpEdges,
   MagnetPasses,
+  PassesPerMin,
   RtcUnix,
   DateTime,
   RtcText = DateTime, // Backward-compatible alias.
