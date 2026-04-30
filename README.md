@@ -140,6 +140,19 @@ raven::LogFilePolicy gLogFilePolicy = {
 - `HubWheelHublink.ino` keeps hardcoded defaults first, then optionally overrides them from `meta.json`.
 - The exact `meta.json` example and key details are documented inline in `HubWheelHublink.ino` so the README stays sketch-agnostic.
 - Low-power/deep-sleep sketches rely on sketch-controlled wake scheduling; they cannot rely on Hublink advertise/sync intervals while asleep. This is why wheel examples include explicit `wheel.*` timing settings in addition to `hublink.*` settings.
+- `HubWheelHublink.ino` includes an optional USB Serial `meta.json` editor: press `e` during a ~5s startup hold window to enter command mode.
+- Top-level commands: `help`, `exit`
+  - Meta commands: `meta show`, `meta get <path>`, `meta set <path> <value>`, `meta setjson <path> <json_literal>`, `meta del <path>`, `meta save`, `meta reload`
+- File commands (root-only): `file help`, `file list`, `file cat <name>`, `file rm <n>`
+  - `file rm` never allows deleting `meta.json`; saves use atomic temp-file replacement (`/meta.tmp` -> `/meta.json`).
+- Example session:
+  - `meta get wheel.sleep_time_seconds`
+  - `meta set wheel.sleep_time_seconds 15`
+  - `meta set logger.inc_on_reboot true`
+  - `meta setjson logger.log_fields ["rtc_unix","datetime","ulp_edges","magnet_passes"]`
+  - `meta save`
+  - `file list`
+  - `file rm 2`
 
 ## Hardware Power Profile
 

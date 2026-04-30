@@ -31,12 +31,12 @@
 //     "log_file_mode": "daily",
 //     "inc_on_reboot": false,
 //     "log_fields": [
-//       "rtc_unix",
 //       "datetime",
-//       "ulp_edges",
 //       "magnet_passes",
 //       "batt_v",
-//       "batt_per"
+//       "batt_per",
+//      "temp_c",
+//      "lux"
 //     ]
 //   },
 //   "device": {
@@ -52,6 +52,7 @@
 
 raven::HublinkNode node;
 raven::DataLoggerHelper logger(node);
+raven::MetaConfigEditor metaEditor;
 Hublink hublink(raven::PIN_SD_CS);
 
 // Hardcoded defaults (meta.json can override these in beginHublink()).
@@ -71,7 +72,8 @@ const raven::CsvFieldMask kDefaultLogFields = raven::csvFields({
 
 RTC_DATA_ATTR uint32_t gLogCount = 0;
 
-struct LogContext {
+struct LogContext
+{
   raven::LogFilePolicy filePolicy;
   raven::CsvFieldMask fieldMask = 0;
 };
@@ -85,25 +87,36 @@ static const __FlashStringHelper *wakeCauseText(esp_sleep_wakeup_cause_t cause)
 {
   switch (cause)
   {
-    case ESP_SLEEP_WAKEUP_UNDEFINED: return F("power_on_or_reset");
-    case ESP_SLEEP_WAKEUP_EXT0: return F("ext0");
-    case ESP_SLEEP_WAKEUP_EXT1: return F("ext1");
-    case ESP_SLEEP_WAKEUP_TIMER: return F("timer");
-    case ESP_SLEEP_WAKEUP_TOUCHPAD: return F("touchpad");
-    case ESP_SLEEP_WAKEUP_ULP: return F("ulp");
-    case ESP_SLEEP_WAKEUP_GPIO: return F("gpio");
-    case ESP_SLEEP_WAKEUP_UART: return F("uart");
-    default: return F("unknown");
+  case ESP_SLEEP_WAKEUP_UNDEFINED:
+    return F("power_on_or_reset");
+  case ESP_SLEEP_WAKEUP_EXT0:
+    return F("ext0");
+  case ESP_SLEEP_WAKEUP_EXT1:
+    return F("ext1");
+  case ESP_SLEEP_WAKEUP_TIMER:
+    return F("timer");
+  case ESP_SLEEP_WAKEUP_TOUCHPAD:
+    return F("touchpad");
+  case ESP_SLEEP_WAKEUP_ULP:
+    return F("ulp");
+  case ESP_SLEEP_WAKEUP_GPIO:
+    return F("gpio");
+  case ESP_SLEEP_WAKEUP_UART:
+    return F("uart");
+  default:
+    return F("unknown");
   }
 }
 
 static void blinkPowerOnPattern(esp_sleep_wakeup_cause_t cause)
 {
-  if (cause != ESP_SLEEP_WAKEUP_UNDEFINED) {
+  if (cause != ESP_SLEEP_WAKEUP_UNDEFINED)
+  {
     return;
   }
   pinMode(raven::PIN_LED_B, OUTPUT);
-  for (uint8_t i = 0; i < 3; ++i) {
+  for (uint8_t i = 0; i < 3; ++i)
+  {
     digitalWrite(raven::PIN_LED_GREEN, HIGH);
     digitalWrite(raven::PIN_LED_B, HIGH);
     delay(100);
@@ -118,7 +131,8 @@ static void blinkMissingSdCard()
 {
   Serial.println(F("HubWheelHublink: SD card not present. Halting."));
   pinMode(raven::PIN_LED_B, OUTPUT);
-  while (true) {
+  while (true)
+  {
     digitalWrite(raven::PIN_LED_GREEN, HIGH);
     digitalWrite(raven::PIN_LED_B, LOW);
     delay(100);
@@ -128,33 +142,41 @@ static void blinkMissingSdCard()
   }
 }
 
-static void applyLogPolicyDefaults() {
+static void applyLogPolicyDefaults()
+{
   gLogContext.filePolicy.baseName = gLogBaseName.c_str();
   gLogContext.filePolicy.mode = gLogFileMode;
   gLogContext.filePolicy.incOnReboot = gIncOnReboot;
 }
 
-static raven::FileNameMode parseLogFileMode(const String &modeText) {
+static raven::FileNameMode parseLogFileMode(const String &modeText)
+{
   String mode = modeText;
   mode.toLowerCase();
   mode.trim();
-  if (mode == "daily") {
+  if (mode == "daily")
+  {
     return raven::FileNameMode::Daily;
   }
-  if (mode == "hourly") {
+  if (mode == "hourly")
+  {
     return raven::FileNameMode::Hourly;
   }
-  if (mode == "manual") {
+  if (mode == "manual")
+  {
     return raven::FileNameMode::Manual;
   }
-  if (mode == "disabled") {
+  if (mode == "disabled")
+  {
     return raven::FileNameMode::Disabled;
   }
   return gLogFileMode;
 }
 
-static const __FlashStringHelper *logFileModeText(raven::FileNameMode mode) {
-  switch (mode) {
+static const __FlashStringHelper *logFileModeText(raven::FileNameMode mode)
+{
+  switch (mode)
+  {
   case raven::FileNameMode::Daily:
     return F("daily");
   case raven::FileNameMode::Hourly:
@@ -167,13 +189,16 @@ static const __FlashStringHelper *logFileModeText(raven::FileNameMode mode) {
   return F("unknown");
 }
 
-static void onTimestampReceived(uint32_t timestamp) {
+static void onTimestampReceived(uint32_t timestamp)
+{
   // Lets gateway-provided timestamps update on-device RTC.
   node.rtc().adjust(DateTime(timestamp));
 }
 
-static void beginHublink() {
-  if (!hublink.begin()) {
+static void beginHublink()
+{
+  if (!hublink.begin())
+  {
     Serial.println(F("HubWheelHublink: Hublink begin failed."));
     return;
   }
@@ -182,45 +207,54 @@ static void beginHublink() {
   hublink.setTimestampCallback(onTimestampReceived);
 
   // wheel namespace: wheel-specific behavior/timing values.
-  if (hublink.hasMetaKey("wheel", "sleep_time_seconds")) {
+  if (hublink.hasMetaKey("wheel", "sleep_time_seconds"))
+  {
     gSleepTimeSeconds = hublink.getMeta<int>("wheel", "sleep_time_seconds");
     Serial.print(F("wheel.sleep_time_seconds: "));
     Serial.println(gSleepTimeSeconds);
   }
-  if (hublink.hasMetaKey("wheel", "sync_every_seconds")) {
+  if (hublink.hasMetaKey("wheel", "sync_every_seconds"))
+  {
     gSyncEverySeconds = hublink.getMeta<int>("wheel", "sync_every_seconds");
     Serial.print(F("wheel.sync_every_seconds: "));
     Serial.println(gSyncEverySeconds);
   }
-  if (hublink.hasMetaKey("wheel", "sync_for_seconds")) {
+  if (hublink.hasMetaKey("wheel", "sync_for_seconds"))
+  {
     gSyncForSeconds = hublink.getMeta<int>("wheel", "sync_for_seconds");
     Serial.print(F("wheel.sync_for_seconds: "));
     Serial.println(gSyncForSeconds);
   }
 
   // logger namespace: cross-sketch file naming + field selection values.
-  if (hublink.hasMetaKey("logger", "log_base_name")) {
+  if (hublink.hasMetaKey("logger", "log_base_name"))
+  {
     gLogBaseName = hublink.getMeta<String>("logger", "log_base_name");
     Serial.print(F("logger.log_base_name: "));
     Serial.println(gLogBaseName);
   }
-  if (hublink.hasMetaKey("logger", "log_file_mode")) {
+  if (hublink.hasMetaKey("logger", "log_file_mode"))
+  {
     gLogFileMode = parseLogFileMode(hublink.getMeta<String>("logger", "log_file_mode"));
     Serial.print(F("logger.log_file_mode: "));
     Serial.println(logFileModeText(gLogFileMode));
   }
-  if (hublink.hasMetaKey("logger", "inc_on_reboot")) {
+  if (hublink.hasMetaKey("logger", "inc_on_reboot"))
+  {
     gIncOnReboot = hublink.getMeta<bool>("logger", "inc_on_reboot");
     Serial.print(F("logger.inc_on_reboot: "));
     Serial.println(gIncOnReboot ? F("true") : F("false"));
   }
-  if (hublink.hasMetaKey("logger", "log_fields")) {
+  if (hublink.hasMetaKey("logger", "log_fields"))
+  {
     const JsonArray fields = hublink.getMeta<JsonArray>("logger", "log_fields");
     const size_t fieldCount = fields.size();
-    if (fieldCount > 0) {
+    if (fieldCount > 0)
+    {
       String *fieldNames = new String[fieldCount];
       size_t i = 0;
-      for (JsonVariant fieldValue : fields) {
+      for (JsonVariant fieldValue : fields)
+      {
         fieldNames[i++] = fieldValue.as<String>();
       }
       gLogContext.fieldMask = raven::buildCsvFieldMaskFromNames(
@@ -234,7 +268,8 @@ static void beginHublink() {
   applyLogPolicyDefaults();
 }
 
-static void runHublinkSyncWindow() {
+static void runHublinkSyncWindow()
+{
   // Keep node characteristic battery level fresh before each sync attempt.
   // Dashboard policy for this sketch:
   // - Valid cell reading -> report actual SOC.
@@ -252,15 +287,20 @@ static void runHublinkSyncWindow() {
   Serial.println(usbPresent ? F("true") : F("false"));
 
   if (battery.status == raven::ServiceStatus::Ok && battery.hasCellReading &&
-      battery.stateOfChargePct > 0.0f) {
+      battery.stateOfChargePct > 0.0f)
+  {
     const int batteryPct = static_cast<int>(battery.stateOfChargePct + 0.5f);
     hublink.setBatteryLevel(static_cast<uint8_t>(constrain(batteryPct, 0, 100)));
     Serial.print(F("HubWheelHublink: setBatteryLevel from gauge="));
     Serial.println(batteryPct);
-  } else if (usbPresent) {
+  }
+  else if (usbPresent)
+  {
     hublink.setBatteryLevel(100);
     Serial.println(F("HubWheelHublink: setBatteryLevel fallback=100 (USB present)"));
-  } else {
+  }
+  else
+  {
     hublink.setBatteryLevel(0);
     Serial.println(F("HubWheelHublink: setBatteryLevel fallback=0 (no USB / no valid gauge)"));
   }
@@ -274,7 +314,8 @@ static void appendWheelLogRow()
   // Shared helper handles path resolution, header-on-create, and row append.
   const raven::ServiceStatus logStatus = raven::captureAndAppendManagedCsv(
       logger, node, gLogContext.filePolicy, gLogContext.fieldMask, sample);
-  if (logStatus != raven::ServiceStatus::Ok) {
+  if (logStatus != raven::ServiceStatus::Ok)
+  {
     Serial.print(F("HubWheelHublink: log write failed ("));
     Serial.print(raven::statusToString(logStatus));
     Serial.println(F(")"));
@@ -311,15 +352,21 @@ void setup()
   node.beginHardware();
   node.beginI2C();
   logger.begin();
-  if (!node.sd().begin() || node.sd().cardType() == CARD_NONE) {
+  if (!node.sd().begin() || node.sd().cardType() == CARD_NONE)
+  {
     blinkMissingSdCard();
+  }
+  const esp_sleep_wakeup_cause_t cause = node.wakeupCause();
+  // Offer editor only on power-on/reset wake, not deep-sleep wake cycles.
+  if (cause == ESP_SLEEP_WAKEUP_UNDEFINED && node.readUsbSense()) {
+    metaEditor.maybeEnterWithFade(node.sd(), true, Serial, 3000,
+                                  raven::PIN_LED_GREEN, raven::PIN_LED_B);
   }
   applyLogPolicyDefaults();
   beginHublink();
 
   Serial.println();
   Serial.println(F("--------- HubWheelHublink Wake ---------"));
-  esp_sleep_wakeup_cause_t cause = node.wakeupCause();
   Serial.print(F("Wake cause: "));
   Serial.print(wakeCauseText(cause));
   Serial.print(F(" ("));
