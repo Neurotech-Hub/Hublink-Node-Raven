@@ -105,17 +105,32 @@ if (raven::resolveLogFilePath(node.sd(), gLogFilePolicy, sample.rtc, logPath) ==
 ### Filename Modes
 
 - Base name is required and should use only letters, numbers, `_`, or `-`.
-- `Daily`: `[base]_YYYYMMDD.csv` (example: `HUBWHEEL_20260429.csv`)
-- `Hourly`: `[base]_YYYYMMDDHHMM.csv` (example: `HUBWHEEL_202604291045.csv`)
-- `Manual`: `[base]_XXXXX.csv` (example: `HUBWHEEL_00000.csv`)
-- `Disabled`: `[base].csv` (example: `HUBWHEEL.csv`)
+- `inc_on_reboot` controls whether a 3-digit reboot suffix (`XXX`) is auto-managed by the logger; default is `false`.
+- `Daily`:
+  - `inc_on_reboot=false`: `[base]_YYYYMMDD.csv` (example: `HUBWHEEL_20260429.csv`)
+  - `inc_on_reboot=true`: `[base]_YYYYMMDDXXX.csv` (example: `HUBWHEEL_20260429000.csv`)
+- `Hourly`:
+  - `inc_on_reboot=false`: `[base]_YYYYMMDDHHMM.csv` (example: `HUBWHEEL_202604291045.csv`)
+  - `inc_on_reboot=true`: `[base]_YYYYMMDDHHMMXXX.csv` (example: `HUBWHEEL_202604291045000.csv`)
+- `Manual`:
+  - `inc_on_reboot=false`: continue writing to the last detected `[base]_XXX.csv` file (or start at `_000` if none exist)
+  - `inc_on_reboot=true`: choose the first available `[base]_XXX.csv` on startup
+- `Disabled`:
+  - `inc_on_reboot=false`: `[base].csv` (example: `HUBWHEEL.csv`)
+  - `inc_on_reboot=true`: `[base]XXX.csv` (example: `HUBWHEEL000.csv`)
 - If the target file does not exist, the logger writes the CSV header first, then appends rows.
-- Manual mode initializes by scanning from `_00000` upward and selecting the first available index. Use `raven::incrementManualCounter(policy)` when you want to advance to the next manual file.
+- In `Manual` mode, use `raven::incrementManualCounter(policy)` when you want to advance to the next file explicitly.
 
 ```cpp
 constexpr char kLogBaseName[] = "LOGGER";
 constexpr raven::FileNameMode kLogFileMode = raven::FileNameMode::Disabled;
-raven::LogFilePolicy gLogFilePolicy = {kLogBaseName, kLogFileMode, 0, false};
+raven::LogFilePolicy gLogFilePolicy = {
+  kLogBaseName,
+  kLogFileMode,
+  0,     // manualCounter
+  false, // manualCounterInitialized
+  false  // incOnReboot
+};
 ```
 
 ### HubWheel + Hublink Example

@@ -14,7 +14,6 @@ constexpr uint32_t kSleepTimeSeconds = 10;
 // File naming policy for logger helper.
 constexpr char kLogBaseName[] = "HUBWHEEL";
 constexpr raven::FileNameMode kLogFileMode = raven::FileNameMode::Daily;
-constexpr bool kShowAwakeLed = true;
 // Keep this sketch's default CSV focused on wheel and battery telemetry.
 const raven::CsvFieldMask kLogFields = raven::csvFields({
     raven::CsvField::RtcUnix,
@@ -49,6 +48,37 @@ static const __FlashStringHelper *wakeCauseText(esp_sleep_wakeup_cause_t cause)
   }
 }
 
+static void blinkPowerOnPattern(esp_sleep_wakeup_cause_t cause)
+{
+  if (cause != ESP_SLEEP_WAKEUP_UNDEFINED) {
+    return;
+  }
+  pinMode(raven::PIN_LED_B, OUTPUT);
+  for (uint8_t i = 0; i < 3; ++i) {
+    digitalWrite(raven::PIN_LED_GREEN, HIGH);
+    digitalWrite(raven::PIN_LED_B, HIGH);
+    delay(100);
+    digitalWrite(raven::PIN_LED_GREEN, LOW);
+    digitalWrite(raven::PIN_LED_B, LOW);
+    delay(100);
+  }
+  digitalWrite(raven::PIN_LED_GREEN, HIGH);
+}
+
+static void blinkMissingSdCard()
+{
+  Serial.println(F("HubWheel: SD card not present. Halting."));
+  pinMode(raven::PIN_LED_B, OUTPUT);
+  while (true) {
+    digitalWrite(raven::PIN_LED_GREEN, HIGH);
+    digitalWrite(raven::PIN_LED_B, LOW);
+    delay(100);
+    digitalWrite(raven::PIN_LED_GREEN, LOW);
+    digitalWrite(raven::PIN_LED_B, HIGH);
+    delay(100);
+  }
+}
+
 static void appendWheelLogRow()
 {
   raven::SampleFields sample;
@@ -73,10 +103,7 @@ static void appendWheelLogRow()
 
 static void enterSleep()
 {
-  if (kShowAwakeLed)
-  {
-    digitalWrite(raven::PIN_LED_GREEN, LOW);
-  }
+  digitalWrite(raven::PIN_LED_GREEN, LOW);
   node.magnetCounter().clearCount();
   node.magnetCounter().begin();
   node.magnetCounter().start();
@@ -96,14 +123,14 @@ void setup()
   }
   pinMode(raven::PIN_LED_GREEN, OUTPUT);
   digitalWrite(raven::PIN_LED_GREEN, LOW);
-  if (kShowAwakeLed)
-  {
-    // Keep LED on while awake; turn off immediately before deep sleep.
-    digitalWrite(raven::PIN_LED_GREEN, HIGH);
-  }
+  // Keep LED on while awake; turn off immediately before deep sleep.
+  digitalWrite(raven::PIN_LED_GREEN, HIGH);
   node.beginHardware();
   node.beginI2C();
   logger.begin();
+  if (!node.sd().begin() || node.sd().cardType() == CARD_NONE) {
+    blinkMissingSdCard();
+  }
 
   Serial.println();
   Serial.println(F("--------- HubWheelMinimal Wake ---------"));
@@ -114,6 +141,7 @@ void setup()
   Serial.print(static_cast<int>(cause));
   Serial.println(F(")"));
   Serial.println();
+  blinkPowerOnPattern(cause);
 
   // Match legacy behavior: only log when waking from timer sleep.
   if (node.isTimerWake())

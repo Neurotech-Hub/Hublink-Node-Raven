@@ -29,9 +29,11 @@
 //   "logger": {
 //     "log_base_name": "HUBWHEEL",
 //     "log_file_mode": "daily",
+//     "inc_on_reboot": false,
 //     "log_fields": [
 //       "rtc_unix",
 //       "datetime",
+//       "ulp_edges",
 //       "magnet_passes",
 //       "batt_v",
 //       "batt_per"
@@ -44,7 +46,7 @@
 //
 // Keys consumed directly by this sketch:
 // - wheel.sleep_time_seconds, wheel.sync_every_seconds, wheel.sync_for_seconds
-// - logger.log_base_name, logger.log_file_mode, logger.log_fields
+// - logger.log_base_name, logger.log_file_mode, logger.inc_on_reboot, logger.log_fields
 //
 // hublink.* and device.* are handled by the Hublink library itself.
 
@@ -58,9 +60,10 @@ uint32_t gSyncEverySeconds = 21600;
 uint32_t gSyncForSeconds = 30;
 String gLogBaseName = "HUBWHEEL";
 raven::FileNameMode gLogFileMode = raven::FileNameMode::Daily;
-constexpr bool kShowAwakeLed = true;
+bool gIncOnReboot = false;
 const raven::CsvFieldMask kDefaultLogFields = raven::csvFields({
     raven::CsvField::RtcUnix,
+    raven::CsvField::UlpEdges,
     raven::CsvField::MagnetPasses,
     raven::CsvField::BattV,
     raven::CsvField::BattPer,
@@ -94,9 +97,41 @@ static const __FlashStringHelper *wakeCauseText(esp_sleep_wakeup_cause_t cause)
   }
 }
 
+static void blinkPowerOnPattern(esp_sleep_wakeup_cause_t cause)
+{
+  if (cause != ESP_SLEEP_WAKEUP_UNDEFINED) {
+    return;
+  }
+  pinMode(raven::PIN_LED_B, OUTPUT);
+  for (uint8_t i = 0; i < 3; ++i) {
+    digitalWrite(raven::PIN_LED_GREEN, HIGH);
+    digitalWrite(raven::PIN_LED_B, HIGH);
+    delay(100);
+    digitalWrite(raven::PIN_LED_GREEN, LOW);
+    digitalWrite(raven::PIN_LED_B, LOW);
+    delay(100);
+  }
+  digitalWrite(raven::PIN_LED_GREEN, HIGH);
+}
+
+static void blinkMissingSdCard()
+{
+  Serial.println(F("HubWheelHublink: SD card not present. Halting."));
+  pinMode(raven::PIN_LED_B, OUTPUT);
+  while (true) {
+    digitalWrite(raven::PIN_LED_GREEN, HIGH);
+    digitalWrite(raven::PIN_LED_B, LOW);
+    delay(100);
+    digitalWrite(raven::PIN_LED_GREEN, LOW);
+    digitalWrite(raven::PIN_LED_B, HIGH);
+    delay(100);
+  }
+}
+
 static void applyLogPolicyDefaults() {
   gLogContext.filePolicy.baseName = gLogBaseName.c_str();
   gLogContext.filePolicy.mode = gLogFileMode;
+  gLogContext.filePolicy.incOnReboot = gIncOnReboot;
 }
 
 static raven::FileNameMode parseLogFileMode(const String &modeText) {
@@ -174,6 +209,11 @@ static void beginHublink() {
     Serial.print(F("logger.log_file_mode: "));
     Serial.println(logFileModeText(gLogFileMode));
   }
+  if (hublink.hasMetaKey("logger", "inc_on_reboot")) {
+    gIncOnReboot = hublink.getMeta<bool>("logger", "inc_on_reboot");
+    Serial.print(F("logger.inc_on_reboot: "));
+    Serial.println(gIncOnReboot ? F("true") : F("false"));
+  }
   if (hublink.hasMetaKey("logger", "log_fields")) {
     const JsonArray fields = hublink.getMeta<JsonArray>("logger", "log_fields");
     const size_t fieldCount = fields.size();
@@ -202,14 +242,27 @@ static void runHublinkSyncWindow() {
   // - No valid reading and no USB -> report 0% to avoid stale/null data.
   const bool usbPresent = node.readUsbSense();
   const raven::BatteryReading battery = node.powerGauge().readSample();
+  Serial.print(F("HubWheelHublink: battery status="));
+  Serial.print(raven::statusToString(battery.status));
+  Serial.print(F(" hasCell="));
+  Serial.print(battery.hasCellReading ? F("true") : F("false"));
+  Serial.print(F(" soc="));
+  Serial.print(battery.stateOfChargePct, 1);
+  Serial.print(F(" usbPresent="));
+  Serial.println(usbPresent ? F("true") : F("false"));
+
   if (battery.status == raven::ServiceStatus::Ok && battery.hasCellReading &&
       battery.stateOfChargePct > 0.0f) {
     const int batteryPct = static_cast<int>(battery.stateOfChargePct + 0.5f);
     hublink.setBatteryLevel(static_cast<uint8_t>(constrain(batteryPct, 0, 100)));
+    Serial.print(F("HubWheelHublink: setBatteryLevel from gauge="));
+    Serial.println(batteryPct);
   } else if (usbPresent) {
     hublink.setBatteryLevel(100);
+    Serial.println(F("HubWheelHublink: setBatteryLevel fallback=100 (USB present)"));
   } else {
     hublink.setBatteryLevel(0);
+    Serial.println(F("HubWheelHublink: setBatteryLevel fallback=0 (no USB / no valid gauge)"));
   }
   // Uses existing Hublink config from meta.json/hardcoded defaults.
   hublink.sync(gSyncForSeconds);
@@ -240,10 +293,7 @@ static void appendWheelLogRow()
 
 static void enterSleep()
 {
-  if (kShowAwakeLed)
-  {
-    digitalWrite(raven::PIN_LED_GREEN, LOW);
-  }
+  digitalWrite(raven::PIN_LED_GREEN, LOW);
   node.magnetCounter().clearCount();
   node.magnetCounter().begin();
   node.magnetCounter().start();
@@ -256,14 +306,14 @@ void setup()
   Serial.begin(115200);
   pinMode(raven::PIN_LED_GREEN, OUTPUT);
   digitalWrite(raven::PIN_LED_GREEN, LOW);
-  if (kShowAwakeLed)
-  {
-    // Keep LED on while awake; turn off immediately before deep sleep.
-    digitalWrite(raven::PIN_LED_GREEN, HIGH);
-  }
+  // Keep LED on while awake; turn off immediately before deep sleep.
+  digitalWrite(raven::PIN_LED_GREEN, HIGH);
   node.beginHardware();
   node.beginI2C();
   logger.begin();
+  if (!node.sd().begin() || node.sd().cardType() == CARD_NONE) {
+    blinkMissingSdCard();
+  }
   applyLogPolicyDefaults();
   beginHublink();
 
@@ -276,6 +326,7 @@ void setup()
   Serial.print(static_cast<int>(cause));
   Serial.println(F(")"));
   Serial.println();
+  blinkPowerOnPattern(cause);
 
   // Match legacy behavior: only log when waking from timer sleep.
   if (node.isTimerWake())

@@ -17,6 +17,9 @@ struct LogFilePolicy {
   FileNameMode mode = FileNameMode::Daily;
   uint32_t manualCounter = 0;
   bool manualCounterInitialized = false;
+  bool incOnReboot = false;
+  uint16_t rebootCounter = 0;
+  bool rebootCounterInitialized = false;
 };
 
 bool isValidBaseName(const char *baseName);

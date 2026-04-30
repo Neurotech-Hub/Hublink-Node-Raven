@@ -13,6 +13,20 @@ raven::LogFilePolicy gLogFilePolicy = {
     false,
 };
 
+static void blinkMissingSdCard()
+{
+  Serial.println(F("DataLogging: SD card not present. Halting."));
+  pinMode(raven::PIN_LED_B, OUTPUT);
+  while (true) {
+    digitalWrite(raven::PIN_LED_GREEN, HIGH);
+    digitalWrite(raven::PIN_LED_B, LOW);
+    delay(100);
+    digitalWrite(raven::PIN_LED_GREEN, LOW);
+    digitalWrite(raven::PIN_LED_B, HIGH);
+    delay(100);
+  }
+}
+
 void setup()
 {
   Serial.begin(115200);
@@ -36,6 +50,9 @@ void setup()
   if (!logger.begin())
   {
     Serial.println(F("Init: logger begin failed."));
+  }
+  if (!node.sd().begin() || node.sd().cardType() == CARD_NONE) {
+    blinkMissingSdCard();
   }
 
   Serial.println();
