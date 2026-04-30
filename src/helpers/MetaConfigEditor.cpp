@@ -251,7 +251,7 @@ void MetaConfigEditor::printTopHelp(Stream &io) const {
   io.println(F("  meta set <path> <value>"));
   io.println(F("  meta setjson <path> <json_literal>"));
   io.println(F("  meta del <path> | meta save | meta reload"));
-  io.println(F("  file help | file list | file cat <name> | file rm <n>"));
+  io.println(F("  file help | file list | file cat <name> | file rm <n> | file rm all"));
   io.println(F("  exit"));
 }
 
@@ -272,6 +272,7 @@ void MetaConfigEditor::printFileHelp(Stream &io) const {
   io.println(F("  file list"));
   io.println(F("  file cat <name>"));
   io.println(F("  file rm <n>"));
+  io.println(F("  file rm all"));
 }
 
 bool MetaConfigEditor::cmdMeta(Stream &io, SdService &sd, const String &rest) {
@@ -301,7 +302,11 @@ bool MetaConfigEditor::cmdFile(Stream &io, SdService &sd, const String &rest) {
     return fileCat(sd, io, trimCopy(op.substring(4)));
   }
   if (op.startsWith("rm ")) {
-    return fileRm(sd, io, trimCopy(op.substring(3)));
+    const String rmArg = trimCopy(op.substring(3));
+    if (rmArg == "all") {
+      return fileRmAll(sd, io);
+    }
+    return fileRm(sd, io, rmArg);
   }
   io.println(F("Unknown file command. Use: file help"));
   return false;
@@ -568,6 +573,44 @@ bool MetaConfigEditor::fileRm(SdService &sd, Stream &io, const String &indexText
   io.println(name);
   hasFreshFileIndex_ = false;
   return true;
+}
+
+bool MetaConfigEditor::fileRmAll(SdService &sd, Stream &io) {
+  if (!hasFreshFileIndex_) {
+    io.println(F("Run `file list` first."));
+    return false;
+  }
+  if (indexedFileCount_ == 0) {
+    io.println(F("No removable files found."));
+    hasFreshFileIndex_ = false;
+    return true;
+  }
+
+  size_t deletedCount = 0;
+  size_t failedCount = 0;
+  for (size_t i = 0; i < indexedFileCount_; ++i) {
+    const String &name = indexedFiles_[i];
+    if (name.length() == 0 || name == "meta.json") {
+      continue;
+    }
+    const String path = String("/") + name;
+    if (sd.remove(path.c_str()) == ServiceStatus::Ok) {
+      ++deletedCount;
+      io.print(F("Deleted: "));
+      io.println(name);
+    } else {
+      ++failedCount;
+      io.print(F("Delete failed: "));
+      io.println(name);
+    }
+  }
+
+  io.print(F("file rm all complete. deleted="));
+  io.print(deletedCount);
+  io.print(F(" failed="));
+  io.println(failedCount);
+  hasFreshFileIndex_ = false;
+  return failedCount == 0;
 }
 
 JsonVariant MetaConfigEditor::resolvePath(JsonDocument &doc, const String &path, bool createMissing,

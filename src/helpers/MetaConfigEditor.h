@@ -49,6 +49,7 @@ private:
   bool fileList(Stream &io);
   bool fileCat(SdService &sd, Stream &io, const String &name);
   bool fileRm(SdService &sd, Stream &io, const String &indexText);
+  bool fileRmAll(SdService &sd, Stream &io);
 
   JsonVariant resolvePath(JsonDocument &doc, const String &path, bool createMissing,
                           bool *ok = nullptr);

@@ -143,7 +143,7 @@ raven::LogFilePolicy gLogFilePolicy = {
 - `HubWheelHublink.ino` includes an optional USB Serial `meta.json` editor: press `e` during a ~5s startup hold window to enter command mode.
 - Top-level commands: `help`, `exit`
   - Meta commands: `meta show`, `meta get <path>`, `meta set <path> <value>`, `meta setjson <path> <json_literal>`, `meta del <path>`, `meta save`, `meta reload`
-- File commands (root-only): `file help`, `file list`, `file cat <name>`, `file rm <n>`
+- File commands (root-only): `file help`, `file list`, `file cat <name>`, `file rm <n>`, `file rm all`
   - `file rm` never allows deleting `meta.json`; saves use atomic temp-file replacement (`/meta.tmp` -> `/meta.json`).
 - Example session:
   - `meta get wheel.sleep_time_seconds`
@@ -153,6 +153,7 @@ raven::LogFilePolicy gLogFilePolicy = {
   - `meta save`
   - `file list`
   - `file rm 2`
+  - `file rm all`
 
 ## Hardware Power Profile
 
