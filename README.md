@@ -136,11 +136,19 @@ raven::LogFilePolicy gLogFilePolicy = {
 };
 ```
 
+### meta.json programmatic access
+
+- Firmware can read `/meta.json` without going through `Hublink::getMeta` by using Raven helpers (`MetaConfigEditor` already shares the load path internally):
+  - `raven::loadMetaJson(sd, doc)` reads and parses a JSON object root.
+  - Typed dot-path accessors: `metaGetUInt32`, `metaGetLong`, `metaGetBool`, `metaGetString`, `metaGetJsonArray` (`wheel.sleep_time_seconds`, `logger.log_fields`, etc.).
+  - Arbitrary lookups: `raven::resolveMetaDotPath(doc.as<JsonVariantConst>(), "<dot.path>", &ok)`.
+- Hublink still owns BLE/upload configuration from `meta.json` via `hublink.begin()`. Sketch-owned namespaces (such as `wheel.*` / `logger.*`) can instead use the Raven APIs so tooling matches the Serial meta editor paths.
+
 ### HubWheel + Hublink Example
 
 - Use `examples/HubWheelHublink/HubWheelHublink.ino` when the Hublink library is installed.
 - Use `examples/HubWheelMinimal/HubWheelMinimal.ino` for the Hublink-free wheel logger.
-- `HubWheelHublink.ino` keeps hardcoded defaults first, then optionally overrides them from `meta.json`.
+- `HubWheelHublink.ino` keeps hardcoded defaults first, then `hublink.begin()` for `hublink.*`; `wheel.*` / `logger.*` are applied from `/meta.json` using `raven::loadMetaJson` and typed getters.
 - The exact `meta.json` example and key details are documented inline in `HubWheelHublink.ino` so the README stays sketch-agnostic.
 - Low-power/deep-sleep sketches rely on sketch-controlled wake scheduling; they cannot rely on Hublink advertise/sync intervals while asleep. This is why wheel examples include explicit `wheel.*` timing settings in addition to `hublink.*` settings.
 - `HubWheelHublink.ino` includes an optional USB Serial `meta.json` editor: press `e` during a ~5s startup hold window to enter command mode.

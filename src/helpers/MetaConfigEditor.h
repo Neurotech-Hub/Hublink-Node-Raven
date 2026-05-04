@@ -7,15 +7,18 @@
 
 namespace raven {
 
+class HublinkNode;
+
 class MetaConfigEditor {
 public:
   bool maybeEnter(SdService &sd, bool usbPresent, Stream &io = Serial,
-                  uint32_t holdWindowMs = 3000);
+                  uint32_t holdWindowMs = 3000, HublinkNode *node = nullptr);
   bool maybeEnterWithFade(SdService &sd, bool usbPresent, Stream &io = Serial,
                           uint32_t holdWindowMs = 3000,
                           uint8_t ledPrimaryPin = PIN_LED_GREEN,
-                          uint8_t ledSecondaryPin = PIN_LED_B);
-  bool enterNow(SdService &sd, Stream &io = Serial);
+                          uint8_t ledSecondaryPin = PIN_LED_B,
+                          HublinkNode *node = nullptr);
+  bool enterNow(SdService &sd, Stream &io = Serial, HublinkNode *node = nullptr);
 
 private:
   static constexpr const char *kMetaPath = "/meta.json";
@@ -27,13 +30,16 @@ private:
   size_t indexedFileCount_ = 0;
   bool hasFreshFileIndex_ = false;
 
-  bool runShell(SdService &sd, Stream &io);
+  bool runShell(SdService &sd, Stream &io, HublinkNode *node);
   bool readLine(Stream &io, String &lineOut);
   bool handleCommand(SdService &sd, Stream &io, const String &line, bool &shouldExit);
 
   void printTopHelp(Stream &io) const;
   void printMetaHelp(Stream &io) const;
   void printFileHelp(Stream &io) const;
+  void printSensorHelp(Stream &io) const;
+
+  bool cmdSensor(Stream &io, HublinkNode *node, const String &rest);
 
   bool cmdMeta(Stream &io, SdService &sd, const String &rest);
   bool cmdFile(Stream &io, SdService &sd, const String &rest);

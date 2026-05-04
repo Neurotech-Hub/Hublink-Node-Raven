@@ -1,5 +1,9 @@
 #include "MetaConfigEditor.h"
+#include "../HublinkNode.h"
+#include "MetaConfigReader.h"
+#include "MetaJsonPath.h"
 #include <SD.h>
+#include <stdio.h>
 
 namespace raven {
 
@@ -47,9 +51,109 @@ bool isFloatText(const String &text) {
   }
   return seenDigit && seenDot;
 }
+
+void ensureNodeSensorsReady(HublinkNode &node) {
+  node.beginHardware();
+  node.beginI2C();
+  node.rtc().begin();
+  node.powerGauge().begin();
+  node.light().begin();
+  node.environment().begin();
+}
+
+void printRtcLine(Stream &io, const char *label, const RtcReading &r) {
+  io.print(label);
+  io.print(F(": "));
+  io.print(statusToString(r.status));
+  if (r.status == ServiceStatus::Ok && r.now.isValid()) {
+    char dt[24];
+    snprintf(dt, sizeof(dt), "%04u-%02u-%02u %02u:%02u:%02u", r.now.year(), r.now.month(),
+             r.now.day(), r.now.hour(), r.now.minute(), r.now.second());
+    io.print(F(" "));
+    io.print(dt);
+    if (!isnan(r.temperatureC)) {
+      io.print(F(" rtcTemp="));
+      io.print(r.temperatureC, 1);
+      io.print('C');
+    }
+  }
+  io.println();
+}
+
+void printFuelLine(Stream &io, const char *label, HublinkNode &node, const BatteryReading &b,
+                   bool verbose) {
+  io.print(label);
+  io.print(F(": "));
+  io.print(statusToString(b.status));
+  if (b.hasCellReading && b.status == ServiceStatus::Ok) {
+    io.print(F(" V="));
+    io.print(b.voltageV, 3);
+    io.print(F(" SOC="));
+    io.print(b.stateOfChargePct, 1);
+    io.print('%');
+  }
+  if (node.powerGauge().isInitialized()) {
+    io.print(F(" chip=0x"));
+    if (node.powerGauge().chipId() < 16U) {
+      io.print('0');
+    }
+    io.print(node.powerGauge().chipId(), HEX);
+  }
+  if (verbose) {
+    io.print(F(" init="));
+    io.print(node.powerGauge().isInitialized() ? F("y") : F("n"));
+  }
+  io.println();
+}
+
+void printLightLine(Stream &io, const char *label, const LightReading &l) {
+  io.print(label);
+  io.print(F(": "));
+  io.print(statusToString(l.status));
+  if (l.status == ServiceStatus::Ok && !isnan(l.lux)) {
+    io.print(F(" lux="));
+    io.print(l.lux, 2);
+    io.print(F(" als="));
+    io.print(l.als);
+  }
+  io.println();
+}
+
+void printEnvLine(Stream &io, const char *label, const EnvReading &e) {
+  io.print(label);
+  io.print(F(": "));
+  io.print(statusToString(e.status));
+  if (e.status == ServiceStatus::Ok) {
+    if (!isnan(e.temperatureC)) {
+      io.print(F(" T="));
+      io.print(e.temperatureC, 1);
+      io.print('C');
+    }
+    if (!isnan(e.pressureHpa)) {
+      io.print(F(" P="));
+      io.print(e.pressureHpa, 1);
+      io.print(F("hPa"));
+    }
+    if (!isnan(e.humidityPct)) {
+      io.print(F(" RH="));
+      io.print(e.humidityPct, 0);
+      io.print('%');
+    }
+  }
+  io.println();
+}
+
+void printPinsLine(Stream &io, HublinkNode &node) {
+  io.print(F("pins: magnet="));
+  io.print(node.readMagnet() ? F("HIGH") : F("LOW"));
+  io.print(F(" usb="));
+  io.println(node.readUsbSense() ? F("present") : F("absent"));
+}
+
 } // namespace
 
-bool MetaConfigEditor::maybeEnter(SdService &sd, bool usbPresent, Stream &io, uint32_t holdWindowMs) {
+bool MetaConfigEditor::maybeEnter(SdService &sd, bool usbPresent, Stream &io, uint32_t holdWindowMs,
+                                 HublinkNode *node) {
   if (!usbPresent) {
     return false;
   }
@@ -68,7 +172,7 @@ bool MetaConfigEditor::maybeEnter(SdService &sd, bool usbPresent, Stream &io, ui
       const char c = static_cast<char>(io.read());
       if (c == 'e' || c == 'E') {
         io.println(F("Entering meta editor..."));
-        runShell(sd, io);
+        runShell(sd, io, node);
         return true;
       }
       break;
@@ -80,7 +184,7 @@ bool MetaConfigEditor::maybeEnter(SdService &sd, bool usbPresent, Stream &io, ui
 
 bool MetaConfigEditor::maybeEnterWithFade(SdService &sd, bool usbPresent, Stream &io,
                                           uint32_t holdWindowMs, uint8_t ledPrimaryPin,
-                                          uint8_t ledSecondaryPin) {
+                                          uint8_t ledSecondaryPin, HublinkNode *node) {
   if (!usbPresent) {
     return false;
   }
@@ -109,7 +213,7 @@ bool MetaConfigEditor::maybeEnterWithFade(SdService &sd, bool usbPresent, Stream
         }
         analogWrite(ledPrimaryPin, 255);
         analogWrite(ledSecondaryPin, 255);
-        return enterNow(sd, io);
+        return enterNow(sd, io, node);
       }
     }
 
@@ -131,16 +235,16 @@ bool MetaConfigEditor::maybeEnterWithFade(SdService &sd, bool usbPresent, Stream
   return false;
 }
 
-bool MetaConfigEditor::enterNow(SdService &sd, Stream &io) {
+bool MetaConfigEditor::enterNow(SdService &sd, Stream &io, HublinkNode *node) {
   if (!sd.begin() || sd.cardType() == CARD_NONE) {
     io.println(F("Meta editor unavailable: SD card not mounted."));
     return false;
   }
   io.println(F("Entering meta editor..."));
-  return runShell(sd, io);
+  return runShell(sd, io, node);
 }
 
-bool MetaConfigEditor::runShell(SdService &sd, Stream &io) {
+bool MetaConfigEditor::runShell(SdService &sd, Stream &io, HublinkNode *node) {
   JsonDocument doc;
   if (!loadMetaDoc(sd, doc, io)) {
     return false;
@@ -218,6 +322,11 @@ bool MetaConfigEditor::runShell(SdService &sd, Stream &io) {
       continue;
     }
 
+    if (rootCmd == "sensor") {
+      cmdSensor(io, node, rest);
+      continue;
+    }
+
     io.println(F("Unknown command. Type: help"));
   }
 
@@ -258,6 +367,7 @@ void MetaConfigEditor::printTopHelp(Stream &io) const {
   io.println(F("  meta setjson <path> <json_literal>"));
   io.println(F("  meta del <path> | meta save | meta reload"));
   io.println(F("  file help | file list | file cat <name> | file rm <n> | file rm all"));
+  io.println(F("  sensor help | sensor | sensor list | sensor fuel | sensor rtc | ..."));
   io.println(F("  exit"));
 }
 
@@ -318,24 +428,111 @@ bool MetaConfigEditor::cmdFile(Stream &io, SdService &sd, const String &rest) {
   return false;
 }
 
+void MetaConfigEditor::printSensorHelp(Stream &io) const {
+  io.println(F("Sensor commands (need HublinkNode when opening editor):"));
+  io.println(F("  sensor          — one-shot: rtc, fuel, light, env, pins"));
+  io.println(F("  sensor all      — same as sensor"));
+  io.println(F("  sensor list     — status line per device (quick)"));
+  io.println(F("  sensor fuel     — battery gauge (aliases: batt, battery)"));
+  io.println(F("  sensor rtc | light | env | pins"));
+}
+
+bool MetaConfigEditor::cmdSensor(Stream &io, HublinkNode *node, const String &rest) {
+  if (node == nullptr) {
+    io.println(
+        F("sensor: no HublinkNode (pass node into maybeEnterWithFade / enterNow for readings)."));
+    return false;
+  }
+
+  const String op = trimCopy(rest);
+  if (op == "help") {
+    printSensorHelp(io);
+    return true;
+  }
+
+  ensureNodeSensorsReady(*node);
+
+  if (op == "list") {
+    const RtcReading rtc = node->rtc().readSample();
+    io.print(F("rtc: "));
+    io.println(statusToString(rtc.status));
+
+    const BatteryReading bat = node->powerGauge().readSample();
+    io.print(F("fuel: "));
+    io.print(statusToString(bat.status));
+    if (node->powerGauge().isInitialized()) {
+      io.print(F(" chip=0x"));
+      if (node->powerGauge().chipId() < 16U) {
+        io.print('0');
+      }
+      io.print(node->powerGauge().chipId(), HEX);
+    }
+    io.println();
+
+    const LightReading light = node->light().readSample();
+    io.print(F("light: "));
+    io.println(statusToString(light.status));
+
+    const EnvReading env = node->environment().readSample();
+    io.print(F("env: "));
+    io.println(statusToString(env.status));
+
+    printPinsLine(io, *node);
+    return true;
+  }
+
+  if (op == "fuel" || op == "batt" || op == "battery") {
+    const BatteryReading bat = node->powerGauge().readSample();
+    printFuelLine(io, "fuel", *node, bat, true);
+    return true;
+  }
+
+  if (op == "rtc") {
+    const RtcReading rtc = node->rtc().readSample();
+    printRtcLine(io, "rtc", rtc);
+    return true;
+  }
+
+  if (op == "light") {
+    const LightReading light = node->light().readSample();
+    printLightLine(io, "light", light);
+    return true;
+  }
+
+  if (op == "env") {
+    const EnvReading env = node->environment().readSample();
+    printEnvLine(io, "env", env);
+    return true;
+  }
+
+  if (op == "pins") {
+    printPinsLine(io, *node);
+    return true;
+  }
+
+  if (op.length() == 0 || op == "all") {
+    const RtcReading rtc = node->rtc().readSample();
+    printRtcLine(io, "rtc", rtc);
+
+    const BatteryReading bat = node->powerGauge().readSample();
+    printFuelLine(io, "fuel", *node, bat, false);
+
+    const LightReading light = node->light().readSample();
+    printLightLine(io, "light", light);
+
+    const EnvReading env = node->environment().readSample();
+    printEnvLine(io, "env", env);
+
+    printPinsLine(io, *node);
+    return true;
+  }
+
+  io.println(F("Unknown sensor subcommand. Try: sensor help"));
+  return false;
+}
+
 bool MetaConfigEditor::loadMetaDoc(SdService &sd, JsonDocument &doc, Stream &io) {
-  String text;
-  const ServiceStatus status = sd.readText(kMetaPath, text);
-  if (status != ServiceStatus::Ok) {
-    io.println(F("Failed to read /meta.json"));
-    return false;
-  }
-  DeserializationError err = deserializeJson(doc, text);
-  if (err) {
-    io.print(F("meta.json parse error: "));
-    io.println(err.c_str());
-    return false;
-  }
-  if (!doc.is<JsonObject>()) {
-    io.println(F("meta.json root must be an object."));
-    return false;
-  }
-  return true;
+  return loadMetaJson(sd, doc, kMetaPath, &io);
 }
 
 bool MetaConfigEditor::saveMetaDocAtomic(SdService &sd, const JsonDocument &doc, Stream &io) {
@@ -676,66 +873,7 @@ JsonVariant MetaConfigEditor::resolvePath(JsonDocument &doc, const String &path,
 
 JsonVariantConst MetaConfigEditor::resolvePathConst(const JsonDocument &doc, const String &path,
                                                     bool *ok) const {
-  if (ok) {
-    *ok = false;
-  }
-  Serial.print(F("[resolvePathConst] input='"));
-  Serial.print(path);
-  Serial.println(F("'"));
-  if (path.length() == 0) {
-    Serial.println(F("[resolvePathConst] empty path"));
-    return JsonVariantConst();
-  }
-  JsonVariantConst current = doc.as<JsonVariantConst>();
-  if (!current.is<JsonObjectConst>()) {
-    Serial.println(F("[resolvePathConst] doc root is not object"));
-    return JsonVariantConst();
-  }
-
-  int start = 0;
-  while (true) {
-    const int dot = path.indexOf('.', start);
-    const String token = dot < 0 ? path.substring(start) : path.substring(start, dot);
-    Serial.print(F("[resolvePathConst] token='"));
-    Serial.print(token);
-    Serial.println(F("'"));
-    if (token.length() == 0) {
-      Serial.println(F("[resolvePathConst] empty token"));
-      return JsonVariantConst();
-    }
-
-    if (!current.is<JsonObjectConst>()) {
-      Serial.println(F("[resolvePathConst] current is not object"));
-      return JsonVariantConst();
-    }
-    JsonObjectConst obj = current.as<JsonObjectConst>();
-    if (!obj.containsKey(token.c_str())) {
-      Serial.print(F("[resolvePathConst] missing key '"));
-      Serial.print(token);
-      Serial.println(F("'"));
-      return JsonVariantConst();
-    }
-    JsonVariantConst next = obj[token.c_str()];
-    Serial.print(F("[resolvePathConst] key found '"));
-    Serial.print(token);
-    Serial.println(F("'"));
-
-    if (dot < 0) {
-      if (ok) {
-        *ok = true;
-      }
-      Serial.println(F("[resolvePathConst] resolved final token"));
-      return next;
-    }
-    if (!next.is<JsonObjectConst>()) {
-      Serial.print(F("[resolvePathConst] key '"));
-      Serial.print(token);
-      Serial.println(F("' is not object"));
-      return JsonVariantConst();
-    }
-    current = next.as<JsonObjectConst>();
-    start = dot + 1;
-  }
+  return resolveMetaDotPath(doc.as<JsonVariantConst>(), path, ok);
 }
 
 bool MetaConfigEditor::splitTwoArgs(const String &text, String &first, String &rest) const {

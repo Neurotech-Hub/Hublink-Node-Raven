@@ -48,8 +48,11 @@
 // Keys consumed directly by this sketch:
 // - wheel.sleep_time_seconds, wheel.sync_every_seconds, wheel.sync_for_seconds
 // - logger.log_base_name, logger.log_file_mode, logger.inc_on_reboot, logger.log_fields
+// These wheel/logger keys are read from /meta.json by this library via raven::loadMetaJson
+// (typed getters in MetaConfigReader), so sketches do not rely on Hublink for namespaces the
+// device firmware owns here.
 //
-// hublink.* and device.* are handled by the Hublink library itself.
+// hublink.* and device.* are still handled inside the Hublink library via hublink.begin().
 
 raven::HublinkNode node;
 raven::DataLoggerHelper logger(node);
@@ -197,6 +200,79 @@ static void onTimestampReceived(uint32_t timestamp)
   node.rtc().adjust(DateTime(timestamp));
 }
 
+// Apply wheel/logger keys from meta.json via Raven helpers (SD + typed reads).
+static void applyWheelLoggerMetaFromSd()
+{
+  JsonDocument metaDoc;
+  if (!raven::loadMetaJson(node.sd(), metaDoc))
+  {
+    return;
+  }
+
+  uint32_t u = 0;
+  if (raven::metaGetUInt32(metaDoc, String("wheel.sleep_time_seconds"), u))
+  {
+    gSleepTimeSeconds = u;
+    Serial.print(F("wheel.sleep_time_seconds: "));
+    Serial.println(gSleepTimeSeconds);
+  }
+  if (raven::metaGetUInt32(metaDoc, String("wheel.sync_every_seconds"), u))
+  {
+    gSyncEverySeconds = u;
+    Serial.print(F("wheel.sync_every_seconds: "));
+    Serial.println(gSyncEverySeconds);
+  }
+  if (raven::metaGetUInt32(metaDoc, String("wheel.sync_for_seconds"), u))
+  {
+    gSyncForSeconds = u;
+    Serial.print(F("wheel.sync_for_seconds: "));
+    Serial.println(gSyncForSeconds);
+  }
+
+  String s;
+  if (raven::metaGetString(metaDoc, String("logger.log_base_name"), s))
+  {
+    gLogBaseName = s;
+    Serial.print(F("logger.log_base_name: "));
+    Serial.println(gLogBaseName);
+  }
+
+  String modeStr;
+  if (raven::metaGetString(metaDoc, String("logger.log_file_mode"), modeStr))
+  {
+    gLogFileMode = parseLogFileMode(modeStr);
+    Serial.print(F("logger.log_file_mode: "));
+    Serial.println(logFileModeText(gLogFileMode));
+  }
+
+  bool rebootInc = false;
+  if (raven::metaGetBool(metaDoc, String("logger.inc_on_reboot"), rebootInc))
+  {
+    gIncOnReboot = rebootInc;
+    Serial.print(F("logger.inc_on_reboot: "));
+    Serial.println(gIncOnReboot ? F("true") : F("false"));
+  }
+
+  JsonArrayConst fields{};
+  if (raven::metaGetJsonArray(metaDoc, String("logger.log_fields"), fields))
+  {
+    const size_t fieldCount = fields.size();
+    if (fieldCount > 0)
+    {
+      auto *fieldNames = new String[fieldCount];
+      for (size_t fi = 0; fi < fieldCount; ++fi)
+      {
+        fieldNames[fi] = fields[fi].as<String>();
+      }
+      gLogContext.fieldMask = raven::buildCsvFieldMaskFromNames(
+          fieldNames, fieldCount, gLogContext.fieldMask, &Serial);
+      delete[] fieldNames;
+      Serial.print(F("logger.log_fields applied: "));
+      Serial.println(raven::DataLoggerHelper::csvHeader(gLogContext.fieldMask));
+    }
+  }
+}
+
 static void beginHublink()
 {
   if (!hublink.begin())
@@ -208,65 +284,7 @@ static void beginHublink()
   Serial.println(F("HubWheelHublink: Hublink initialized."));
   hublink.setTimestampCallback(onTimestampReceived);
 
-  // wheel namespace: wheel-specific behavior/timing values.
-  if (hublink.hasMetaKey("wheel", "sleep_time_seconds"))
-  {
-    gSleepTimeSeconds = hublink.getMeta<int>("wheel", "sleep_time_seconds");
-    Serial.print(F("wheel.sleep_time_seconds: "));
-    Serial.println(gSleepTimeSeconds);
-  }
-  if (hublink.hasMetaKey("wheel", "sync_every_seconds"))
-  {
-    gSyncEverySeconds = hublink.getMeta<int>("wheel", "sync_every_seconds");
-    Serial.print(F("wheel.sync_every_seconds: "));
-    Serial.println(gSyncEverySeconds);
-  }
-  if (hublink.hasMetaKey("wheel", "sync_for_seconds"))
-  {
-    gSyncForSeconds = hublink.getMeta<int>("wheel", "sync_for_seconds");
-    Serial.print(F("wheel.sync_for_seconds: "));
-    Serial.println(gSyncForSeconds);
-  }
-
-  // logger namespace: cross-sketch file naming + field selection values.
-  if (hublink.hasMetaKey("logger", "log_base_name"))
-  {
-    gLogBaseName = hublink.getMeta<String>("logger", "log_base_name");
-    Serial.print(F("logger.log_base_name: "));
-    Serial.println(gLogBaseName);
-  }
-  if (hublink.hasMetaKey("logger", "log_file_mode"))
-  {
-    gLogFileMode = parseLogFileMode(hublink.getMeta<String>("logger", "log_file_mode"));
-    Serial.print(F("logger.log_file_mode: "));
-    Serial.println(logFileModeText(gLogFileMode));
-  }
-  if (hublink.hasMetaKey("logger", "inc_on_reboot"))
-  {
-    gIncOnReboot = hublink.getMeta<bool>("logger", "inc_on_reboot");
-    Serial.print(F("logger.inc_on_reboot: "));
-    Serial.println(gIncOnReboot ? F("true") : F("false"));
-  }
-  if (hublink.hasMetaKey("logger", "log_fields"))
-  {
-    const JsonArray fields = hublink.getMeta<JsonArray>("logger", "log_fields");
-    const size_t fieldCount = fields.size();
-    if (fieldCount > 0)
-    {
-      String *fieldNames = new String[fieldCount];
-      size_t i = 0;
-      for (JsonVariant fieldValue : fields)
-      {
-        fieldNames[i++] = fieldValue.as<String>();
-      }
-      gLogContext.fieldMask = raven::buildCsvFieldMaskFromNames(
-          fieldNames, fieldCount, gLogContext.fieldMask, &Serial);
-      delete[] fieldNames;
-      Serial.print(F("logger.log_fields applied: "));
-      Serial.println(raven::DataLoggerHelper::csvHeader(gLogContext.fieldMask));
-    }
-  }
-
+  applyWheelLoggerMetaFromSd();
   applyLogPolicyDefaults();
 }
 
@@ -393,7 +411,7 @@ void setup()
   // Offer editor only on power-on/reset wake, not deep-sleep wake cycles.
   if (cause == ESP_SLEEP_WAKEUP_UNDEFINED && node.readUsbSense()) {
     metaEditor.maybeEnterWithFade(node.sd(), true, Serial, 3000,
-                                  raven::PIN_LED_GREEN, raven::PIN_LED_B);
+                                  raven::PIN_LED_GREEN, raven::PIN_LED_B, &node);
   }
   applyLogPolicyDefaults();
   beginHublink();

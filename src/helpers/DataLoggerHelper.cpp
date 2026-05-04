@@ -1,4 +1,5 @@
 #include "DataLoggerHelper.h"
+#include "LowBatteryBoot.h"
 
 namespace raven {
 namespace {
@@ -157,6 +158,10 @@ bool DataLoggerHelper::begin() {
   // Allow partial peripheral availability; each read reports its own status.
   node_.rtc().begin();
   node_.powerGauge().begin();
+  const bool usbPresent = node_.readUsbSense();
+  const BatteryReading batteryBoot = node_.powerGauge().readSample();
+  runLowBatteryBootGate(node_, batteryBoot, usbPresent);
+
   node_.light().begin();
   node_.environment().begin();
   node_.sd().begin();
