@@ -27,7 +27,8 @@ static constexpr raven::CsvFieldMask kCsvFieldMask = raven::csvFields({
     raven::CsvField::BattPer,
 });
 
-struct LogContext {
+struct LogContext
+{
   raven::LogFilePolicy filePolicy;
   raven::CsvFieldMask fieldMask = 0;
 };
@@ -41,30 +42,41 @@ static const __FlashStringHelper *wakeCauseText(esp_sleep_wakeup_cause_t cause)
 {
   switch (cause)
   {
-    case ESP_SLEEP_WAKEUP_UNDEFINED: return F("power_on_or_reset");
-    case ESP_SLEEP_WAKEUP_EXT0: return F("ext0");
-    case ESP_SLEEP_WAKEUP_EXT1: return F("ext1");
-    case ESP_SLEEP_WAKEUP_TIMER: return F("timer");
-    case ESP_SLEEP_WAKEUP_TOUCHPAD: return F("touchpad");
-    case ESP_SLEEP_WAKEUP_ULP: return F("ulp");
-    case ESP_SLEEP_WAKEUP_GPIO: return F("gpio");
-    case ESP_SLEEP_WAKEUP_UART: return F("uart");
-    default: return F("unknown");
+  case ESP_SLEEP_WAKEUP_UNDEFINED:
+    return F("power_on_or_reset");
+  case ESP_SLEEP_WAKEUP_EXT0:
+    return F("ext0");
+  case ESP_SLEEP_WAKEUP_EXT1:
+    return F("ext1");
+  case ESP_SLEEP_WAKEUP_TIMER:
+    return F("timer");
+  case ESP_SLEEP_WAKEUP_TOUCHPAD:
+    return F("touchpad");
+  case ESP_SLEEP_WAKEUP_ULP:
+    return F("ulp");
+  case ESP_SLEEP_WAKEUP_GPIO:
+    return F("gpio");
+  case ESP_SLEEP_WAKEUP_UART:
+    return F("uart");
+  default:
+    return F("unknown");
   }
 }
 
 static void blinkPowerOnPattern(esp_sleep_wakeup_cause_t cause)
 {
-  if (cause != ESP_SLEEP_WAKEUP_UNDEFINED) {
+  if (cause != ESP_SLEEP_WAKEUP_UNDEFINED)
+  {
     return;
   }
-  pinMode(raven::PIN_LED_B, OUTPUT);
-  for (uint8_t i = 0; i < 3; ++i) {
+  pinMode(raven::PIN_LED_BLUE, OUTPUT);
+  for (uint8_t i = 0; i < 3; ++i)
+  {
     digitalWrite(raven::PIN_LED_GREEN, HIGH);
-    digitalWrite(raven::PIN_LED_B, HIGH);
+    digitalWrite(raven::PIN_LED_BLUE, HIGH);
     delay(100);
     digitalWrite(raven::PIN_LED_GREEN, LOW);
-    digitalWrite(raven::PIN_LED_B, LOW);
+    digitalWrite(raven::PIN_LED_BLUE, LOW);
     delay(100);
   }
   digitalWrite(raven::PIN_LED_GREEN, HIGH);
@@ -73,13 +85,14 @@ static void blinkPowerOnPattern(esp_sleep_wakeup_cause_t cause)
 static void blinkMissingSdCard()
 {
   Serial.println(F("HubWheel: SD card not present. Halting."));
-  pinMode(raven::PIN_LED_B, OUTPUT);
-  while (true) {
+  pinMode(raven::PIN_LED_BLUE, OUTPUT);
+  while (true)
+  {
     digitalWrite(raven::PIN_LED_GREEN, HIGH);
-    digitalWrite(raven::PIN_LED_B, LOW);
+    digitalWrite(raven::PIN_LED_BLUE, LOW);
     delay(100);
     digitalWrite(raven::PIN_LED_GREEN, LOW);
-    digitalWrite(raven::PIN_LED_B, HIGH);
+    digitalWrite(raven::PIN_LED_BLUE, HIGH);
     delay(100);
   }
 }
@@ -94,19 +107,22 @@ static void appendWheelLogRow()
   String logPath;
   const raven::ServiceStatus pathStatus =
       raven::resolveLogFilePath(node.sd(), gLogContext.filePolicy, sample.rtc, logPath);
-  if (pathStatus != raven::ServiceStatus::Ok) {
+  if (pathStatus != raven::ServiceStatus::Ok)
+  {
     Serial.print(F("HubWheel: log write failed ("));
     Serial.print(raven::statusToString(pathStatus));
     Serial.println(F(")"));
     return;
   }
 
-  if (!node.sd().exists(logPath.c_str())) {
+  if (!node.sd().exists(logPath.c_str()))
+  {
     const String header = gLogContext.fieldMask == 0
                               ? raven::DataLoggerHelper::csvHeader()
                               : raven::DataLoggerHelper::csvHeader(gLogContext.fieldMask);
     const raven::ServiceStatus headerStatus = node.sd().appendLine(logPath.c_str(), header);
-    if (headerStatus != raven::ServiceStatus::Ok) {
+    if (headerStatus != raven::ServiceStatus::Ok)
+    {
       Serial.print(F("HubWheel: log write failed ("));
       Serial.print(raven::statusToString(headerStatus));
       Serial.println(F(")"));
@@ -118,7 +134,8 @@ static void appendWheelLogRow()
                                              ? logger.appendCsvSample(logPath.c_str(), sample)
                                              : logger.appendCsvSample(logPath.c_str(), sample,
                                                                       gLogContext.fieldMask);
-  if (rowStatus != raven::ServiceStatus::Ok) {
+  if (rowStatus != raven::ServiceStatus::Ok)
+  {
     Serial.print(F("HubWheel: log write failed ("));
     Serial.print(raven::statusToString(rowStatus));
     Serial.println(F(")"));
@@ -154,15 +171,17 @@ void setup()
   node.beginHardware();
   node.beginI2C();
   logger.begin();
-  if (!node.sd().begin() || node.sd().cardType() == CARD_NONE) {
+  if (!node.sd().begin() || node.sd().cardType() == CARD_NONE)
+  {
     blinkMissingSdCard();
   }
 
   const esp_sleep_wakeup_cause_t cause = node.wakeupCause();
   // Offer editor only on power-on/reset wake, not deep-sleep wake cycles (same as HubWheelHublink).
-  if (cause == ESP_SLEEP_WAKEUP_UNDEFINED && node.readUsbSense()) {
+  if (cause == ESP_SLEEP_WAKEUP_UNDEFINED && node.readUsbSense())
+  {
     metaEditor.maybeEnterWithFade(node.sd(), true, Serial, 3000,
-                                  raven::PIN_LED_GREEN, raven::PIN_LED_B, &node);
+                                  raven::PIN_LED_GREEN, raven::PIN_LED_BLUE, &node);
   }
 
   Serial.println();

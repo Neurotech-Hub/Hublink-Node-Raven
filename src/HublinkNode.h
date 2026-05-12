@@ -1,6 +1,6 @@
 #pragma once
 
-#include "hardware/HublinkPins.h"
+#include "hardware/RavenPins.h"
 #include "services/EnvService.h"
 #include "services/LightService.h"
 #include "services/MagnetCounterService.h"

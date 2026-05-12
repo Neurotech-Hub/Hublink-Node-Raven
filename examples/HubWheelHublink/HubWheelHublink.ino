@@ -120,14 +120,14 @@ static void blinkPowerOnPattern(esp_sleep_wakeup_cause_t cause)
   {
     return;
   }
-  pinMode(raven::PIN_LED_B, OUTPUT);
+  pinMode(raven::PIN_LED_BLUE, OUTPUT);
   for (uint8_t i = 0; i < 3; ++i)
   {
     digitalWrite(raven::PIN_LED_GREEN, HIGH);
-    digitalWrite(raven::PIN_LED_B, HIGH);
+    digitalWrite(raven::PIN_LED_BLUE, HIGH);
     delay(100);
     digitalWrite(raven::PIN_LED_GREEN, LOW);
-    digitalWrite(raven::PIN_LED_B, LOW);
+    digitalWrite(raven::PIN_LED_BLUE, LOW);
     delay(100);
   }
   digitalWrite(raven::PIN_LED_GREEN, HIGH);
@@ -136,14 +136,14 @@ static void blinkPowerOnPattern(esp_sleep_wakeup_cause_t cause)
 static void blinkMissingSdCard()
 {
   Serial.println(F("HubWheelHublink: SD card not present. Halting."));
-  pinMode(raven::PIN_LED_B, OUTPUT);
+  pinMode(raven::PIN_LED_BLUE, OUTPUT);
   while (true)
   {
     digitalWrite(raven::PIN_LED_GREEN, HIGH);
-    digitalWrite(raven::PIN_LED_B, LOW);
+    digitalWrite(raven::PIN_LED_BLUE, LOW);
     delay(100);
     digitalWrite(raven::PIN_LED_GREEN, LOW);
-    digitalWrite(raven::PIN_LED_B, HIGH);
+    digitalWrite(raven::PIN_LED_BLUE, HIGH);
     delay(100);
   }
 }
@@ -410,9 +410,10 @@ void setup()
   }
   const esp_sleep_wakeup_cause_t cause = node.wakeupCause();
   // Offer editor only on power-on/reset wake, not deep-sleep wake cycles.
-  if (cause == ESP_SLEEP_WAKEUP_UNDEFINED && node.readUsbSense()) {
+  if (cause == ESP_SLEEP_WAKEUP_UNDEFINED && node.readUsbSense())
+  {
     metaEditor.maybeEnterWithFade(node.sd(), true, Serial, 3000,
-                                  raven::PIN_LED_GREEN, raven::PIN_LED_B, &node);
+                                  raven::PIN_LED_GREEN, raven::PIN_LED_BLUE, &node);
   }
   applyLogPolicyDefaults();
   beginHublink();

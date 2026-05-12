@@ -19,7 +19,12 @@ void setup() {
 
 void loop() {
   const bool magnetHigh = node.readMagnet();
-  node.setStatusLeds(!magnetHigh);
+  // Boot switch (active LOW): force green LED on; otherwise mirror magnet on both status LEDs.
+  if (digitalRead(raven::PIN_BOOT_BUTTON) == LOW) {
+    digitalWrite(raven::PIN_LED_GREEN, HIGH);
+  } else {
+    node.setStatusLeds(!magnetHigh);
+  }
 
   static uint32_t lastPrintMs = 0;
   static uint32_t lastDiagnoseMs = 0;
@@ -42,7 +47,9 @@ void loop() {
     Serial.print(F("MAG_OUT="));
     Serial.print(magnetHigh ? F("HIGH") : F("LOW"));
     Serial.print(F(" USB_SENSE="));
-    Serial.println(node.readUsbSense() ? F("HIGH") : F("LOW"));
+    Serial.print(node.readUsbSense() ? F("HIGH") : F("LOW"));
+    Serial.print(F(" BOOT="));
+    Serial.println(digitalRead(raven::PIN_BOOT_BUTTON) == LOW ? F("LOW(held)") : F("HIGH"));
   }
 
   if (nowMs - lastDiagnoseMs >= 10000U) {

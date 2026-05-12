@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../hardware/HublinkPins.h"
+#include "../hardware/RavenPins.h"
 #include <Arduino.h>
 #include <driver/rtc_io.h>
 #include <esp_sleep.h>

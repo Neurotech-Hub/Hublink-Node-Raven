@@ -33,10 +33,11 @@ namespace raven
     pinMode(PIN_ALERT, INPUT);
 
     pinMode(PIN_LED_GREEN, OUTPUT);
-    pinMode(PIN_LED_B, OUTPUT);
+    pinMode(PIN_LED_BLUE, OUTPUT);
     setStatusLeds(false);
 
     pinMode(PIN_USB_SENSE, INPUT_PULLUP);
+    pinMode(PIN_BOOT_BUTTON, INPUT_PULLUP);
 
     pinMode(PIN_SPI_MOSI, INPUT);
     pinMode(PIN_SPI_SCK, INPUT);
@@ -92,7 +93,7 @@ namespace raven
   void HublinkNode::setStatusLeds(bool on)
   {
     const int level = on ? HIGH : LOW;
-    digitalWrite(PIN_LED_B, level);
+    digitalWrite(PIN_LED_BLUE, level);
     digitalWrite(PIN_LED_GREEN, level);
   }
 

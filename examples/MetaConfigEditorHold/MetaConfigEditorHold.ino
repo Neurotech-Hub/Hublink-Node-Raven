@@ -22,18 +22,21 @@ void setup()
   node.light().begin();
   node.environment().begin();
 
-  if (!node.sd().begin() || node.sd().cardType() == CARD_NONE) {
+  if (!node.sd().begin() || node.sd().cardType() == CARD_NONE)
+  {
     Serial.println(F("MetaConfigEditorHold: SD card required. Halting."));
-    while (true) {
+    while (true)
+    {
       delay(1000);
     }
   }
 
   const esp_sleep_wakeup_cause_t cause = node.wakeupCause();
   // Same gate as wheel examples: only after cold boot / reset, not after timer deep sleep wake.
-  if (cause == ESP_SLEEP_WAKEUP_UNDEFINED && node.readUsbSense()) {
+  if (cause == ESP_SLEEP_WAKEUP_UNDEFINED && node.readUsbSense())
+  {
     metaEditor.maybeEnterWithFade(node.sd(), true, Serial, 3000,
-                                  raven::PIN_LED_GREEN, raven::PIN_LED_B, &node);
+                                  raven::PIN_LED_GREEN, raven::PIN_LED_BLUE, &node);
   }
 
   Serial.println(F("MetaConfigEditorHold: hold finished; loop idle."));
