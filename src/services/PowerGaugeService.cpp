@@ -59,8 +59,8 @@ BatteryReading PowerGaugeService::readSample() {
 
   out.status = ServiceStatus::Ok;
   out.voltageV = voltage;
-  if (!isnan(soc) && soc >= 0.0f && soc <= 100.0f) {
-    out.stateOfChargePct = soc;
+  if (!isnan(soc) && soc >= 0.0f) {
+    out.stateOfChargePct = min(soc, 100.0f);
   }
   out.hasCellReading = true;
   return out;

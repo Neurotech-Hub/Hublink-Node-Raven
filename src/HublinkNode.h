@@ -14,7 +14,16 @@ namespace raven {
 
 class HublinkNode {
 public:
-  bool beginHardware();
+  /// Default CPU clock before pin setup. 80 MHz is a common choice for reliable Wi‑Fi / Bluetooth on ESP32-S3.
+  static constexpr uint32_t kDefaultMcuClockMhz = 80;
+
+  /// Set the ESP32 CPU frequency (Arduino-ESP32 `setCpuFrequencyMhz`). Typical values: 80, 160, 240 MHz.
+  static bool setMcuClockMhz(uint32_t mhz);
+  /// Current CPU frequency in MHz (from `getCpuFrequencyMhz()`).
+  static uint32_t mcuClockMhz();
+
+  /// @param mcuClockMhz Applied first via `setMcuClockMhz`; default is `kDefaultMcuClockMhz`.
+  bool beginHardware(uint32_t mcuClockMhz = kDefaultMcuClockMhz);
   bool beginI2C(uint32_t clockHz = DEFAULT_I2C_CLOCK_HZ);
 
   void setI2CPowerEnabled(bool enabled);

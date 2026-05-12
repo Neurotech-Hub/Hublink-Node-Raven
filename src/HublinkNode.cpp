@@ -1,11 +1,17 @@
 #include "HublinkNode.h"
+#include <esp32-hal-cpu.h>
 #include <esp_log.h>
 
 namespace raven
 {
 
-  bool HublinkNode::beginHardware()
+  bool HublinkNode::setMcuClockMhz(uint32_t mhz) { return setCpuFrequencyMhz(mhz); }
+
+  uint32_t HublinkNode::mcuClockMhz() { return getCpuFrequencyMhz(); }
+
+  bool HublinkNode::beginHardware(uint32_t mcuClockMhz)
   {
+    (void)setMcuClockMhz(mcuClockMhz);
     pinMode(PIN_AUX_GPIO0, INPUT_PULLUP);
     pinMode(PIN_AUX_GPIO1, INPUT_PULLUP);
     pinMode(PIN_GPIO5, INPUT);

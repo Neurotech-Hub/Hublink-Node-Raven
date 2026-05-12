@@ -64,6 +64,14 @@ void loop() {
 - ULP magnet counting is core hardware functionality; wake cadence and logging policy remain sketch-controlled in `HubWheelMinimal.ino`/`HubWheelHublink.ino`.
 - `PIN_ALERT` is a shared hardware interrupt line created by combining `~RTC_INT` and `~FUEL_ALERT` through an AND gate. Because both upstream signals are active-low, if either source asserts LOW, `PIN_ALERT` goes LOW (LOW-level interrupt behavior). This lets sketches monitor one GPIO for either source, but the library does not currently expose APIs to configure specific RTC or fuel-gauge alert thresholds/masks.
 
+## Battery and low-voltage safeguard (voltage-only, millis-based)
+
+- **Defaults:** [`kSafeguardTripVoltsDefault`](src/helpers/LowBatteryBoot.h) (**2.0 V**), `kSafeguardRecoverVoltsDefault` (**2.6 V**), `kSafeguardPollIntervalSecondsDefault` (**600** s), `kSafeguardShutdownWakeupSecondsDefault` (**600** s). No **`meta.json`** keys.
+- **Automatic path:** [`maybeAutomaticVoltageSafeguard(node, true)`](src/helpers/LowBatteryBoot.h)—internal millis spacing and **`LowBatteryGateConfig`** defaults (**USB** blocks sleep); same behavior as **[`DataLoggerHelper::begin()`](src/helpers/DataLoggerHelper.cpp)** after **`beginI2C()`**. Call from **`setup()`/`loop()`** on your cadence—the helper still throttles gauge reads. **`maybeAutomaticVoltageSafeguard(node, false)`** is a no-op.
+- **Manual path:** [`isCellBelowTripVoltage(node[, tripVolts])`](src/helpers/LowBatteryBoot.h); then optionally [`safeguardShutdown(node, wakeupInSeconds)`](src/helpers/LowBatteryBoot.h) (**LEDs off**, timer deep sleep, does **not** return). USB and policy are sketch-controlled. Example: [`examples/BasicHardware/BasicHardware.ino`](examples/BasicHardware/BasicHardware.ino).
+- **Diagnostics:** [`diagnoseVoltageSafeguard(Stream, node, usbPresent)`](src/helpers/LowBatteryBoot.h)—optional fourth argument **`LowBatteryGateConfig`** if you tune reporting.
+- **Meta editor:** `sensor safeguard` runs diagnose when `HublinkNode` is passed into `maybeEnterWithFade` / `enterNow`.
+
 ## Data Logger
 
 - `RtcService::begin()` now performs a best-effort RTC-to-system-time sync when RTC data is valid. If RTC is unavailable or invalid, initialization continues without failing.
@@ -153,6 +161,7 @@ raven::LogFilePolicy gLogFilePolicy = {
 - Low-power/deep-sleep sketches rely on sketch-controlled wake scheduling; they cannot rely on Hublink advertise/sync intervals while asleep. This is why wheel examples include explicit `wheel.*` timing settings in addition to `hublink.*` settings.
 - `HubWheelHublink.ino` includes an optional USB Serial `meta.json` editor: press `e` during a ~5s startup hold window to enter command mode.
 - Top-level commands: `help`, `reboot`, `exit`
+  - Sensor commands (when `HublinkNode*` is passed into the editor): `sensor`, `sensor list`, `sensor fuel`, `sensor safeguard`, etc.
   - Meta commands: `meta show`, `meta get <path>`, `meta set <path> <value>`, `meta setjson <path> <json_literal>`, `meta del <path>`, `meta save`, `meta reload`
 - File commands (root-only): `file help`, `file list`, `file cat <name>`, `file rm <n>`, `file rm all`
   - `file rm` never allows deleting `meta.json`; saves use atomic temp-file replacement (`/meta.tmp` -> `/meta.json`).

@@ -1,5 +1,6 @@
 #include "MetaConfigEditor.h"
 #include "../HublinkNode.h"
+#include "LowBatteryBoot.h"
 #include "MetaConfigReader.h"
 #include "MetaJsonPath.h"
 #include <SD.h>
@@ -367,7 +368,7 @@ void MetaConfigEditor::printTopHelp(Stream &io) const {
   io.println(F("  meta setjson <path> <json_literal>"));
   io.println(F("  meta del <path> | meta save | meta reload"));
   io.println(F("  file help | file list | file cat <name> | file rm <n> | file rm all"));
-  io.println(F("  sensor help | sensor | sensor list | sensor fuel | sensor rtc | ..."));
+  io.println(F("  sensor help | sensor | sensor list | sensor fuel | sensor safeguard | ..."));
   io.println(F("  exit"));
 }
 
@@ -435,6 +436,7 @@ void MetaConfigEditor::printSensorHelp(Stream &io) const {
   io.println(F("  sensor list     — status line per device (quick)"));
   io.println(F("  sensor fuel     — battery gauge (aliases: batt, battery)"));
   io.println(F("  sensor rtc | light | env | pins"));
+  io.println(F("  sensor safeguard — low-voltage safeguard diagnose (no sleep)"));
 }
 
 bool MetaConfigEditor::cmdSensor(Stream &io, HublinkNode *node, const String &rest) {
@@ -507,6 +509,11 @@ bool MetaConfigEditor::cmdSensor(Stream &io, HublinkNode *node, const String &re
 
   if (op == "pins") {
     printPinsLine(io, *node);
+    return true;
+  }
+
+  if (op == "safeguard") {
+    (void)diagnoseVoltageSafeguard(io, *node, node->readUsbSense());
     return true;
   }
 

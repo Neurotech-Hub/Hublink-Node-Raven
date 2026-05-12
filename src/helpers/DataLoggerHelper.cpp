@@ -155,13 +155,11 @@ bool DataLoggerHelper::begin() {
     return false;
   }
 
+  maybeAutomaticVoltageSafeguard(node_, true);
+
   // Allow partial peripheral availability; each read reports its own status.
   node_.rtc().begin();
   node_.powerGauge().begin();
-  const bool usbPresent = node_.readUsbSense();
-  const BatteryReading batteryBoot = node_.powerGauge().readSample();
-  runLowBatteryBootGate(node_, batteryBoot, usbPresent);
-
   node_.light().begin();
   node_.environment().begin();
   node_.sd().begin();
