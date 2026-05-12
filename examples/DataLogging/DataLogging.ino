@@ -13,6 +13,27 @@ raven::LogFilePolicy gLogFilePolicy = {
     false,
 };
 
+// This sketch stays awake (no deep sleep / ULP counting), so omit ulp_edges, magnet_passes,
+// and passes_min; live GPIO magnet state is enough.
+static constexpr raven::CsvFieldMask kCsvFieldMask = raven::csvFields({
+    raven::CsvField::Millis,
+    raven::CsvField::RtcUnix,
+    raven::CsvField::DateTime,
+    raven::CsvField::RtcTempC,
+    raven::CsvField::BattV,
+    raven::CsvField::BattPer,
+    raven::CsvField::Lux,
+    raven::CsvField::Als,
+    raven::CsvField::White,
+    raven::CsvField::TempC,
+    raven::CsvField::PressureHpa,
+    raven::CsvField::HumidityPct,
+    raven::CsvField::GasKOhm,
+    raven::CsvField::AltM,
+    raven::CsvField::Magnet,
+    raven::CsvField::UsbSense,
+});
+
 static void blinkMissingSdCard()
 {
   Serial.println(F("DataLogging: SD card not present. Halting."));
@@ -58,7 +79,7 @@ void setup()
   Serial.println();
   Serial.println(F("--------- DataLogging Active -----------"));
   Serial.print(F("CSV Header: "));
-  Serial.println(raven::DataLoggerHelper::csvHeader());
+  Serial.println(raven::DataLoggerHelper::csvHeader(kCsvFieldMask));
   Serial.println(F("----------------------------------------"));
 }
 
@@ -69,7 +90,7 @@ void loop()
   raven::SampleFields sample;
   String logPath;
   raven::ServiceStatus logStatus = raven::captureAndAppendManagedCsv(
-      logger, node, gLogFilePolicy, 0, sample, &logPath);
+      logger, node, gLogFilePolicy, kCsvFieldMask, sample, &logPath);
   if (logStatus != raven::ServiceStatus::Ok)
   {
     Serial.println(F("Log write failed"));
@@ -77,7 +98,7 @@ void loop()
     return;
   }
 
-  String csvLine = raven::DataLoggerHelper::toCsv(sample);
+  String csvLine = raven::DataLoggerHelper::toCsv(sample, kCsvFieldMask);
   Serial.print(F("Log write: "));
   Serial.println(raven::statusToString(logStatus));
   Serial.print(F("Log path: "));

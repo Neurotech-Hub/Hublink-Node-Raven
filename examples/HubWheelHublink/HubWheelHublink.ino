@@ -66,7 +66,8 @@ uint32_t gSyncForSeconds = 30;
 String gLogBaseName = "HUBWHEEL";
 raven::FileNameMode gLogFileMode = raven::FileNameMode::Daily;
 bool gIncOnReboot = false;
-const raven::CsvFieldMask kDefaultLogFields = raven::csvFields({
+// Default CSV columns until meta.json `logger.log_fields` overrides (deep-sleep wheel + gauge).
+static constexpr raven::CsvFieldMask kCsvFieldMask = raven::csvFields({
     raven::CsvField::RtcUnix,
     raven::CsvField::UlpEdges,
     raven::CsvField::MagnetPasses,
@@ -85,7 +86,7 @@ struct LogContext
 
 LogContext gLogContext = {
     {nullptr, raven::FileNameMode::Daily, 0, false},
-    kDefaultLogFields,
+    kCsvFieldMask,
 };
 
 static const __FlashStringHelper *wakeCauseText(esp_sleep_wakeup_cause_t cause)

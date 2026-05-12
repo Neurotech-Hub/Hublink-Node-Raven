@@ -2,21 +2,25 @@
 #include <esp_sleep.h>
 
 // HubWheelMinimal:
-// - Core wheel logging + deep-sleep loop
-// - No Hublink dependency
-// - Uses fixed sketch defaults for cadence and file policy
+// - Core wheel logging + deep-sleep loop (same flow as HubWheelHublink without the Hublink library).
+// - Optional USB Serial MetaConfigEditor on power-on (same hold as HubWheelHublink); no gateway sync.
+// - Hardcoded sleep interval, log file policy, and default CSV columns match HubWheelHublink when
+//   meta.json is absent; see examples/HubWheelHublink/HubWheelHublink.ino for wheel.* / logger.*
+//   keys and the sample meta.json comment block.
 
 raven::HublinkNode node;
 raven::DataLoggerHelper logger(node);
+raven::MetaConfigEditor metaEditor;
 
 // Core wheel timing policy.
 constexpr uint32_t kSleepTimeSeconds = 10;
 // File naming policy for logger helper.
 constexpr char kLogBaseName[] = "HUBWHEEL";
 constexpr raven::FileNameMode kLogFileMode = raven::FileNameMode::Daily;
-// Keep this sketch's default CSV focused on wheel and battery telemetry.
-const raven::CsvFieldMask kLogFields = raven::csvFields({
+// Default CSV columns: deep-sleep wheel + gauge (same mask order as HubWheelHublink kCsvFieldMask).
+static constexpr raven::CsvFieldMask kCsvFieldMask = raven::csvFields({
     raven::CsvField::RtcUnix,
+    raven::CsvField::UlpEdges,
     raven::CsvField::MagnetPasses,
     raven::CsvField::PassesPerMin,
     raven::CsvField::BattV,
@@ -30,7 +34,7 @@ struct LogContext {
 
 LogContext gLogContext = {
     {kLogBaseName, kLogFileMode, 0, false},
-    kLogFields,
+    kCsvFieldMask,
 };
 
 static const __FlashStringHelper *wakeCauseText(esp_sleep_wakeup_cause_t cause)
@@ -143,13 +147,6 @@ static void enterSleep()
 void setup()
 {
   Serial.begin(115200);
-  // Only wait for USB serial if USB is physically present.
-  if (node.readUsbSense()) {
-    const uint32_t serialWaitStartMs = millis();
-    while (!Serial && (millis() - serialWaitStartMs) < 3000) {
-      delay(10);
-    }
-  }
   pinMode(raven::PIN_LED_GREEN, OUTPUT);
   digitalWrite(raven::PIN_LED_GREEN, LOW);
   // Keep LED on while awake; turn off immediately before deep sleep.
@@ -161,9 +158,15 @@ void setup()
     blinkMissingSdCard();
   }
 
+  const esp_sleep_wakeup_cause_t cause = node.wakeupCause();
+  // Offer editor only on power-on/reset wake, not deep-sleep wake cycles (same as HubWheelHublink).
+  if (cause == ESP_SLEEP_WAKEUP_UNDEFINED && node.readUsbSense()) {
+    metaEditor.maybeEnterWithFade(node.sd(), true, Serial, 3000,
+                                  raven::PIN_LED_GREEN, raven::PIN_LED_B, &node);
+  }
+
   Serial.println();
   Serial.println(F("--------- HubWheelMinimal Wake ---------"));
-  esp_sleep_wakeup_cause_t cause = node.wakeupCause();
   Serial.print(F("Wake cause: "));
   Serial.print(wakeCauseText(cause));
   Serial.print(F(" ("));

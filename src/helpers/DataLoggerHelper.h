@@ -48,7 +48,7 @@ constexpr CsvFieldMask csvFieldBit(CsvField field) {
   return static_cast<CsvFieldMask>(1UL << static_cast<uint8_t>(field));
 }
 
-inline CsvFieldMask csvFields(std::initializer_list<CsvField> fields) {
+constexpr CsvFieldMask csvFields(std::initializer_list<CsvField> fields) {
   CsvFieldMask mask = 0;
   for (CsvField field : fields) {
     mask |= csvFieldBit(field);
