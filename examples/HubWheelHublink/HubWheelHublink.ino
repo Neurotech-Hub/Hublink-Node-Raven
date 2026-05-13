@@ -19,7 +19,7 @@
 //     "reconnect_every": 30,
 //     "upload_path": "/RAVEN",
 //     "append_path": "device:id",
-//     "disable": false
+//     "disable": false   // true: skip runHublinkSyncWindow (Hublink.begin() still runs)
 //   },
 //   "wheel": {
 //     "sleep_time_seconds": 10,
@@ -46,9 +46,13 @@
 // }
 //
 // Keys consumed directly by this sketch:
+// - hublink.disable (skip gateway sync window when true; still read by Hublink library in begin())
 // - wheel.sleep_time_seconds, wheel.sync_every_seconds, wheel.sync_for_seconds
 // - logger.log_base_name, logger.log_file_mode, logger.inc_on_reboot, logger.log_fields
-// These wheel/logger keys are read from /meta.json by this library via raven::loadMetaJson
+// Power-on / reset wake uses kHublinkSyncSecondsOnReset for sync duration; timer wakes use
+// wheel.sync_for_seconds (meta) / gSyncForSeconds default. Before that long reset sync, a short
+// LED hold polls PIN_BOOT_BUTTON — holding boot skips the long sync for this wake only.
+// These wheel/logger/hublink.disable keys are read from /meta.json by this library via raven::loadMetaJson
 // (typed getters in MetaConfigReader), so sketches do not rely on Hublink for namespaces the
 // device firmware owns here.
 //
@@ -63,9 +67,16 @@ Hublink hublink(raven::PIN_SD_CS);
 uint32_t gSleepTimeSeconds = 10;
 uint32_t gSyncEverySeconds = 21600;
 uint32_t gSyncForSeconds = 30;
+/// Hublink `sync()` duration after power-on / reset wake (`ESP_SLEEP_WAKEUP_UNDEFINED`).
+constexpr uint32_t kHublinkSyncSecondsOnReset = 120;
+/// Fast LED blink window before long reset sync; hold `PIN_BOOT_BUTTON` LOW to skip that sync.
+constexpr uint32_t kLongSyncBootHoldMs = 5000;
+constexpr uint32_t kLongSyncBootBlinkHalfMs = 60;
 String gLogBaseName = "HUBWHEEL";
 raven::FileNameMode gLogFileMode = raven::FileNameMode::Daily;
 bool gIncOnReboot = false;
+/// When true (from meta `hublink.disable`), skip `runHublinkSyncWindow` but still advance sync cadence.
+bool gHublinkDisable = false;
 // Default CSV columns until meta.json `logger.log_fields` overrides (deep-sleep wheel + gauge).
 static constexpr raven::CsvFieldMask kCsvFieldMask = raven::csvFields({
     raven::CsvField::RtcUnix,
@@ -210,6 +221,14 @@ static void applyWheelLoggerMetaFromSd()
     return;
   }
 
+  bool hublinkDisable = false;
+  if (raven::metaGetBool(metaDoc, String("hublink.disable"), hublinkDisable))
+  {
+    gHublinkDisable = hublinkDisable;
+    Serial.print(F("hublink.disable: "));
+    Serial.println(gHublinkDisable ? F("true") : F("false"));
+  }
+
   uint32_t u = 0;
   if (raven::metaGetUInt32(metaDoc, String("wheel.sleep_time_seconds"), u))
   {
@@ -289,7 +308,7 @@ static void beginHublink()
   applyLogPolicyDefaults();
 }
 
-static void runHublinkSyncWindow()
+static void runHublinkSyncWindow(uint32_t syncForSeconds)
 {
   // Keep node characteristic battery level fresh before each sync attempt.
   // Dashboard policy for this sketch:
@@ -326,7 +345,39 @@ static void runHublinkSyncWindow()
     Serial.println(F("HubWheelHublink: setBatteryLevel fallback=0 (no USB / no valid gauge)"));
   }
   // Uses existing Hublink config from meta.json/hardcoded defaults.
-  hublink.sync(gSyncForSeconds);
+  hublink.sync(syncForSeconds);
+}
+
+/// Alternating green/blue quickly; returns true if boot button held (skip long reset sync).
+static bool waitBootHoldToSkipLongSync()
+{
+  const uint32_t startMs = millis();
+  uint32_t lastToggleMs = startMs;
+  bool greenHigh = true;
+  digitalWrite(raven::PIN_LED_GREEN, greenHigh ? HIGH : LOW);
+  digitalWrite(raven::PIN_LED_BLUE, greenHigh ? LOW : HIGH);
+  while (static_cast<uint32_t>(millis() - startMs) < kLongSyncBootHoldMs)
+  {
+    if (digitalRead(raven::PIN_BOOT_BUTTON) == LOW)
+    {
+      Serial.println(F("HubWheelHublink: boot held — skipping long reset sync"));
+      digitalWrite(raven::PIN_LED_GREEN, HIGH);
+      digitalWrite(raven::PIN_LED_BLUE, LOW);
+      return true;
+    }
+    const uint32_t nowMs = millis();
+    if (static_cast<uint32_t>(nowMs - lastToggleMs) >= kLongSyncBootBlinkHalfMs)
+    {
+      lastToggleMs = nowMs;
+      greenHigh = !greenHigh;
+      digitalWrite(raven::PIN_LED_GREEN, greenHigh ? HIGH : LOW);
+      digitalWrite(raven::PIN_LED_BLUE, greenHigh ? LOW : HIGH);
+    }
+    delay(1);
+  }
+  digitalWrite(raven::PIN_LED_GREEN, HIGH);
+  digitalWrite(raven::PIN_LED_BLUE, LOW);
+  return false;
 }
 
 static void appendWheelLogRow()
@@ -438,13 +489,37 @@ void setup()
     gLogCount = 0;
   }
 
-  if (raven::shouldRunSyncWindow(gSleepTimeSeconds, gSyncEverySeconds, gLogCount))
+  const uint32_t syncForSeconds =
+      (cause == ESP_SLEEP_WAKEUP_UNDEFINED) ? kHublinkSyncSecondsOnReset : gSyncForSeconds;
+  const bool syncDue = raven::shouldRunSyncWindow(gSleepTimeSeconds, gSyncEverySeconds, gLogCount);
+  bool userSkippedLongResetSync = false;
+  if (cause == ESP_SLEEP_WAKEUP_UNDEFINED && syncDue && !gHublinkDisable &&
+      syncForSeconds == kHublinkSyncSecondsOnReset)
   {
-    Serial.print(F("HubWheelHublink: sync window "));
-    Serial.print(gSyncForSeconds);
-    Serial.println(F("s"));
-    runHublinkSyncWindow();
+    Serial.println(F("HubWheelHublink: hold boot to skip long reset sync…"));
+    userSkippedLongResetSync = waitBootHoldToSkipLongSync();
+  }
+
+  if (syncDue && gHublinkDisable)
+  {
+    Serial.println(F("HubWheelHublink: sync window skipped (hublink.disable=true)"));
     gLogCount = 0;
+  }
+  else if (syncDue && !gHublinkDisable)
+  {
+    if (userSkippedLongResetSync)
+    {
+      Serial.println(F("HubWheelHublink: long reset sync skipped (boot during hold)"));
+      gLogCount = 0;
+    }
+    else
+    {
+      Serial.print(F("HubWheelHublink: sync window "));
+      Serial.print(syncForSeconds);
+      Serial.println(F("s"));
+      runHublinkSyncWindow(syncForSeconds);
+      gLogCount = 0;
+    }
   }
   else
   {
