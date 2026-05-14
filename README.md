@@ -86,7 +86,7 @@ void loop() {
 - `passes_min` is derived from wake cadence: `magnet_passes * 60 / sleep_time_seconds`.
 - Full selectable field list:
   - Runtime: `millis`, `ulp_edges`, `magnet_passes`, `passes_min`, `magnet`, `usb_sense`
-  - RTC: `rtc_unix`, `datetime`, `rtc_temp_c`
+  - RTC: `unix`, `datetime`, `rtc_temp_c`
   - Battery: `batt_v`, `batt_per`
   - Light: `lux`, `als`, `white`
   - Environment: `temp_c`, `pressure_hpa`, `humidity_pct`, `gas_kohm`, `alt_m`
@@ -169,7 +169,7 @@ raven::LogFilePolicy gLogFilePolicy = {
   - `meta get wheel.sleep_time_seconds`
   - `meta set wheel.sleep_time_seconds 15`
   - `meta set logger.inc_on_reboot true`
-  - `meta setjson logger.log_fields ["rtc_unix","datetime","ulp_edges","magnet_passes","passes_min"]`
+  - `meta setjson logger.log_fields ["unix","datetime","ulp_edges","magnet_passes","passes_min"]`
   - `meta save`
   - `file list`
   - `file rm 2`
@@ -182,11 +182,11 @@ raven::LogFilePolicy gLogFilePolicy = {
   - `examples/HubWheelMinimal/HubWheelMinimal.ino` (ULP enabled): `236 uA` (`0.236 mA`)
 - Estimated battery life:
 
-| Battery | Deep sleep baseline (`50 uA`) | HubWheel ULP mode (`236 uA`) |
-| --- | --- | --- |
-| `100 mAh` | ~`2000` hours (~`83` days) | ~`424` hours (~`18` days) |
-| `500 mAh` | ~`10000` hours (~`417` days) | ~`2119` hours (~`88` days) |
-| `1000 mAh` | ~`20000` hours (~`833` days) | ~`4237` hours (~`177` days) |
-| `2000 mAh` | ~`40000` hours (~`1667` days) | ~`8475` hours (~`353` days) |
+| Battery    | Deep sleep baseline (`50 uA`) | HubWheel ULP mode (`236 uA`) |
+| ---------- | ----------------------------- | ---------------------------- |
+| `100 mAh`  | ~`2000` hours (~`83` days)    | ~`424` hours (~`18` days)    |
+| `500 mAh`  | ~`10000` hours (~`417` days)  | ~`2119` hours (~`88` days)   |
+| `1000 mAh` | ~`20000` hours (~`833` days)  | ~`4237` hours (~`177` days)  |
+| `2000 mAh` | ~`40000` hours (~`1667` days) | ~`8475` hours (~`353` days)  |
 - Magnet sensor (Allegro Microsystems `APS11753KMDALX-3PL1`): about `56 uA` with a `1.5 ms` sampling period—a reasonable tradeoff between higher-frequency magnetic sensing and low power. The part may be removed or replaced with other common magnet sensors (including latching types); higher bandwidth and latching types often draw upwards of `1 mA` constantly.
 - Active current is workload-dependent and typically ranges from about `20-50 mA` depending on clock speed and sensor/SD card utilization.

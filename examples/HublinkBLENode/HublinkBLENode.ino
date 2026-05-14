@@ -3,9 +3,11 @@
 // - Bring-up matches HubWheelHublink: beginHardware/I2C → DataLoggerHelper::begin → Raven SD mount
 //   check → hublink.begin(advName) (Hublink then sees SD already initialized).
 // - BLE name: JX_BBB + last three hex digits of BT MAC (uppercase), passed to hublink.begin(advName).
-// - Loop: hublink.sync() (blocking), blocking NimBLE scan window (10s), vitals/settings/JBV logging, delay.
+// - Status: green LED only — solid ON for all of setup after hardware init; one quick off→on pulse
+//   before hublink.begin (advertising); two short flashes before each BLE scan; green off when idle.
+// - Loop: hublink.sync(), BLE scan window, vitals/JXS/JXB when RTC valid, delay.
 // - Gateway JSON timestamps (Hublink) update the DS3231 via setTimestampCallback, same as HubWheelHublink.
-// - JBV scan: only peers whose advertised **name** starts with `JX_`; `peer_id` is that name (not MAC).
+// - JXB scan: only peers whose advertised **name** starts with `JX_`; `peer_id` is that name (not MAC).
 //
 // Requires Neurotech-Hub Hublink library (NimBLE). Board: Tools → Bluetooth → NimBLE.
 
@@ -19,11 +21,19 @@
 
 static constexpr uint32_t kLoopDelayMs = 2000;
 static constexpr uint32_t kScanWindowMs = 10000;
+/// Let controller/host settle after Hublink may have called NimBLE deinit (Hublink uses multi-step delays).
+static constexpr uint32_t kAfterHublinkBleCoolMs = 200;
+/// After a forced deinit when NimBLE still reports initialized (partial/stale state).
+static constexpr uint32_t kNimbleForceDeinitSettleMs = 200;
+/// After NimBLEDevice::init before getScan/getResults.
+static constexpr uint32_t kNimblePostInitSettleMs = 250;
 static constexpr uint32_t kVitalsIntervalMs = 60000;
 static constexpr uint32_t kScanIntervalS = kScanWindowMs / 1000;
 static constexpr uint32_t kVitalsIntervalS = kVitalsIntervalMs / 1000;
+/// Green-only status blinks (short, low duty).
+static constexpr uint32_t kLedBlinkMs = 70;
 
-/// Raven library / sketch firmware string for JSV (align with library.properties when you bump releases).
+/// Raven library / sketch firmware string for JXS settings row (align with library.properties when you bump releases).
 static constexpr char kFwVersion[] = "0.2.1";
 
 static constexpr raven::CsvFieldMask kCsvFieldMask = raven::csvFields({
@@ -68,6 +78,37 @@ static void dbgln(const __FlashStringHelper *msg)
 {
   Serial.println(msg);
   Serial.flush();
+}
+
+static void ledGreenOn()
+{
+  digitalWrite(raven::PIN_LED_GREEN, HIGH);
+}
+
+static void ledGreenOff()
+{
+  digitalWrite(raven::PIN_LED_GREEN, LOW);
+}
+
+/// One quick dip (off→on) while LED was on for setup; ends with green on.
+static void ledGreenBlinkOnceBeforeAdvertising()
+{
+  ledGreenOff();
+  delay(kLedBlinkMs);
+  ledGreenOn();
+  delay(kLedBlinkMs);
+}
+
+/// Two brief flashes from dark (before each scan); ends with green off.
+static void ledGreenBlinkTwiceBeforeScan()
+{
+  ledGreenOn();
+  delay(kLedBlinkMs);
+  ledGreenOff();
+  delay(kLedBlinkMs);
+  ledGreenOn();
+  delay(kLedBlinkMs);
+  ledGreenOff();
 }
 
 static void dbgf(const char *fmt, ...)
@@ -126,8 +167,20 @@ static void buildDailyPath(const char *prefix3, const DateTime &dt, char *out, s
 
 static void runBleScanWindowAndLogJbv()
 {
+  // NimBLE init/deinit here runs only from loop() (Arduino main task), not from BLE callbacks.
+  // Cool-down + isInitialized guard tolerate Hublink stopAdvertising/deinit timing vs our scan window.
+  //
   // Max RSSI per advertised **name** (not MAC). Only names starting with "JX_" (active scan for scan response).
   std::map<std::string, int> peerNameMaxRssi;
+
+  delay(kAfterHublinkBleCoolMs);
+
+  if (NimBLEDevice::isInitialized())
+  {
+    dbgln(F("[scan] NimBLE still initialized; forcing deinit before scan init."));
+    (void)NimBLEDevice::deinit(true);
+    delay(kNimbleForceDeinitSettleMs);
+  }
 
   dbgln(F("[scan] NimBLEDevice::init..."));
   if (!NimBLEDevice::init("JX_scan"))
@@ -135,7 +188,7 @@ static void runBleScanWindowAndLogJbv()
     dbgln(F("[scan] NimBLEDevice::init failed."));
     return;
   }
-  delay(50);
+  delay(kNimblePostInitSettleMs);
 
   NimBLEScan *pScan = NimBLEDevice::getScan();
   if (pScan == nullptr)
@@ -180,17 +233,17 @@ static void runBleScanWindowAndLogJbv()
   {
     if (!rtcOk)
     {
-      dbgln(F("[scan] skip JBV: RTC not valid for logging."));
+      dbgln(F("[scan] skip JXB: RTC not valid for logging."));
     }
     else
     {
-      dbgln(F("[scan] skip JBV: no JX_ advertisement names this window."));
+      dbgln(F("[scan] skip JXB: no JX_ advertisement names this window."));
     }
     return;
   }
 
   char path[28];
-  buildDailyPath("JBV", rtc.now, path, sizeof(path));
+  buildDailyPath("JXB", rtc.now, path, sizeof(path));
 
   const bool newFile = !node.sd().exists(path);
   if (newFile)
@@ -217,7 +270,7 @@ static void runBleScanWindowAndLogJbv()
 static void ensureJsvForNewDay(const raven::RtcReading &rtc)
 {
   char path[28];
-  buildDailyPath("JSV", rtc.now, path, sizeof(path));
+  buildDailyPath("JXS", rtc.now, path, sizeof(path));
   if (node.sd().exists(path))
   {
     return;
@@ -292,7 +345,9 @@ void setup()
   dbgln(F("[setup] beginI2C..."));
   node.beginI2C();
 
-  dbgln(F("[setup] DataLoggerHelper::begin (same order as HubWheelHublink)..."));
+  ledGreenOn();
+
+  dbgln(F("[setup] DataLoggerHelper::begin..."));
   if (!logger.begin())
   {
     dbgln(F("[setup] DataLoggerHelper::begin failed."));
@@ -306,6 +361,7 @@ void setup()
   if (!node.sd().begin() || node.sd().cardType() == CARD_NONE)
   {
     dbgln(F("SD mount failed. Halting."));
+    ledGreenOff();
     while (true)
     {
       delay(1000);
@@ -318,10 +374,12 @@ void setup()
   Serial.println(gAdvName);
   Serial.flush();
 
+  ledGreenBlinkOnceBeforeAdvertising();
   dbgln(F("[setup] hublink.begin()..."));
   if (!hublink.begin(gAdvName))
   {
     dbgln(F("Hublink begin failed. Halting."));
+    ledGreenOff();
     while (true)
     {
       delay(1000);
@@ -333,6 +391,7 @@ void setup()
 
   gLastVitalsMs = millis();
 
+  ledGreenOff();
   dbgln(F("Hublink ready — entering loop."));
 }
 
@@ -345,12 +404,13 @@ void loop()
   dbgf("[loop %lu] sync returned %s", static_cast<unsigned long>(gLoopCount),
        syncOk ? "true" : "false");
 
+  ledGreenBlinkTwiceBeforeScan();
   runBleScanWindowAndLogJbv();
 
   raven::RtcReading rtc;
   if (rtcOkForLogging(rtc))
   {
-    dbgln(F("[loop] RTC ok — JSV/JXV may write."));
+    dbgln(F("[loop] RTC ok — JXS/JXV may write."));
     ensureJsvForNewDay(rtc);
     maybeAppendVitals(rtc);
   }

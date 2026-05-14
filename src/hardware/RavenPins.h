@@ -39,6 +39,6 @@ namespace raven
     constexpr uint8_t PIN_SD_CS = 46;
 
     constexpr uint32_t DEFAULT_I2C_CLOCK_HZ = 100000;
-    constexpr uint32_t DEFAULT_SD_SPI_CLOCK_HZ = 10000000;
+    constexpr uint32_t DEFAULT_SD_SPI_CLOCK_HZ = 1000000; // matches hublink
 
 } // namespace raven
