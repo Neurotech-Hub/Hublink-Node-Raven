@@ -1,7 +1,8 @@
 // HublinkBLENode — Raven hardware + SD, Hublink BLE gateway, 10s NimBLE scan, daily RTC CSV logs.
 //
 // - Bring-up matches HubWheelHublink: beginHardware/I2C → DataLoggerHelper::begin → Raven SD mount
-//   check → hublink.begin(advName) (Hublink then sees SD already initialized).
+//   check → hublink.begin(advName) (Hublink then sees SD already initialized). When RTC is valid,
+//   setup also creates today's JXV/JXS/JXB files with CSV headers so loop can append without races.
 // - BLE name: JX_BBB + last three hex digits of BT MAC (uppercase), passed to hublink.begin(advName).
 // - Status: green LED only — solid ON for all of setup after hardware init; one quick off→on pulse
 //   before hublink.begin (advertising); two short flashes before each BLE scan; green off when idle.
@@ -165,6 +166,31 @@ static void buildDailyPath(const char *prefix3, const DateTime &dt, char *out, s
   snprintf(out, outLen, "/%s%04d%02d%02d.csv", prefix3, dt.year(), dt.month(), dt.day());
 }
 
+/// Create today's JXV file with a header row only if missing (does not touch gLastVitalsMs).
+static void ensureJxvDailyHeaderOnly(const raven::RtcReading &rtc)
+{
+  char path[28];
+  buildDailyPath("JXV", rtc.now, path, sizeof(path));
+  if (node.sd().exists(path))
+  {
+    return;
+  }
+  const String header = raven::DataLoggerHelper::csvHeader(kCsvFieldMask);
+  (void)node.sd().appendLine(path, header);
+}
+
+/// Create today's JXB file with a header row only if missing.
+static void ensureJxbDailyHeaderOnly(const raven::RtcReading &rtc)
+{
+  char path[28];
+  buildDailyPath("JXB", rtc.now, path, sizeof(path));
+  if (node.sd().exists(path))
+  {
+    return;
+  }
+  (void)node.sd().appendLine(path, String(F("unix,observer_id,peer_id,rssi")));
+}
+
 static void runBleScanWindowAndLogJbv()
 {
   // NimBLE init/deinit here runs only from loop() (Arduino main task), not from BLE callbacks.
@@ -229,26 +255,20 @@ static void runBleScanWindowAndLogJbv()
 
   raven::RtcReading rtc;
   const bool rtcOk = rtcOkForLogging(rtc);
-  if (!rtcOk || peerNameMaxRssi.empty())
+  if (!rtcOk)
   {
-    if (!rtcOk)
-    {
-      dbgln(F("[scan] skip JXB: RTC not valid for logging."));
-    }
-    else
-    {
-      dbgln(F("[scan] skip JXB: no JX_ advertisement names this window."));
-    }
+    dbgln(F("[scan] skip JXB: RTC not valid for logging."));
     return;
   }
 
   char path[28];
   buildDailyPath("JXB", rtc.now, path, sizeof(path));
+  ensureJxbDailyHeaderOnly(rtc);
 
-  const bool newFile = !node.sd().exists(path);
-  if (newFile)
+  if (peerNameMaxRssi.empty())
   {
-    (void)node.sd().appendLine(path, String(F("unix,observer_id,peer_id,rssi")));
+    dbgln(F("[scan] skip JXB rows: no JX_ advertisement names this window."));
+    return;
   }
 
   const uint32_t unixTs = rtc.now.unixtime();
@@ -296,6 +316,14 @@ static void ensureJsvForNewDay(const raven::RtcReading &rtc)
   row += ',';
   row += gAdvName;
   (void)node.sd().appendLine(path, row);
+}
+
+/// When RTC is valid, ensure today's daily CSV files exist with headers (JXS also gets its settings row).
+static void ensureTodaysDailyCsvFiles(const raven::RtcReading &rtc)
+{
+  ensureJxvDailyHeaderOnly(rtc);
+  ensureJxbDailyHeaderOnly(rtc);
+  ensureJsvForNewDay(rtc);
 }
 
 static void maybeAppendVitals(const raven::RtcReading &rtc)
@@ -391,6 +419,19 @@ void setup()
 
   gLastVitalsMs = millis();
 
+  {
+    raven::RtcReading rtcBoot;
+    if (rtcOkForLogging(rtcBoot))
+    {
+      dbgln(F("[setup] RTC ok — ensuring today's JXV/JXS/JXB CSV shells (headers)."));
+      ensureTodaysDailyCsvFiles(rtcBoot);
+    }
+    else
+    {
+      dbgln(F("[setup] RTC not valid — skip pre-creating daily CSV files; loop will retry."));
+    }
+  }
+
   ledGreenOff();
   dbgln(F("Hublink ready — entering loop."));
 }
@@ -411,7 +452,7 @@ void loop()
   if (rtcOkForLogging(rtc))
   {
     dbgln(F("[loop] RTC ok — JXS/JXV may write."));
-    ensureJsvForNewDay(rtc);
+    ensureTodaysDailyCsvFiles(rtc);
     maybeAppendVitals(rtc);
   }
   else
