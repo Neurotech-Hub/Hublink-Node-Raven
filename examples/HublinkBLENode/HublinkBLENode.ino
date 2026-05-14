@@ -1,14 +1,17 @@
 // HublinkBLENode — Raven hardware + SD, Hublink BLE gateway, 10s NimBLE scan, daily RTC CSV logs.
 //
+// - Bring-up matches HubWheelHublink: beginHardware/I2C → DataLoggerHelper::begin → Raven SD mount
+//   check → hublink.begin(advName) (Hublink then sees SD already initialized).
 // - BLE name: JX_BBB + last three hex digits of BT MAC (uppercase), passed to hublink.begin(advName).
 // - Loop: hublink.sync() (blocking), blocking NimBLE scan window (10s), vitals/settings/JBV logging, delay.
-// - CSV files (RTC date, no underscore before date): /JXVyyyymmdd.csv, /JSVyyyymmdd.csv, /JBVyyyymmdd.csv
-//   SD writes only when RTC read is Ok and DateTime is valid (no fallback clock for filenames).
+// - Gateway JSON timestamps (Hublink) update the DS3231 via setTimestampCallback, same as HubWheelHublink.
+// - JBV scan: only peers whose advertised **name** starts with `JX_`; `peer_id` is that name (not MAC).
 //
 // Requires Neurotech-Hub Hublink library (NimBLE). Board: Tools → Bluetooth → NimBLE.
 
 #include <Hublink.h>
 #include <HublinkNodeRaven.h>
+#include <cstdarg>
 #include <cstdio>
 #include <esp_mac.h>
 #include <map>
@@ -24,7 +27,6 @@ static constexpr uint32_t kVitalsIntervalS = kVitalsIntervalMs / 1000;
 static constexpr char kFwVersion[] = "0.2.1";
 
 static constexpr raven::CsvFieldMask kCsvFieldMask = raven::csvFields({
-    raven::CsvField::Millis,
     raven::CsvField::RtcUnix,
     raven::CsvField::DateTime,
     raven::CsvField::BattV,
@@ -60,31 +62,55 @@ raven::DataLoggerHelper logger(node);
 Hublink hublink(raven::PIN_SD_CS);
 static String gAdvName;
 static uint32_t gLastVitalsMs = 0;
+static uint32_t gLoopCount = 0;
 
-namespace {
+static void dbgln(const __FlashStringHelper *msg)
+{
+  Serial.println(msg);
+  Serial.flush();
+}
 
-std::map<std::string, int> gPeerMaxRssi;
+static void dbgf(const char *fmt, ...)
+{
+  char buf[160];
+  va_list ap;
+  va_start(ap, fmt);
+  vsnprintf(buf, sizeof(buf), fmt, ap);
+  va_end(ap);
+  Serial.println(buf);
+  Serial.flush();
+}
 
-class HubScanCallbacks : public NimBLEScanCallbacks {
-  void onResult(const NimBLEAdvertisedDevice *advertisedDevice) override
+static bool peerAdvNameIsJxFamily(const std::string &name)
+{
+  return name.size() >= 3 && name.compare(0, 3, "JX_") == 0;
+}
+
+/// Append a single CSV field; quote if needed for commas/quotes.
+static void appendCsvField(String &line, const std::string &field)
+{
+  const bool mustQuote =
+      field.find(',') != std::string::npos || field.find('"') != std::string::npos ||
+      field.find('\n') != std::string::npos || field.find('\r') != std::string::npos;
+  if (!mustQuote)
   {
-    if (!advertisedDevice)
+    line += field.c_str();
+    return;
+  }
+  line += '"';
+  for (const char c : field)
+  {
+    if (c == '"')
     {
-      return;
+      line += "\"\"";
     }
-    const std::string id = advertisedDevice->getAddress().toString();
-    const int rssi = advertisedDevice->getRSSI();
-    const auto it = gPeerMaxRssi.find(id);
-    if (it == gPeerMaxRssi.end() || rssi > it->second)
+    else
     {
-      gPeerMaxRssi[id] = rssi;
+      line += c;
     }
   }
-};
-
-HubScanCallbacks gHubScanCallbacks;
-
-} // namespace
+  line += '"';
+}
 
 static bool rtcOkForLogging(raven::RtcReading &out)
 {
@@ -100,27 +126,66 @@ static void buildDailyPath(const char *prefix3, const DateTime &dt, char *out, s
 
 static void runBleScanWindowAndLogJbv()
 {
-  gPeerMaxRssi.clear();
+  // Max RSSI per advertised **name** (not MAC). Only names starting with "JX_" (active scan for scan response).
+  std::map<std::string, int> peerNameMaxRssi;
 
+  dbgln(F("[scan] NimBLEDevice::init..."));
   if (!NimBLEDevice::init("JX_scan"))
   {
-    Serial.println(F("NimBLEDevice::init failed (scan)."));
+    dbgln(F("[scan] NimBLEDevice::init failed."));
+    return;
+  }
+  delay(50);
+
+  NimBLEScan *pScan = NimBLEDevice::getScan();
+  if (pScan == nullptr)
+  {
+    dbgln(F("[scan] getScan() returned null."));
+    (void)NimBLEDevice::deinit(true);
     return;
   }
 
-  NimBLEScan *pScan = NimBLEDevice::getScan();
-  pScan->setScanCallbacks(&gHubScanCallbacks, false);
   pScan->setActiveScan(true);
-  if (!pScan->start(kScanWindowMs, false, true))
+  dbgln(F("[scan] getResults (blocking ~10s)..."));
+  const NimBLEScanResults results = pScan->getResults(kScanWindowMs, false);
+
+  const int n = results.getCount();
+  for (int i = 0; i < n; ++i)
   {
-    Serial.println(F("BLE scan start failed."));
+    const NimBLEAdvertisedDevice *dev = results.getDevice(static_cast<uint32_t>(i));
+    if (dev == nullptr || !dev->haveName())
+    {
+      continue;
+    }
+    const std::string peerName = dev->getName();
+    if (!peerAdvNameIsJxFamily(peerName))
+    {
+      continue;
+    }
+    const int rssi = dev->getRSSI();
+    const auto it = peerNameMaxRssi.find(peerName);
+    if (it == peerNameMaxRssi.end() || rssi > it->second)
+    {
+      peerNameMaxRssi[peerName] = rssi;
+    }
   }
 
   (void)NimBLEDevice::deinit(true);
+  dbgf("[scan] done; raw devices=%d JX_ peers(unique)=%u", n,
+       static_cast<unsigned>(peerNameMaxRssi.size()));
 
   raven::RtcReading rtc;
-  if (!rtcOkForLogging(rtc) || gPeerMaxRssi.empty())
+  const bool rtcOk = rtcOkForLogging(rtc);
+  if (!rtcOk || peerNameMaxRssi.empty())
   {
+    if (!rtcOk)
+    {
+      dbgln(F("[scan] skip JBV: RTC not valid for logging."));
+    }
+    else
+    {
+      dbgln(F("[scan] skip JBV: no JX_ advertisement names this window."));
+    }
     return;
   }
 
@@ -134,15 +199,15 @@ static void runBleScanWindowAndLogJbv()
   }
 
   const uint32_t unixTs = rtc.now.unixtime();
-  for (const auto &kv : gPeerMaxRssi)
+  for (const auto &kv : peerNameMaxRssi)
   {
     String line;
-    line.reserve(64);
+    line.reserve(80);
     line += unixTs;
     line += ',';
     line += gAdvName;
     line += ',';
-    line += kv.first.c_str();
+    appendCsvField(line, kv.first);
     line += ',';
     line += kv.second;
     (void)node.sd().appendLine(path, line);
@@ -210,65 +275,91 @@ static void maybeAppendVitals(const raven::RtcReading &rtc)
   gLastVitalsMs = nowMs;
 }
 
+static void onTimestampReceived(uint32_t timestamp)
+{
+  // Lets gateway-provided timestamps update on-device RTC.
+  node.rtc().adjust(DateTime(timestamp));
+}
+
 void setup()
 {
   Serial.begin(115200);
   delay(1000);
-  Serial.println(F("HublinkBLENode: Serial ready"));
+  dbgln(F("HublinkBLENode: Serial ready"));
 
+  dbgln(F("[setup] beginHardware..."));
   node.beginHardware();
+  dbgln(F("[setup] beginI2C..."));
   node.beginI2C();
 
-  if (!node.sd().begin() || node.sd().cardType() == CARD_NONE)
-  {
-    Serial.println(F("SD mount failed. Halting."));
-    while (true)
-    {
-      delay(1000);
-    }
-  }
-
-  if (!node.rtc().begin())
-  {
-    Serial.println(F("RTC begin failed; SD vitals/JBV/JSV logging will be skipped until RTC is valid."));
-  }
-
+  dbgln(F("[setup] DataLoggerHelper::begin (same order as HubWheelHublink)..."));
   if (!logger.begin())
   {
-    Serial.println(F("DataLoggerHelper::begin failed."));
+    dbgln(F("[setup] DataLoggerHelper::begin failed."));
+  }
+  else
+  {
+    dbgln(F("[setup] DataLoggerHelper ok."));
   }
 
-  gAdvName = buildAdvName();
-  Serial.print(F("advName="));
-  Serial.println(gAdvName);
-
-  if (!hublink.begin(gAdvName))
+  dbgln(F("[setup] Raven SD mount..."));
+  if (!node.sd().begin() || node.sd().cardType() == CARD_NONE)
   {
-    Serial.println(F("Hublink begin failed. Halting."));
+    dbgln(F("SD mount failed. Halting."));
     while (true)
     {
       delay(1000);
     }
   }
+  dbgf("[setup] SD ok, cardType=%u", static_cast<unsigned>(node.sd().cardType()));
+
+  gAdvName = buildAdvName();
+  Serial.print(F("[setup] advName="));
+  Serial.println(gAdvName);
+  Serial.flush();
+
+  dbgln(F("[setup] hublink.begin()..."));
+  if (!hublink.begin(gAdvName))
+  {
+    dbgln(F("Hublink begin failed. Halting."));
+    while (true)
+    {
+      delay(1000);
+    }
+  }
+  dbgln(F("[setup] hublink.begin() returned true."));
+  hublink.setTimestampCallback(onTimestampReceived);
   hublink.watchdogTimeoutMs = 60000;
 
   gLastVitalsMs = millis();
 
-  Serial.println(F("Hublink ready."));
+  dbgln(F("Hublink ready — entering loop."));
 }
 
 void loop()
 {
-  (void)hublink.sync();
+  ++gLoopCount;
+  dbgf("[loop %lu] hublink.sync()...", static_cast<unsigned long>(gLoopCount));
+
+  const bool syncOk = hublink.sync();
+  dbgf("[loop %lu] sync returned %s", static_cast<unsigned long>(gLoopCount),
+       syncOk ? "true" : "false");
 
   runBleScanWindowAndLogJbv();
 
   raven::RtcReading rtc;
   if (rtcOkForLogging(rtc))
   {
+    dbgln(F("[loop] RTC ok — JSV/JXV may write."));
     ensureJsvForNewDay(rtc);
     maybeAppendVitals(rtc);
   }
+  else
+  {
+    dbgln(F("[loop] RTC not ok — skip CSV writes."));
+  }
 
+  dbgf("[loop %lu] delay(%lums)...", static_cast<unsigned long>(gLoopCount),
+       static_cast<unsigned long>(kLoopDelayMs));
   delay(kLoopDelayMs);
 }
