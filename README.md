@@ -14,6 +14,14 @@ It exposes low-level board controls plus optional higher-level helpers for monit
   - SD card storage (SPI)
 - Optional data logging helper that generates CSV rows from a combined sensor reading
 - Built-in ULP magnet edge counting service for deep-sleep wheel applications
+- `MetaConfigEditor` for USB Serial `meta.json` and SD file maintenance (used by wheel examples and `MetaConfigEditorHold`)
+
+## Dependencies
+
+Install via Arduino Library Manager (or equivalent) before building examples:
+
+- **Required (library.properties):** RTClib, Adafruit MAX1704X, Adafruit BusIO, Adafruit VEML7700 Library, Adafruit BME680 Library, ArduinoJson
+- **Hublink examples only:** [Neurotech-Hub Hublink](https://github.com/Neurotech-Hub/Hublink) — set board **Tools → Bluetooth → NimBLE** for `HublinkBLENode` and `HubWheelHublink`
 
 ## Arduino IDE Setup
 
@@ -48,19 +56,25 @@ void loop() {
 }
 ```
 
+`#include <HublinkNodeRaven.h>` pulls in `raven::HublinkNode`, sensor/SD services, `DataLoggerHelper`, `LogFileNaming`, `MetaConfigEditor`, `MetaConfigReader`, and low-battery safeguard helpers.
+
 ## Examples
 
-- `examples/BasicHardware/BasicHardware.ino`
-- `examples/SensorSnapshot/SensorSnapshot.ino`
-- `examples/DataLogging/DataLogging.ino`
-- `examples/HubWheelMinimal/HubWheelMinimal.ino`
-- `examples/HubWheelHublink/HubWheelHublink.ino` (requires Hublink library)
-- `examples/AlertPinTest/AlertPinTest.ino` (DS3231 + optional MAX17048, `PIN_ALERT` exercise)
+| Sketch | Purpose |
+| --- | --- |
+| `examples/BasicHardware/BasicHardware.ino` | Minimal bring-up; optional low-battery safeguard demo |
+| `examples/SensorSnapshot/SensorSnapshot.ino` | One-shot sensor readout over Serial |
+| `examples/DataLogging/DataLogging.ino` | Masked CSV logging to SD with `LogFilePolicy` |
+| `examples/HubWheelMinimal/HubWheelMinimal.ino` | Deep-sleep wheel logger (no Hublink) |
+| `examples/HubWheelHublink/HubWheelHublink.ino` | Wheel logger + Hublink gateway (NimBLE) |
+| `examples/HublinkBLENode/HublinkBLENode.ino` | Hublink gateway + local JX observer logs (NimBLE) — see below |
+| `examples/MetaConfigEditorHold/MetaConfigEditorHold.ino` | USB startup hold + `MetaConfigEditor` shell only |
+| `examples/AlertPinTest/AlertPinTest.ino` | DS3231 + optional MAX17048, `PIN_ALERT` exercise |
 
 ## Notes
 
 - This library intentionally targets fixed custom hardware. Runtime pin remapping is not supported.
-- Defaults are conservative for reliability (`I2C=100kHz`, SD disabled until mounted).
+- Defaults are conservative for reliability (`I2C=100kHz`, SD disabled until mounted). Default SD SPI clock is `1 MHz` (`DEFAULT_SD_SPI_CLOCK_HZ` in `RavenPins.h`), aligned with Hublink SD usage when both share the card.
 - ULP magnet counting is core hardware functionality; wake cadence and logging policy remain sketch-controlled in `HubWheelMinimal.ino`/`HubWheelHublink.ino`.
 - `PIN_ALERT` is a shared hardware interrupt line created by combining `~RTC_INT` and `~FUEL_ALERT` through an AND gate. Because both upstream signals are active-low, if either source asserts LOW, `PIN_ALERT` goes LOW (LOW-level interrupt behavior). This lets sketches monitor one GPIO for either source, but the library does not currently expose APIs to configure specific RTC or fuel-gauge alert thresholds/masks.
 
@@ -82,7 +96,7 @@ void loop() {
 - `DataLoggerHelper::csvHeader()` and `DataLoggerHelper::toCsv(...)` keep default full-field behavior for backward compatibility.
 - To log only selected columns, use typed masks with `CsvField` and overloads that accept `CsvFieldMask`.
 - Battery percentage is exposed as `batt_per` in CSV output.
-- `datetime` is formatted as `YYYY-MM-DD HH:MM:SS` for straightforward parsing in Python (`pandas.to_datetime` or `datetime.strptime`).
+- `datetime` is formatted as `YYYY-MM-DD HH:MM:SS` for straightforward parsing in Python (`pandas.to_datetime` or `datetime.strptime`). In `meta.json` `logger.log_fields`, the alias `rtc_text` is also accepted for `datetime`.
 - `passes_min` is derived from wake cadence: `magnet_passes * 60 / sleep_time_seconds`.
 - Full selectable field list:
   - Runtime: `millis`, `ulp_edges`, `magnet_passes`, `passes_min`, `magnet`, `usb_sense`
@@ -152,6 +166,28 @@ raven::LogFilePolicy gLogFilePolicy = {
   - Arbitrary lookups: `raven::resolveMetaDotPath(doc.as<JsonVariantConst>(), "<dot.path>", &ok)`.
 - Hublink still owns BLE/upload configuration from `meta.json` via `hublink.begin()`. Sketch-owned namespaces (such as `wheel.*` / `logger.*`) can instead use the Raven APIs so tooling matches the Serial meta editor paths.
 
+### HublinkBLENode (JX observer)
+
+Use `examples/HublinkBLENode/HublinkBLENode.ino` for a **stationary Hublink gateway** that advertises as a JX-family node, syncs with the Hublink cloud, and logs local observer data to SD. Requires the Hublink library and **NimBLE** (not Bluedroid).
+
+**Bring-up (same SD ordering as HubWheelHublink):** `beginHardware` / `beginI2C` → `DataLoggerHelper::begin` → Raven `sd().begin()` → `hublink.begin(advName)` so Hublink sees an already-mounted card.
+
+**Advertising name:** `JX_BBB` + last three hex digits of the Bluetooth MAC (uppercase), e.g. `JX_BBBA1F`.
+
+**Loop (when RTC is valid):** `hublink.sync()` → ~10 s NimBLE active scan → append vitals/settings/BLE rows → delay. Gateway JSON timestamps update the DS3231 via `setTimestampCallback` (same pattern as HubWheelHublink).
+
+**Status LED:** green only — solid during setup after I2C init; one short dip before `hublink.begin`; two flashes before each scan; off when idle.
+
+**Daily SD files** (prefix + `YYYYMMDD`, root path `/JX…csv`). At boot (and each loop when RTC is valid), missing files are created with headers so append paths are ready:
+
+| File | Role | Header / first row |
+| --- | --- | --- |
+| `/JXVyyyymmdd.csv` | Observer vitals (~60 s) | Masked columns from `DataLoggerHelper` (`unix`, `datetime`, `batt_v`, `batt_per`, `lux`, `temp_c`, `humidity_pct`, `gas_kohm` in the sketch default) |
+| `/JXSyyyymmdd.csv` | Settings snapshot (once per day) | `fw_version,scan_interval_s,adv_interval_s,vitals_interval,ble_name` then one data row (`adv_interval_s` from `hublink.advertise_every`) |
+| `/JXByyyymmdd.csv` | Nearby JX BLE peers per scan window | `unix,observer_id,peer_id,rssi` — `peer_id` is the advertised **name** (not MAC); only names starting with `JX_`; max RSSI per name per window |
+
+Sketch constants (`kScanWindowMs`, `kVitalsIntervalMs`, `kFwVersion`, CSV field mask) are defined at the top of `HublinkBLENode.ino`. NimBLE scan runs only from `loop()` with cool-down / forced-deinit guards after Hublink may have torn down the stack. This sketch does **not** use `LogFilePolicy`; filenames are the fixed `JXV` / `JXS` / `JXB` daily prefixes above.
+
 ### HubWheel + Hublink Example
 
 - Use `examples/HubWheelHublink/HubWheelHublink.ino` when the Hublink library is installed.
@@ -174,6 +210,10 @@ raven::LogFilePolicy gLogFilePolicy = {
   - `file list`
   - `file rm 2`
   - `file rm all`
+
+### MetaConfigEditorHold
+
+- `examples/MetaConfigEditorHold/MetaConfigEditorHold.ino` isolates the USB startup hold used by the wheel sketches: after cold boot with USB connected, press `e` during the fade window to enter the same `meta` / `file` / `sensor` shell without running wheel or Hublink logic.
 
 ## Hardware Power Profile
 
