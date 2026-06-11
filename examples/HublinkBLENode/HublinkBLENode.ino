@@ -5,8 +5,12 @@
 //   setup also creates today's JXV/JXS/JXB files with CSV headers so loop can append without races.
 // - BLE name: JX_BBB + last three hex digits of BT MAC (uppercase), passed to hublink.begin(advName).
 // - Status: green LED only — solid ON for all of setup after hardware init; one quick off→on pulse
-//   before hublink.begin (advertising); two short flashes before each BLE scan; green off when idle.
+//   before hublink.begin (advertising); two short flashes before each BLE scan; green off when idle;
+//   slow ~250 ms toggle while blocked in the SD recovery wait loop after a runtime write failure.
 // - Loop: hublink.sync(), BLE scan window, vitals/JXS/JXB when RTC valid, delay.
+// - SD removal: any runtime appendLine failure surfaces a Serial line and enters a blocking wait
+//   loop that re-mounts the card (end + begin) on a backoff while blinking green; loop resumes only
+//   after a successful remount.
 // - Gateway JSON timestamps (Hublink) update the DS3231 via setTimestampCallback, same as HubWheelHublink.
 // - JXB scan: only peers whose advertised **name** starts with `JX_`; `peer_id` is that name (not MAC).
 //
@@ -17,6 +21,8 @@
 #include <cstdarg>
 #include <cstdio>
 #include <esp_mac.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 #include <map>
 #include <string>
 
@@ -33,6 +39,10 @@ static constexpr uint32_t kScanIntervalS = kScanWindowMs / 1000;
 static constexpr uint32_t kVitalsIntervalS = kVitalsIntervalMs / 1000;
 /// Green-only status blinks (short, low duty).
 static constexpr uint32_t kLedBlinkMs = 70;
+/// Half-period of the green-LED toggle while blocked waiting for SD remount.
+static constexpr uint32_t kSdRecoveryBlinkMs = 250;
+/// How often the SD recovery wait loop attempts a remount (independent of the LED toggle cadence).
+static constexpr uint32_t kSdRecoveryRetryMs = 2000;
 
 /// Raven library / sketch firmware string for JXS settings row (align with library.properties when you bump releases).
 static constexpr char kFwVersion[] = "0.2.1";
@@ -166,6 +176,73 @@ static void buildDailyPath(const char *prefix3, const DateTime &dt, char *out, s
   snprintf(out, outLen, "/%s%04d%02d%02d.csv", prefix3, dt.year(), dt.month(), dt.day());
 }
 
+/// Fully tear down and re-mount the Raven SD service. Returns true only if a real card is present.
+static bool tryRemountSd()
+{
+  node.sd().end();
+  if (!node.sd().begin())
+  {
+    return false;
+  }
+  return node.sd().cardType() != CARD_NONE;
+}
+
+/// Block until SD is mounted again, blinking green at ~250 ms half-period and retrying the
+/// underlying remount every kSdRecoveryRetryMs. Used after a runtime appendLine failure.
+static void waitForSdReady()
+{
+  dbgln(F("[sd] entering recovery wait — blink green until SD remounts."));
+  uint32_t lastRetryMs = 0;
+  bool ledOn = false;
+  while (true)
+  {
+    ledOn = !ledOn;
+    digitalWrite(raven::PIN_LED_GREEN, ledOn ? HIGH : LOW);
+    delay(kSdRecoveryBlinkMs);
+
+    const uint32_t now = millis();
+    if (now - lastRetryMs >= kSdRecoveryRetryMs)
+    {
+      lastRetryMs = now;
+      if (tryRemountSd())
+      {
+        ledGreenOff();
+        dbgln(F("[sd] remount ok; resuming."));
+        return;
+      }
+      dbgln(F("[sd] remount attempt failed; still waiting."));
+    }
+  }
+}
+
+/// Append `line` to `path`. On failure, surface a Serial diagnostic, enter the SD recovery wait
+/// loop, then retry the append once. `what` is a short F() label used in the Serial output.
+static raven::ServiceStatus sdAppendOrRecover(const char *path, const String &line,
+                                              const __FlashStringHelper *what)
+{
+  raven::ServiceStatus rc = node.sd().appendLine(path, line);
+  if (rc == raven::ServiceStatus::Ok)
+  {
+    return rc;
+  }
+  Serial.print(F("[sd] write failed for "));
+  Serial.print(what);
+  Serial.print(F(" path="));
+  Serial.println(path);
+  Serial.flush();
+
+  waitForSdReady();
+
+  rc = node.sd().appendLine(path, line);
+  if (rc != raven::ServiceStatus::Ok)
+  {
+    Serial.print(F("[sd] retry write still failed for "));
+    Serial.println(what);
+    Serial.flush();
+  }
+  return rc;
+}
+
 /// Create today's JXV file with a header row only if missing (does not touch gLastVitalsMs).
 static void ensureJxvDailyHeaderOnly(const raven::RtcReading &rtc)
 {
@@ -176,7 +253,18 @@ static void ensureJxvDailyHeaderOnly(const raven::RtcReading &rtc)
     return;
   }
   const String header = raven::DataLoggerHelper::csvHeader(kCsvFieldMask);
-  (void)node.sd().appendLine(path, header);
+  raven::ServiceStatus rc = node.sd().appendLine(path, header);
+  if (rc == raven::ServiceStatus::Ok)
+  {
+    return;
+  }
+  Serial.println(F("[sd] write failed for JXV header; entering recovery."));
+  Serial.flush();
+  waitForSdReady();
+  if (!node.sd().exists(path))
+  {
+    (void)node.sd().appendLine(path, header);
+  }
 }
 
 /// Create today's JXB file with a header row only if missing.
@@ -188,7 +276,19 @@ static void ensureJxbDailyHeaderOnly(const raven::RtcReading &rtc)
   {
     return;
   }
-  (void)node.sd().appendLine(path, String(F("unix,observer_id,peer_id,rssi")));
+  const String header = String(F("unix,observer_id,peer_id,rssi"));
+  raven::ServiceStatus rc = node.sd().appendLine(path, header);
+  if (rc == raven::ServiceStatus::Ok)
+  {
+    return;
+  }
+  Serial.println(F("[sd] write failed for JXB header; entering recovery."));
+  Serial.flush();
+  waitForSdReady();
+  if (!node.sd().exists(path))
+  {
+    (void)node.sd().appendLine(path, header);
+  }
 }
 
 static void runBleScanWindowAndLogJbv()
@@ -283,7 +383,11 @@ static void runBleScanWindowAndLogJbv()
     appendCsvField(line, kv.first);
     line += ',';
     line += kv.second;
-    (void)node.sd().appendLine(path, line);
+    if (sdAppendOrRecover(path, line, F("JXB row")) != raven::ServiceStatus::Ok)
+    {
+      // Recovery already attempted inside the wrapper; bail to avoid a long fail loop here.
+      break;
+    }
   }
 }
 
@@ -299,7 +403,10 @@ static void ensureJsvForNewDay(const raven::RtcReading &rtc)
   static constexpr char kJsvHeader[] =
       "fw_version,scan_interval_s,adv_interval_s,vitals_interval,ble_name";
 
-  (void)node.sd().appendLine(path, String(kJsvHeader));
+  if (sdAppendOrRecover(path, String(kJsvHeader), F("JXS header")) != raven::ServiceStatus::Ok)
+  {
+    return;
+  }
 
   // adv_interval_s = Hublink time between advertising/sync attempts (meta advertise_every).
   const uint32_t advEveryS = hublink.advertise_every;
@@ -315,7 +422,7 @@ static void ensureJsvForNewDay(const raven::RtcReading &rtc)
   row += kVitalsIntervalS;
   row += ',';
   row += gAdvName;
-  (void)node.sd().appendLine(path, row);
+  (void)sdAppendOrRecover(path, row, F("JXS row"));
 }
 
 /// When RTC is valid, ensure today's daily CSV files exist with headers (JXS also gets its settings row).
@@ -341,7 +448,7 @@ static void maybeAppendVitals(const raven::RtcReading &rtc)
   if (newFile)
   {
     const String header = raven::DataLoggerHelper::csvHeader(kCsvFieldMask);
-    if (node.sd().appendLine(path, header) != raven::ServiceStatus::Ok)
+    if (sdAppendOrRecover(path, header, F("JXV header")) != raven::ServiceStatus::Ok)
     {
       return;
     }
@@ -349,7 +456,7 @@ static void maybeAppendVitals(const raven::RtcReading &rtc)
 
   raven::SampleFields sample = logger.captureSample();
   const String row = raven::DataLoggerHelper::toCsv(sample, kCsvFieldMask);
-  if (node.sd().appendLine(path, row) != raven::ServiceStatus::Ok)
+  if (sdAppendOrRecover(path, row, F("JXV row")) != raven::ServiceStatus::Ok)
   {
     return;
   }
@@ -459,6 +566,16 @@ void loop()
   {
     dbgln(F("[loop] RTC not ok — skip CSV writes."));
   }
+
+  // Free heap / min-ever heap / largest contiguous block / current task stack high-water mark.
+  // ESP.getMinFreeHeap() and uxTaskGetStackHighWaterMark report the worst-case low water marks
+  // since boot, which is more useful for spotting leaks/overflow than the instantaneous values.
+  dbgf("[loop %lu] mem heap_free=%lu min_free=%lu max_alloc=%lu stack_min_free=%lu",
+       static_cast<unsigned long>(gLoopCount),
+       static_cast<unsigned long>(ESP.getFreeHeap()),
+       static_cast<unsigned long>(ESP.getMinFreeHeap()),
+       static_cast<unsigned long>(ESP.getMaxAllocHeap()),
+       static_cast<unsigned long>(uxTaskGetStackHighWaterMark(nullptr)));
 
   dbgf("[loop %lu] delay(%lums)...", static_cast<unsigned long>(gLoopCount),
        static_cast<unsigned long>(kLoopDelayMs));
