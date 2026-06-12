@@ -1,18 +1,28 @@
-// HublinkBLENode — Raven hardware + SD, Hublink BLE gateway, 10s NimBLE scan, daily RTC CSV logs.
+// HublinkBLENode — Raven hardware + SD, Hublink BLE gateway, NimBLE scan, daily RTC CSV logs,
+// duty-cycled via deep sleep.
 //
-// - Bring-up matches HubWheelHublink: beginHardware/I2C → DataLoggerHelper::begin → Raven SD mount
-//   check → hublink.begin(advName) (Hublink then sees SD already initialized). When RTC is valid,
-//   setup also creates today's JXV/JXS/JXB files with CSV headers so loop can append without races.
+// - Wake → bring-up (beginHardware/I2C → DataLoggerHelper::begin → Raven SD mount check →
+//   hublink.begin(advName)) → hublink.sync(kMasterIntervalSeconds) → NimBLE active scan for
+//   kMasterIntervalSeconds → JXV/JXS/JXB CSV writes when RTC valid → deep sleep for
+//   kMasterIntervalSeconds. loop() is empty; setup() never returns.
 // - BLE name: JX_BBB + last three hex digits of BT MAC (uppercase), passed to hublink.begin(advName).
 // - Status: green LED only — solid ON for all of setup after hardware init; one quick off→on pulse
-//   before hublink.begin (advertising); two short flashes before each BLE scan; green off when idle;
-//   slow ~250 ms toggle while blocked in the SD recovery wait loop after a runtime write failure.
-// - Loop: hublink.sync(), BLE scan window, vitals/JXS/JXB when RTC valid, delay.
-// - SD removal: any runtime appendLine failure surfaces a Serial line and enters a blocking wait
-//   loop that re-mounts the card (end + begin) on a backoff while blinking green; loop resumes only
-//   after a successful remount.
-// - Gateway JSON timestamps (Hublink) update the DS3231 via setTimestampCallback, same as HubWheelHublink.
+//   before hublink.begin (advertising); two short flashes before each BLE scan; green off before
+//   deep sleep; slow ~250 ms toggle while blocked in the SD recovery wait loop on write failure.
+// - SD removal: any appendLine failure surfaces a Serial line and enters a blocking wait loop that
+//   re-mounts the card (end + begin) on a backoff while blinking green; the wake resumes only after
+//   a successful remount. Boot-time SD mount also routes through this path (no permanent halt).
+// - RTC recovery: if the DS3231 has lost time (battery dead), the wake parks in a forever loop
+//   that runs hublink.sync(kMasterIntervalSeconds) with green LED held ON, then delays
+//   kRtcRecoveryRestMs between sync windows, until a gateway pushes a timestamp via
+//   setTimestampCallback (which adjusts the DS3231).
+// - Gateway JSON timestamps (Hublink) update the DS3231 via setTimestampCallback.
 // - JXB scan: only peers whose advertised **name** starts with `JX_`; `peer_id` is that name (not MAC).
+// - Hublink keeps NimBLE self-contained: it init's during hublink.begin() and deinit's after each
+//   sync window. So this sketch must independently re-init NimBLE for its scan (NimBLEDevice::init
+//   "JX_scan"), then deinit again before deep sleep. That means each wake performs TWO BT controller
+//   bring-ups; the deep-sleep cadence keeps the per-hour count low so the rare ipc0 stack pressure
+//   that previously crashed the continuous loop turns into "this wake reboots, next wake retries".
 //
 // Requires Neurotech-Hub Hublink library (NimBLE). Board: Tools → Bluetooth → NimBLE.
 
@@ -21,28 +31,38 @@
 #include <cstdarg>
 #include <cstdio>
 #include <esp_mac.h>
+#include <esp_sleep.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <map>
 #include <string>
 
-static constexpr uint32_t kLoopDelayMs = 2000;
-static constexpr uint32_t kScanWindowMs = 10000;
-/// Let controller/host settle after Hublink may have called NimBLE deinit (Hublink uses multi-step delays).
+/// Single cadence used for the Hublink sync window, the NimBLE scan window, and the deep-sleep
+/// interval between wakes.
+static constexpr uint32_t kMasterIntervalSeconds = 10;
+static constexpr uint64_t kMasterIntervalUs =
+    static_cast<uint64_t>(kMasterIntervalSeconds) * 1000000ULL;
+static constexpr uint32_t kScanWindowMs = kMasterIntervalSeconds * 1000UL;
+/// Hublink internal watchdog timeout (5 minutes) — kept generous since each wake only calls
+/// hublink.sync() once with a short window.
+static constexpr uint32_t kHublinkWatchdogMs = 300000;
+/// Cool-down after Hublink finishes its sync window so the controller fully settles before we
+/// take ownership for the scan.
 static constexpr uint32_t kAfterHublinkBleCoolMs = 200;
-/// After a forced deinit when NimBLE still reports initialized (partial/stale state).
+/// Settle delay if NimBLE still reports initialized when we expected it cleared.
 static constexpr uint32_t kNimbleForceDeinitSettleMs = 200;
-/// After NimBLEDevice::init before getScan/getResults.
+/// Settle delay between NimBLEDevice::init and the first getScan/getResults call.
 static constexpr uint32_t kNimblePostInitSettleMs = 250;
-static constexpr uint32_t kVitalsIntervalMs = 60000;
-static constexpr uint32_t kScanIntervalS = kScanWindowMs / 1000;
-static constexpr uint32_t kVitalsIntervalS = kVitalsIntervalMs / 1000;
+/// Extra serial settle when USB is detected so an attached host's CDC port can enumerate.
+static constexpr uint32_t kUsbSerialSettleMs = 2000;
 /// Green-only status blinks (short, low duty).
 static constexpr uint32_t kLedBlinkMs = 70;
 /// Half-period of the green-LED toggle while blocked waiting for SD remount.
 static constexpr uint32_t kSdRecoveryBlinkMs = 250;
 /// How often the SD recovery wait loop attempts a remount (independent of the LED toggle cadence).
 static constexpr uint32_t kSdRecoveryRetryMs = 2000;
+/// Quiet rest between hublink.sync() retries while waiting for the RTC to acquire a valid time.
+static constexpr uint32_t kRtcRecoveryRestMs = 5000;
 
 /// Raven library / sketch firmware string for JXS settings row (align with library.properties when you bump releases).
 static constexpr char kFwVersion[] = "0.2.1";
@@ -82,8 +102,6 @@ raven::HublinkNode node;
 raven::DataLoggerHelper logger(node);
 Hublink hublink(raven::PIN_SD_CS);
 static String gAdvName;
-static uint32_t gLastVitalsMs = 0;
-static uint32_t gLoopCount = 0;
 
 static void dbgln(const __FlashStringHelper *msg)
 {
@@ -243,7 +261,7 @@ static raven::ServiceStatus sdAppendOrRecover(const char *path, const String &li
   return rc;
 }
 
-/// Create today's JXV file with a header row only if missing (does not touch gLastVitalsMs).
+/// Create today's JXV file with a header row only if missing.
 static void ensureJxvDailyHeaderOnly(const raven::RtcReading &rtc)
 {
   char path[28];
@@ -291,27 +309,33 @@ static void ensureJxbDailyHeaderOnly(const raven::RtcReading &rtc)
   }
 }
 
+/// Active-scan for kScanWindowMs after Hublink's sync window has ended. Hublink owns its own
+/// NimBLE lifecycle and deinits after each sync, so this sketch independently brings the stack
+/// up for the scan and tears it down again before returning. Max RSSI per advertised **name**
+/// (not MAC), only names starting with "JX_".
+///
+/// Stack notes: NimBLEDevice::init runs from setup() (Arduino main task) and dispatches BT
+/// controller bring-up to ipc0. The default ipc0 stack is small; on Arduino-ESP32 there's no
+/// portable knob to raise it, so the deep-sleep cadence is the primary mitigation — a rare
+/// canary trip during init becomes "this wake reboots, the next wake retries" rather than a
+/// long-running deployment hang.
 static void runBleScanWindowAndLogJbv()
 {
-  // NimBLE init/deinit here runs only from loop() (Arduino main task), not from BLE callbacks.
-  // Cool-down + isInitialized guard tolerate Hublink stopAdvertising/deinit timing vs our scan window.
-  //
-  // Max RSSI per advertised **name** (not MAC). Only names starting with "JX_" (active scan for scan response).
   std::map<std::string, int> peerNameMaxRssi;
 
   delay(kAfterHublinkBleCoolMs);
 
   if (NimBLEDevice::isInitialized())
   {
-    dbgln(F("[scan] NimBLE still initialized; forcing deinit before scan init."));
+    dbgln(F("[scan] NimBLE still initialized after Hublink sync; forcing deinit before scan init."));
     (void)NimBLEDevice::deinit(true);
     delay(kNimbleForceDeinitSettleMs);
   }
 
-  dbgln(F("[scan] NimBLEDevice::init..."));
+  dbgln(F("[scan] NimBLEDevice::init(\"JX_scan\")..."));
   if (!NimBLEDevice::init("JX_scan"))
   {
-    dbgln(F("[scan] NimBLEDevice::init failed."));
+    dbgln(F("[scan] NimBLEDevice::init failed; skipping scan."));
     return;
   }
   delay(kNimblePostInitSettleMs);
@@ -319,13 +343,13 @@ static void runBleScanWindowAndLogJbv()
   NimBLEScan *pScan = NimBLEDevice::getScan();
   if (pScan == nullptr)
   {
-    dbgln(F("[scan] getScan() returned null."));
+    dbgln(F("[scan] getScan() returned null; deinit and skip."));
     (void)NimBLEDevice::deinit(true);
     return;
   }
 
   pScan->setActiveScan(true);
-  dbgln(F("[scan] getResults (blocking ~10s)..."));
+  dbgf("[scan] getResults (blocking ~%lus)...", static_cast<unsigned long>(kMasterIntervalSeconds));
   const NimBLEScanResults results = pScan->getResults(kScanWindowMs, false);
 
   const int n = results.getCount();
@@ -349,7 +373,10 @@ static void runBleScanWindowAndLogJbv()
     }
   }
 
+  // Release the BLE stack before any SD work so a card-removed wait loop doesn't keep the
+  // controller initialized longer than necessary.
   (void)NimBLEDevice::deinit(true);
+
   dbgf("[scan] done; raw devices=%d JX_ peers(unique)=%u", n,
        static_cast<unsigned>(peerNameMaxRssi.size()));
 
@@ -408,18 +435,16 @@ static void ensureJsvForNewDay(const raven::RtcReading &rtc)
     return;
   }
 
-  // adv_interval_s = Hublink time between advertising/sync attempts (meta advertise_every).
-  const uint32_t advEveryS = hublink.advertise_every;
-
+  // All three intervals are driven by the single deep-sleep cadence in this design.
   String row;
   row.reserve(128);
   row += kFwVersion;
   row += ',';
-  row += kScanIntervalS;
+  row += kMasterIntervalSeconds;
   row += ',';
-  row += advEveryS;
+  row += kMasterIntervalSeconds;
   row += ',';
-  row += kVitalsIntervalS;
+  row += kMasterIntervalSeconds;
   row += ',';
   row += gAdvName;
   (void)sdAppendOrRecover(path, row, F("JXS row"));
@@ -433,19 +458,15 @@ static void ensureTodaysDailyCsvFiles(const raven::RtcReading &rtc)
   ensureJsvForNewDay(rtc);
 }
 
-static void maybeAppendVitals(const raven::RtcReading &rtc)
+/// Capture sensors and append a single JXV vitals row. Headers are pre-created in
+/// ensureTodaysDailyCsvFiles, but we still guard against a missing file (e.g. fresh card swapped in
+/// during recovery) by writing a header on demand.
+static void appendVitalsRow(const raven::RtcReading &rtc)
 {
-  const uint32_t nowMs = millis();
-  if ((nowMs - gLastVitalsMs) < kVitalsIntervalMs)
-  {
-    return;
-  }
-
   char path[28];
   buildDailyPath("JXV", rtc.now, path, sizeof(path));
 
-  const bool newFile = !node.sd().exists(path);
-  if (newFile)
+  if (!node.sd().exists(path))
   {
     const String header = raven::DataLoggerHelper::csvHeader(kCsvFieldMask);
     if (sdAppendOrRecover(path, header, F("JXV header")) != raven::ServiceStatus::Ok)
@@ -456,11 +477,7 @@ static void maybeAppendVitals(const raven::RtcReading &rtc)
 
   raven::SampleFields sample = logger.captureSample();
   const String row = raven::DataLoggerHelper::toCsv(sample, kCsvFieldMask);
-  if (sdAppendOrRecover(path, row, F("JXV row")) != raven::ServiceStatus::Ok)
-  {
-    return;
-  }
-  gLastVitalsMs = nowMs;
+  (void)sdAppendOrRecover(path, row, F("JXV row"));
 }
 
 static void onTimestampReceived(uint32_t timestamp)
@@ -469,14 +486,61 @@ static void onTimestampReceived(uint32_t timestamp)
   node.rtc().adjust(DateTime(timestamp));
 }
 
+/// Block until the DS3231 reports a valid date. The most likely cause of an invalid date is a
+/// dead RTC backup battery, so we cannot make progress without a gateway-supplied timestamp.
+/// Each iteration: hold green LED ON, run hublink.sync(kMasterIntervalSeconds) (during which
+/// onTimestampReceived may fire and adjust the DS3231), then check the RTC; if still invalid,
+/// LED off and rest for kRtcRecoveryRestMs before retrying. Caller is responsible for any LED
+/// state it wants after this returns.
+static void waitForRtcReady()
+{
+  raven::RtcReading probe;
+  if (rtcOkForLogging(probe))
+  {
+    return;
+  }
+  dbgln(F("[rtc] DS3231 has no valid date (likely backup battery dead). Awaiting gateway timestamp."));
+  while (true)
+  {
+    ledGreenOn();
+    dbgf("[rtc] hublink.sync(%lu) attempting timestamp acquisition...",
+         static_cast<unsigned long>(kMasterIntervalSeconds));
+    (void)hublink.sync(kMasterIntervalSeconds);
+    if (rtcOkForLogging(probe))
+    {
+      ledGreenOff();
+      dbgln(F("[rtc] valid; resuming wake."));
+      return;
+    }
+    ledGreenOff();
+    dbgf("[rtc] still invalid; rest %lums then retry sync.",
+         static_cast<unsigned long>(kRtcRecoveryRestMs));
+    delay(kRtcRecoveryRestMs);
+  }
+}
+
+/// Enter deep sleep for kMasterIntervalSeconds. Does not return.
+static void enterDeepSleep()
+{
+  ledGreenOff();
+  Serial.flush();
+  esp_sleep_enable_timer_wakeup(kMasterIntervalUs);
+  dbgf("[sleep] deep sleep for %lus", static_cast<unsigned long>(kMasterIntervalSeconds));
+  Serial.flush();
+  esp_deep_sleep_start();
+}
+
 void setup()
 {
   Serial.begin(115200);
-  delay(1000);
+  // beginHardware brings up PIN_USB_SENSE (input pullup) so readUsbSense is meaningful below.
+  node.beginHardware();
+  if (node.readUsbSense())
+  {
+    delay(kUsbSerialSettleMs);
+  }
   dbgln(F("HublinkBLENode: Serial ready"));
 
-  dbgln(F("[setup] beginHardware..."));
-  node.beginHardware();
   dbgln(F("[setup] beginI2C..."));
   node.beginI2C();
 
@@ -495,12 +559,9 @@ void setup()
   dbgln(F("[setup] Raven SD mount..."));
   if (!node.sd().begin() || node.sd().cardType() == CARD_NONE)
   {
-    dbgln(F("SD mount failed. Halting."));
-    ledGreenOff();
-    while (true)
-    {
-      delay(1000);
-    }
+    dbgln(F("[setup] SD mount failed; entering recovery wait."));
+    waitForSdReady();
+    ledGreenOn();
   }
   dbgf("[setup] SD ok, cardType=%u", static_cast<unsigned>(node.sd().cardType()));
 
@@ -513,44 +574,20 @@ void setup()
   dbgln(F("[setup] hublink.begin()..."));
   if (!hublink.begin(gAdvName))
   {
-    dbgln(F("Hublink begin failed. Halting."));
-    ledGreenOff();
-    while (true)
-    {
-      delay(1000);
-    }
+    dbgln(F("[setup] Hublink begin failed; sleeping for retry."));
+    enterDeepSleep();
   }
   dbgln(F("[setup] hublink.begin() returned true."));
   hublink.setTimestampCallback(onTimestampReceived);
-  hublink.watchdogTimeoutMs = 60000;
+  hublink.watchdogTimeoutMs = kHublinkWatchdogMs;
 
-  gLastVitalsMs = millis();
+  // Block here if the DS3231 has lost time; we can't write meaningful CSV rows without a valid
+  // unix timestamp. Returns once the gateway pushes a timestamp via setTimestampCallback.
+  waitForRtcReady();
 
-  {
-    raven::RtcReading rtcBoot;
-    if (rtcOkForLogging(rtcBoot))
-    {
-      dbgln(F("[setup] RTC ok — ensuring today's JXV/JXS/JXB CSV shells (headers)."));
-      ensureTodaysDailyCsvFiles(rtcBoot);
-    }
-    else
-    {
-      dbgln(F("[setup] RTC not valid — skip pre-creating daily CSV files; loop will retry."));
-    }
-  }
-
-  ledGreenOff();
-  dbgln(F("Hublink ready — entering loop."));
-}
-
-void loop()
-{
-  ++gLoopCount;
-  dbgf("[loop %lu] hublink.sync()...", static_cast<unsigned long>(gLoopCount));
-
-  const bool syncOk = hublink.sync();
-  dbgf("[loop %lu] sync returned %s", static_cast<unsigned long>(gLoopCount),
-       syncOk ? "true" : "false");
+  dbgf("[wake] hublink.sync(%lu)...", static_cast<unsigned long>(kMasterIntervalSeconds));
+  const bool syncOk = hublink.sync(kMasterIntervalSeconds);
+  dbgf("[wake] sync returned %s", syncOk ? "true" : "false");
 
   ledGreenBlinkTwiceBeforeScan();
   runBleScanWindowAndLogJbv();
@@ -558,26 +595,28 @@ void loop()
   raven::RtcReading rtc;
   if (rtcOkForLogging(rtc))
   {
-    dbgln(F("[loop] RTC ok — JXS/JXV may write."));
+    dbgln(F("[wake] RTC ok — JXS/JXV may write."));
     ensureTodaysDailyCsvFiles(rtc);
-    maybeAppendVitals(rtc);
+    appendVitalsRow(rtc);
   }
   else
   {
-    dbgln(F("[loop] RTC not ok — skip CSV writes."));
+    dbgln(F("[wake] RTC not valid — skip CSV writes; will retry next wake."));
   }
 
   // Free heap / min-ever heap / largest contiguous block / current task stack high-water mark.
   // ESP.getMinFreeHeap() and uxTaskGetStackHighWaterMark report the worst-case low water marks
   // since boot, which is more useful for spotting leaks/overflow than the instantaneous values.
-  dbgf("[loop %lu] mem heap_free=%lu min_free=%lu max_alloc=%lu stack_min_free=%lu",
-       static_cast<unsigned long>(gLoopCount),
+  dbgf("[wake] mem heap_free=%lu min_free=%lu max_alloc=%lu stack_min_free=%lu",
        static_cast<unsigned long>(ESP.getFreeHeap()),
        static_cast<unsigned long>(ESP.getMinFreeHeap()),
        static_cast<unsigned long>(ESP.getMaxAllocHeap()),
        static_cast<unsigned long>(uxTaskGetStackHighWaterMark(nullptr)));
 
-  dbgf("[loop %lu] delay(%lums)...", static_cast<unsigned long>(gLoopCount),
-       static_cast<unsigned long>(kLoopDelayMs));
-  delay(kLoopDelayMs);
+  enterDeepSleep();
+}
+
+void loop()
+{
+  // setup() never returns (it always calls esp_deep_sleep_start). loop() is intentionally empty.
 }
