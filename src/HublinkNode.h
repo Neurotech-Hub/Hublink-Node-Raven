@@ -28,6 +28,17 @@ public:
 
   void setI2CPowerEnabled(bool enabled);
   bool isI2CPowerEnabled() const;
+  /// Drive the SD power gate (`PIN_SD_EN`, active-low) directly without managing the FS state.
+  /// Most sketches should prefer `sd().begin()` / `sd().end()` (which also handle SPI and FS),
+  /// or the combined `setExternalRailsEnabled` below for deep-sleep prep.
+  void setSdPowerEnabled(bool enabled);
+  bool isSdPowerEnabled() const;
+  /// Enable or disable both the I2C aux rail and the SD rail with one call. The disable path
+  /// closes the SD filesystem (`sd().end()`) before dropping its rail, then drops the I2C rail.
+  /// The enable path drives the I2C rail on first, then mounts SD (`sd().begin()`). Useful as
+  /// `setExternalRailsEnabled(false)` immediately before `esp_deep_sleep_start()` so neither gate
+  /// continues to draw current during sleep.
+  void setExternalRailsEnabled(bool enabled);
 
   bool readMagnet() const;
   bool readUsbSense() const;

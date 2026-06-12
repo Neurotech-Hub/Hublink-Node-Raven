@@ -4,11 +4,21 @@
 // - Wake → bring-up (beginHardware/I2C → DataLoggerHelper::begin → Raven SD mount check →
 //   hublink.begin(advName)) → hublink.sync(kMasterIntervalSeconds) → NimBLE active scan for
 //   kMasterIntervalSeconds → JXV/JXS/JXB CSV writes when RTC valid → deep sleep for
-//   kMasterIntervalSeconds. loop() is empty; setup() never returns.
+//   (kWakeCyclePeriodSeconds − measured wake elapsed). loop() is empty; setup() never returns.
+// - Cadence: each wake aims for a fixed kWakeCyclePeriodSeconds period of *non-Hublink* work
+//   from boot to next boot. enterDeepSleep computes (target − (millis() − gHublinkSyncTotalMs))
+//   so a long gateway connection or repeated RTC-recovery syncs never compress the next sleep
+//   window. The result is clamped to [kMinDeepSleepUs, kWakeCyclePeriodUs] so deep_sleep_start
+//   never receives 0 or a runaway value. trackedHublinkSync() must be used everywhere instead
+//   of hublink.sync() for the accounting to be correct.
 // - BLE name: JX_BBB + last three hex digits of BT MAC (uppercase), passed to hublink.begin(advName).
-// - Status: green LED only — solid ON for all of setup after hardware init; one quick off→on pulse
-//   before hublink.begin (advertising); two short flashes before each BLE scan; green off before
-//   deep sleep; slow ~250 ms toggle while blocked in the SD recovery wait loop on write failure.
+// - Status: green LED only — solid ON for all of setup after hardware init; 3 quick 50 ms blinks
+//   ending OFF just before hublink.sync (LED stays OFF during the sync window); 1 quick 50 ms
+//   blink ending OFF just before each BLE scan (LED stays OFF during the scan window); green
+//   solid ON during waitForRtcReady's sync windows; slow ~250 ms toggle while blocked in the
+//   SD recovery wait loop on write failure; OFF during deep sleep.
+// - Sleep current: enterDeepSleep calls node.setExternalRailsEnabled(false) so PIN_I2C_EN and
+//   PIN_SD_EN both go HIGH (rails off) before esp_deep_sleep_start.
 // - SD removal: any appendLine failure surfaces a Serial line and enters a blocking wait loop that
 //   re-mounts the card (end + begin) on a backoff while blinking green; the wake resumes only after
 //   a successful remount. Boot-time SD mount also routes through this path (no permanent halt).
@@ -37,26 +47,38 @@
 #include <map>
 #include <string>
 
-/// Single cadence used for the Hublink sync window, the NimBLE scan window, and the deep-sleep
-/// interval between wakes.
+/// Length (seconds) of the Hublink sync window, the NimBLE scan window, and the JXS interval
+/// fields. Independent of the total wake cycle period.
 static constexpr uint32_t kMasterIntervalSeconds = 10;
-static constexpr uint64_t kMasterIntervalUs =
-    static_cast<uint64_t>(kMasterIntervalSeconds) * 1000000ULL;
 static constexpr uint32_t kScanWindowMs = kMasterIntervalSeconds * 1000UL;
+/// Target wake-to-wake period (seconds). enterDeepSleep sleeps for the remainder of this budget
+/// after subtracting the measured millis() elapsed since boot, so total cadence is approximately
+/// constant regardless of how long sync/scan/SD work took.
+static constexpr uint32_t kWakeCyclePeriodSeconds = 60;
+static constexpr uint64_t kWakeCyclePeriodUs =
+    static_cast<uint64_t>(kWakeCyclePeriodSeconds) * 1000000ULL;
+/// Floor for the deep-sleep duration so a wake that overran the cycle (long recovery loops, etc.)
+/// still actually deep-sleeps and resets the chip rather than falling through to a logical no-op.
+static constexpr uint64_t kMinDeepSleepUs = 1000000ULL;
 /// Hublink internal watchdog timeout (5 minutes) — kept generous since each wake only calls
 /// hublink.sync() once with a short window.
 static constexpr uint32_t kHublinkWatchdogMs = 300000;
 /// Cool-down after Hublink finishes its sync window so the controller fully settles before we
-/// take ownership for the scan.
-static constexpr uint32_t kAfterHublinkBleCoolMs = 200;
+/// take ownership for the scan. Hublink's stopAdvertising only waits ~170 ms internally after
+/// NimBLEDevice::deinit before sync() returns; an earlier version of this sketch happened to add
+/// ~280 ms of LED-blink delay between sync() and the scan, which empirically masked the BT
+/// controller's residual teardown work and kept ipc0 stack pressure manageable. The current
+/// LED choreography only adds ~100 ms of pre-scan blink, so this cool-down absorbs the slack
+/// (and then some) to keep the effective settle above the previously-stable ~480 ms total.
+static constexpr uint32_t kAfterHublinkBleCoolMs = 2000;
 /// Settle delay if NimBLE still reports initialized when we expected it cleared.
-static constexpr uint32_t kNimbleForceDeinitSettleMs = 200;
+static constexpr uint32_t kNimbleForceDeinitSettleMs = 500;
 /// Settle delay between NimBLEDevice::init and the first getScan/getResults call.
 static constexpr uint32_t kNimblePostInitSettleMs = 250;
 /// Extra serial settle when USB is detected so an attached host's CDC port can enumerate.
 static constexpr uint32_t kUsbSerialSettleMs = 2000;
-/// Green-only status blinks (short, low duty).
-static constexpr uint32_t kLedBlinkMs = 70;
+/// Half-period of the green-LED quick blinks used as transition cues (3x before sync, 1x before scan).
+static constexpr uint32_t kLedQuickBlinkMs = 50;
 /// Half-period of the green-LED toggle while blocked waiting for SD remount.
 static constexpr uint32_t kSdRecoveryBlinkMs = 250;
 /// How often the SD recovery wait loop attempts a remount (independent of the LED toggle cadence).
@@ -102,6 +124,10 @@ raven::HublinkNode node;
 raven::DataLoggerHelper logger(node);
 Hublink hublink(raven::PIN_SD_CS);
 static String gAdvName;
+/// Total wall-clock millis spent inside hublink.sync() across this wake. Subtracted from the
+/// cycle budget in enterDeepSleep so a gateway operator holding a long connection doesn't
+/// compress the next sleep window. Re-zeroes naturally on the next wake (deep-sleep wake = chip reset).
+static uint32_t gHublinkSyncTotalMs = 0;
 
 static void dbgln(const __FlashStringHelper *msg)
 {
@@ -119,25 +145,18 @@ static void ledGreenOff()
   digitalWrite(raven::PIN_LED_GREEN, LOW);
 }
 
-/// One quick dip (off→on) while LED was on for setup; ends with green on.
-static void ledGreenBlinkOnceBeforeAdvertising()
+/// Emit `n` discrete on/off blinks with `halfPeriodMs` per state. Always normalizes to LED OFF
+/// first so the user sees `n` distinct pulses regardless of prior LED state, and ends with LED OFF.
+static void ledGreenBlinkNTimes(uint8_t n, uint32_t halfPeriodMs)
 {
   ledGreenOff();
-  delay(kLedBlinkMs);
-  ledGreenOn();
-  delay(kLedBlinkMs);
-}
-
-/// Two brief flashes from dark (before each scan); ends with green off.
-static void ledGreenBlinkTwiceBeforeScan()
-{
-  ledGreenOn();
-  delay(kLedBlinkMs);
-  ledGreenOff();
-  delay(kLedBlinkMs);
-  ledGreenOn();
-  delay(kLedBlinkMs);
-  ledGreenOff();
+  for (uint8_t i = 0; i < n; ++i)
+  {
+    delay(halfPeriodMs);
+    ledGreenOn();
+    delay(halfPeriodMs);
+    ledGreenOff();
+  }
 }
 
 static void dbgf(const char *fmt, ...)
@@ -149,6 +168,18 @@ static void dbgf(const char *fmt, ...)
   va_end(ap);
   Serial.println(buf);
   Serial.flush();
+}
+
+/// Wrap hublink.sync() with wall-clock measurement so enterDeepSleep can subtract gateway-
+/// connected time from the cycle budget. Use this for *every* sync call in this sketch
+/// (main wake + RTC recovery loop) so the tracker accumulates correctly.
+static bool trackedHublinkSync(uint32_t durationSeconds)
+{
+  const uint32_t t0 = millis();
+  const bool ok = hublink.sync(durationSeconds);
+  const uint32_t dt = millis() - t0;
+  gHublinkSyncTotalMs += dt;
+  return ok;
 }
 
 static bool peerAdvNameIsJxFamily(const std::string &name)
@@ -505,7 +536,7 @@ static void waitForRtcReady()
     ledGreenOn();
     dbgf("[rtc] hublink.sync(%lu) attempting timestamp acquisition...",
          static_cast<unsigned long>(kMasterIntervalSeconds));
-    (void)hublink.sync(kMasterIntervalSeconds);
+    (void)trackedHublinkSync(kMasterIntervalSeconds);
     if (rtcOkForLogging(probe))
     {
       ledGreenOff();
@@ -519,13 +550,55 @@ static void waitForRtcReady()
   }
 }
 
-/// Enter deep sleep for kMasterIntervalSeconds. Does not return.
+/// Enter deep sleep so total wake-to-wake time approximates kWakeCyclePeriodSeconds *excluding*
+/// time spent inside hublink.sync() (a long gateway connection or RTC-recovery loop should not
+/// compress the next sleep window). Does not return. Final sleep is clamped to
+/// [kMinDeepSleepUs, kWakeCyclePeriodUs] so we never pass an invalid or runaway value to
+/// esp_sleep_enable_timer_wakeup. Powers down the SD and aux-I2C rails first via the shared
+/// HublinkNode API so neither gate draws current during sleep (PIN_SD_EN HIGH, PIN_I2C_EN HIGH).
 static void enterDeepSleep()
 {
+  const uint32_t totalElapsedMs = millis();
+  const uint32_t hublinkMs = gHublinkSyncTotalMs;
+  // Defensive: hublinkMs should never exceed totalElapsedMs (we only add measured intervals to
+  // it after each sync), but underflow on a uint32_t would produce a huge value, so guard.
+  const uint32_t effectiveElapsedMs =
+      (totalElapsedMs > hublinkMs) ? (totalElapsedMs - hublinkMs) : 0;
+  const uint64_t effectiveElapsedUs = static_cast<uint64_t>(effectiveElapsedMs) * 1000ULL;
+
+  uint64_t sleepUs;
+  if (effectiveElapsedUs >= kWakeCyclePeriodUs)
+  {
+    // Effective wake work somehow exceeded the cycle (logic bug, or scan/SD overran). Don't
+    // compress to floor and don't underflow — sleep one full cycle so the device returns to
+    // nominal cadence on the wake after this one.
+    sleepUs = kWakeCyclePeriodUs;
+  }
+  else
+  {
+    sleepUs = kWakeCyclePeriodUs - effectiveElapsedUs;
+  }
+  if (sleepUs < kMinDeepSleepUs)
+  {
+    sleepUs = kMinDeepSleepUs;
+  }
+  if (sleepUs > kWakeCyclePeriodUs)
+  {
+    // Belt-and-suspenders cap; should be unreachable given the branches above.
+    sleepUs = kWakeCyclePeriodUs;
+  }
+
   ledGreenOff();
+  dbgln(F("[sleep] disabling external rails (SD + aux I2C)..."));
   Serial.flush();
-  esp_sleep_enable_timer_wakeup(kMasterIntervalUs);
-  dbgf("[sleep] deep sleep for %lus", static_cast<unsigned long>(kMasterIntervalSeconds));
+  node.setExternalRailsEnabled(false);
+  esp_sleep_enable_timer_wakeup(sleepUs);
+  dbgf("[sleep] cycle=%lus total=%lums hublink=%lums effective=%lums sleep=%lums",
+       static_cast<unsigned long>(kWakeCyclePeriodSeconds),
+       static_cast<unsigned long>(totalElapsedMs),
+       static_cast<unsigned long>(hublinkMs),
+       static_cast<unsigned long>(effectiveElapsedMs),
+       static_cast<unsigned long>(sleepUs / 1000ULL));
   Serial.flush();
   esp_deep_sleep_start();
 }
@@ -570,7 +643,6 @@ void setup()
   Serial.println(gAdvName);
   Serial.flush();
 
-  ledGreenBlinkOnceBeforeAdvertising();
   dbgln(F("[setup] hublink.begin()..."));
   if (!hublink.begin(gAdvName))
   {
@@ -585,11 +657,16 @@ void setup()
   // unix timestamp. Returns once the gateway pushes a timestamp via setTimestampCallback.
   waitForRtcReady();
 
+  // 3 quick blinks then LED OFF — visual cue for entering the sync window without holding the
+  // LED on during the long sync.
+  ledGreenBlinkNTimes(3, kLedQuickBlinkMs);
   dbgf("[wake] hublink.sync(%lu)...", static_cast<unsigned long>(kMasterIntervalSeconds));
-  const bool syncOk = hublink.sync(kMasterIntervalSeconds);
-  dbgf("[wake] sync returned %s", syncOk ? "true" : "false");
+  const bool syncOk = trackedHublinkSync(kMasterIntervalSeconds);
+  dbgf("[wake] sync returned %s (cumulative sync ms=%lu)", syncOk ? "true" : "false",
+       static_cast<unsigned long>(gHublinkSyncTotalMs));
 
-  ledGreenBlinkTwiceBeforeScan();
+  // 1 quick blink then LED OFF — visual cue for entering the scan window.
+  ledGreenBlinkNTimes(1, kLedQuickBlinkMs);
   runBleScanWindowAndLogJbv();
 
   raven::RtcReading rtc;

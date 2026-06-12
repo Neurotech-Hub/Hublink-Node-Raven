@@ -83,6 +83,31 @@ namespace raven
     return digitalRead(PIN_I2C_EN) == LOW;
   }
 
+  void HublinkNode::setSdPowerEnabled(bool enabled)
+  {
+    // PIN_SD_EN is active-low. This is a raw rail control; FS state is the caller's responsibility.
+    digitalWrite(PIN_SD_EN, enabled ? LOW : HIGH);
+  }
+
+  bool HublinkNode::isSdPowerEnabled() const
+  {
+    return digitalRead(PIN_SD_EN) == LOW;
+  }
+
+  void HublinkNode::setExternalRailsEnabled(bool enabled)
+  {
+    if (enabled)
+    {
+      setI2CPowerEnabled(true);
+      (void)sd_.begin();
+    }
+    else
+    {
+      sd_.end();             // closes FS, ends SPI, drives PIN_SD_EN HIGH
+      setI2CPowerEnabled(false); // drives PIN_I2C_EN HIGH
+    }
+  }
+
   bool HublinkNode::readMagnet() const { return digitalRead(PIN_AUX_GPIO0) == HIGH; }
 
   bool HublinkNode::readUsbSense() const
