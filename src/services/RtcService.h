@@ -21,6 +21,8 @@ public:
   bool isInitialized() const { return initialized_; }
 
 private:
+  void syncSystemTimeFromRtc(const DateTime &now);
+
   TwoWire *wire_ = nullptr;
   RTC_DS3231 rtc_;
   bool initialized_ = false;
