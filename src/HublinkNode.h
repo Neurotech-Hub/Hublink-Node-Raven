@@ -4,6 +4,7 @@
 #include "services/EnvService.h"
 #include "services/LightService.h"
 #include "services/MagnetCounterService.h"
+#include "services/MotionCounterService.h"
 #include "services/PowerGaugeService.h"
 #include "services/RtcService.h"
 #include "services/SdService.h"
@@ -52,6 +53,7 @@ public:
   LightService &light() { return light_; }
   EnvService &environment() { return environment_; }
   MagnetCounterService &magnetCounter() { return magnetCounter_; }
+  MotionCounterService &motionCounter() { return motionCounter_; }
 
 private:
   bool hardwareInitialized_ = false;
@@ -62,6 +64,7 @@ private:
   LightService light_;
   EnvService environment_;
   MagnetCounterService magnetCounter_;
+  MotionCounterService motionCounter_;
 };
 
 } // namespace raven

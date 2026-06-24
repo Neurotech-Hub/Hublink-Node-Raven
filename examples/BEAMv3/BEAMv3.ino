@@ -1,37 +1,59 @@
-// BEAMv3 — minimal Raven bring-up and fast poll of PIN_AUX_GPIO1.
+// BEAMv3 — ULP motion counter on PIN_AUX_GPIO1 during deep sleep.
 //
-// beginHardware() configures the aux GPIO as INPUT_PULLUP by default; this sketch
-// reconfigures PIN_AUX_GPIO1 as INPUT_PULLDOWN before polling.
-// loop() reads continuously and prints only when the pin level changes.
+// Each wake: print motion_count from the previous sleep window (timer wake only), re-arm the ULP
+// program, deep sleep for kSleepSeconds. loop() is empty; setup() never returns.
 
 #include <HublinkNodeRaven.h>
+#include <esp_sleep.h>
+
+static constexpr uint32_t kSleepSeconds = 10;
+static constexpr uint32_t kUsbSerialSettleMs = 2000;
 
 raven::HublinkNode node;
 
-static int gLastGpio1 = -1;
+static void enterDeepSleep()
+{
+  node.motionCounter().clearCount();
+  node.motionCounter().begin(static_cast<gpio_num_t>(raven::PIN_AUX_GPIO1));
+  if (!node.motionCounter().start())
+  {
+    Serial.println(F("BEAMv3: ULP start failed; halting."));
+    while (true)
+    {
+      delay(1000);
+    }
+  }
+
+  esp_sleep_enable_timer_wakeup(static_cast<uint64_t>(kSleepSeconds) * 1000000ULL);
+  Serial.printf("BEAMv3: entering deep sleep for %lus\n",
+                static_cast<unsigned long>(kSleepSeconds));
+  Serial.flush();
+  esp_deep_sleep_start();
+}
 
 void setup()
 {
   Serial.begin(115200);
-  delay(1000);
-// beginHardware() configures aux GPIOs as INPUT_PULLUP; we override GPIO1 to pulldown.
   node.beginHardware();
-  pinMode(raven::PIN_AUX_GPIO1, INPUT_PULLDOWN);
-  Serial.print(F("MCU clock MHz: "));
-  Serial.println(raven::HublinkNode::mcuClockMhz());
-  // Match BasicHardware: enable the aux I2C rail and bring up Wire.
-  node.setI2CPowerEnabled(true);
-  node.beginI2C();
-  gLastGpio1 = digitalRead(raven::PIN_AUX_GPIO1);
-  Serial.println(F("BEAMv3: PIN_AUX_GPIO1 — print on change only"));
+  if (node.readUsbSense())
+  {
+    delay(kUsbSerialSettleMs);
+  }
+
+  const esp_sleep_wakeup_cause_t cause = node.wakeupCause();
+  if (cause == ESP_SLEEP_WAKEUP_TIMER)
+  {
+    Serial.printf("motion_count=%u\n", node.motionCounter().motionCount());
+  }
+  else
+  {
+    Serial.println(F("BEAMv3: power-on — ULP motion test on PIN_AUX_GPIO1"));
+  }
+
+  enterDeepSleep();
 }
 
 void loop()
 {
-  const int gpio1 = digitalRead(raven::PIN_AUX_GPIO1);
-  if (gpio1 != gLastGpio1)
-  {
-    gLastGpio1 = gpio1;
-    Serial.printf("GPIO1=%d\n", gpio1);
-  }
+  // setup() never returns (esp_deep_sleep_start). loop() is intentionally empty.
 }
