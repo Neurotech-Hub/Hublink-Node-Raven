@@ -12,13 +12,18 @@
 namespace raven {
 
 /// BEAM-style ULP motion counter: +1 per 1-second sampling window where the sensor pin is active.
-/// Default pin is PIN_AUX_GPIO1 with internal pulldown (HIGH = motion).
+/// Default pin is PIN_AUX_GPIO1 with internal pulldown (HIGH = motion). Includes inactivity-period
+/// tracking in RTC memory for BEAM CSV metrics.
 class MotionCounterService {
 public:
   bool begin(gpio_num_t sensorPin = static_cast<gpio_num_t>(PIN_AUX_GPIO1));
   bool start();
   uint16_t motionCount() const;
   void clearCount();
+
+  void setInactivityPeriod(uint16_t seconds);
+  uint16_t inactivityCount() const;
+  void clearInactivityCounters();
 
 private:
   bool initialized_ = false;

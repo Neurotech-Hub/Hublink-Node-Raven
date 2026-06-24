@@ -5,10 +5,13 @@ namespace raven {
 namespace {
 enum : uint16_t {
   kMotionCountAddr = 0,
+  kInactivityCountAddr = 1,
+  kInactivityTrackerAddr = 2,
+  kInactivityPeriodAddr = 3,
   kProgramStart = 1,
 };
 
-ulp_insn_t gUlpProgram[40];
+ulp_insn_t gUlpProgram[64];
 } // namespace
 
 bool MotionCounterService::begin(gpio_num_t sensorPin) {
@@ -31,7 +34,7 @@ bool MotionCounterService::start() {
   }
 
   // Port of BEAM ULPManager PIR program: 1-second sampling windows, +1 count per window with
-  // motion. HIGH = motion (pulldown idle). Inactivity tracking omitted in v1.
+  // motion. HIGH = motion (pulldown idle). Inactivity tracking matches legacy BEAM ULPManager.
   const ulp_insn_t programTemplate[] = {
       I_MOVI(R2, kMotionCountAddr),
       I_MOVI(R3, 1),
@@ -57,14 +60,35 @@ bool MotionCounterService::start() {
       M_LABEL(4),
       I_MOVR(R0, R3),
       M_BE(5, 0),
-      M_BX(8),
+      M_BX(6),
 
       M_LABEL(5),
       I_LD(R1, R2, 0),
       I_ADDI(R1, R1, 1),
       I_ST(R1, R2, 0),
+      M_BX(8),
+
+      M_LABEL(6),
+      I_MOVI(R1, kInactivityTrackerAddr),
+      I_LD(R0, R1, 0),
+      I_ADDI(R0, R0, 1),
+      I_ST(R0, R1, 0),
+      I_MOVI(R1, kInactivityPeriodAddr),
+      I_LD(R1, R1, 0),
+      I_SUBR(R0, R1, R0),
+      M_BG(9, 1),
+
+      I_MOVI(R1, kInactivityCountAddr),
+      I_LD(R0, R1, 0),
+      I_ADDI(R0, R0, 1),
+      I_ST(R0, R1, 0),
 
       M_LABEL(8),
+      I_MOVI(R0, 0),
+      I_MOVI(R1, kInactivityTrackerAddr),
+      I_ST(R0, R1, 0),
+
+      M_LABEL(9),
       I_MOVI(R3, 1),
       M_BX(1),
   };
@@ -84,6 +108,22 @@ uint16_t MotionCounterService::motionCount() const {
   return static_cast<uint16_t>(RTC_SLOW_MEM[kMotionCountAddr] & 0xFFFF);
 }
 
-void MotionCounterService::clearCount() { RTC_SLOW_MEM[kMotionCountAddr] = 0; }
+void MotionCounterService::clearCount() {
+  RTC_SLOW_MEM[kMotionCountAddr] = 0;
+  clearInactivityCounters();
+}
+
+void MotionCounterService::setInactivityPeriod(uint16_t seconds) {
+  RTC_SLOW_MEM[kInactivityPeriodAddr] = seconds;
+}
+
+uint16_t MotionCounterService::inactivityCount() const {
+  return static_cast<uint16_t>(RTC_SLOW_MEM[kInactivityCountAddr] & 0xFFFF);
+}
+
+void MotionCounterService::clearInactivityCounters() {
+  RTC_SLOW_MEM[kInactivityCountAddr] = 0;
+  RTC_SLOW_MEM[kInactivityTrackerAddr] = 0;
+}
 
 } // namespace raven

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "HublinkNode.h"
+#include "helpers/BeamCsvLogger.h"
+#include "helpers/BeamFileNaming.h"
 #include "helpers/DataLoggerHelper.h"
 #include "helpers/LogFileNaming.h"
 #include "helpers/LowBatteryBoot.h"
