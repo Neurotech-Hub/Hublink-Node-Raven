@@ -384,22 +384,8 @@ static bool appendBeamLogRow(bool isWakeFromSleep, bool isRebootRow, String &row
 
 static void enterDeepSleep()
 {
-  Serial.println(F("BEAMv3: starting motion counter (ULP)"));
-  Serial.flush();
   node.motionCounter().setInactivityPeriod(static_cast<uint16_t>(gInactivityPeriodSeconds));
-  node.motionCounter().clearCount();
   node.motionCounter().begin(static_cast<gpio_num_t>(raven::PIN_AUX_GPIO1));
-  if (!node.motionCounter().start())
-  {
-    Serial.println(F("BEAMv3: ULP start failed; halting."));
-    errorBlinkForever();
-  }
-
-  const raven::RtcReading rtc = node.rtc().readSample();
-  if (rtc.status == raven::ServiceStatus::Ok && rtc.now.isValid())
-  {
-    gSleepStartUnix = rtc.now.unixtime();
-  }
 
   digitalWrite(raven::PIN_LED_GREEN, LOW);
   digitalWrite(raven::PIN_LED_BLUE, LOW);
@@ -412,6 +398,20 @@ static void enterDeepSleep()
                 static_cast<unsigned long>(gLogEveryMinutes),
                 static_cast<unsigned long long>(sleepUs));
   Serial.flush();
+
+  const raven::RtcReading rtc = node.rtc().readSample();
+  if (rtc.status == raven::ServiceStatus::Ok && rtc.now.isValid())
+  {
+    gSleepStartUnix = rtc.now.unixtime();
+  }
+
+  node.motionCounter().clearCount();
+  if (!node.motionCounter().start())
+  {
+    Serial.println(F("BEAMv3: ULP start failed; halting."));
+    errorBlinkForever();
+  }
+
   esp_deep_sleep_start();
 }
 

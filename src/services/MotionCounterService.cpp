@@ -11,6 +11,11 @@ enum : uint16_t {
   kProgramStart = 1,
 };
 
+// ESP32-S3 ULP uses RTC_FAST (~17.5 MHz). Legacy ESP32 BEAM 40000/415 yields ~0.95 s windows
+// on S3. Target ~1.0 s: iterations * (delay + ~12 insn cycles) / 17.5e6.
+constexpr uint16_t kUlpSampleDelayCycles = 415;
+constexpr uint16_t kUlpWindowIterations = 41100;
+
 ulp_insn_t gUlpProgram[64];
 } // namespace
 
@@ -40,7 +45,7 @@ bool MotionCounterService::start() {
       I_MOVI(R3, 1),
 
       M_LABEL(1),
-      I_MOVI(R1, 40000),
+      I_MOVI(R1, kUlpWindowIterations),
 
       M_LABEL(2),
       I_RD_REG(RTC_GPIO_IN_REG, rtcGpioIndex_ + RTC_GPIO_IN_NEXT_S,
@@ -49,7 +54,7 @@ bool MotionCounterService::start() {
       I_MOVI(R3, 0),
 
       M_LABEL(3),
-      I_DELAY(415),
+      I_DELAY(kUlpSampleDelayCycles),
       I_SUBI(R1, R1, 1),
       I_MOVR(R0, R1),
       M_BE(4, 0),
