@@ -5,7 +5,7 @@
 //
 // Power-on: pre-editor init (like MetaConfigEditorHold) → maybeEnterWithFade (USB) →
 // boot wait fade → load meta once → logging init → log → deep sleep.
-// Timer wake: pre-editor init → load meta → logging init → log → deep sleep.
+// Timer wake: pre-editor init (incl. min battery gate) → load meta → logging → deep sleep.
 
 #include <ArduinoJson.h>
 #include <HublinkNodeRaven.h>
@@ -22,6 +22,7 @@ static constexpr char kLibraryVersion[] = "0.2.1";
 static constexpr uint32_t kUsbSerialSettleMs = 2000;
 static constexpr uint32_t kErrorBlinkMs = 200;
 static constexpr uint32_t kBootDebounceMs = 80;
+static constexpr float kMinBatteryVolts = 3.7f;
 
 raven::HublinkNode node;
 raven::MetaConfigEditor metaEditor;
@@ -100,6 +101,31 @@ static void errorBlinkForever()
   }
 }
 
+static bool checkMinBatteryVoltage()
+{
+  if (node.readUsbSense())
+  {
+    return true;
+  }
+
+  const raven::BatteryReading batt = node.powerGauge().readSample();
+  if (batt.status != raven::ServiceStatus::Ok || !batt.hasCellReading)
+  {
+    Serial.println(F("BEAMv3: battery voltage unavailable (skip min-voltage gate)"));
+    return true;
+  }
+  if (batt.voltageV < kMinBatteryVolts)
+  {
+    Serial.print(F("BEAMv3: battery below minimum: "));
+    Serial.print(batt.voltageV, 3);
+    Serial.print(F(" V (need >= "));
+    Serial.print(kMinBatteryVolts, 1);
+    Serial.println(F(" V)"));
+    return false;
+  }
+  return true;
+}
+
 static bool initBeamPreEditor()
 {
   node.beginHardware();
@@ -111,6 +137,10 @@ static bool initBeamPreEditor()
   }
   node.rtc().begin();
   node.powerGauge().begin();
+  if (!checkMinBatteryVoltage())
+  {
+    return false;
+  }
   node.light().begin();
   node.environment().begin();
   if (!node.sd().begin() || node.sd().cardType() == CARD_NONE)
