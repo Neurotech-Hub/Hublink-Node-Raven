@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../services/SdService.h"
 #include <WString.h>
 
 namespace raven {
@@ -33,6 +34,8 @@ class BeamCsvLogger {
 public:
   static String header();
   static String formatRow(const BeamLogSample &sample);
+  /// Create the CSV with header row when path is missing; no-op when it already exists.
+  static bool ensureLogFile(SdService &sd, const char *path);
 };
 
 } // namespace raven

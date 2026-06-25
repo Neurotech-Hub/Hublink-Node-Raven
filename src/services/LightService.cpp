@@ -11,13 +11,11 @@ bool LightService::begin(TwoWire &wire) {
     return false;
   }
 
-  // Default to high-sensitivity ALS settings for low-light deployments.
+  // Max sensitivity: gain 2x, 800 ms integration (VEML7700 limits).
   sensor_.setGain(VEML7700_GAIN_2);
   sensor_.setIntegrationTime(VEML7700_IT_800MS);
-  sensor_.setLowThreshold(10000);
-  sensor_.setHighThreshold(20000);
-  sensor_.interruptEnable(true);
-  sensor_.powerSaveEnable(true);
+  sensor_.interruptEnable(false);
+  sensor_.powerSaveEnable(false);
   sensor_.enable(false);
 
   initialized_ = true;
@@ -35,12 +33,15 @@ LightReading LightService::readSample() {
   }
 
   sensor_.enable(true);
-  // One-shot mode needs an integration window before lux can settle.
-  // Match the default low-light 800 ms integration with margin.
-  delay(850);
-  out.als = sensor_.readALS(true);
+  // After shutdown, readWait() can skip delaying because lastRead is stale. Wait a
+  // full integration window explicitly (matches Adafruit readWait × 2).
+  const uint32_t integrationWaitMs =
+      static_cast<uint32_t>(sensor_.getIntegrationTimeValue()) * 2U;
+  delay(integrationWaitMs);
+  // Single ALS sample; corrected lux for low-light nonlinearity.
+  out.lux = sensor_.readLux(VEML_LUX_CORRECTED_NOWAIT);
+  out.als = sensor_.readALS(false);
   out.white = sensor_.readWhite(false);
-  out.lux = sensor_.readLux(VEML_LUX_NORMAL_NOWAIT);
   const uint16_t irq = sensor_.interruptStatus();
   sensor_.enable(false);
 

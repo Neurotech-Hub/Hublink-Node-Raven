@@ -3,8 +3,9 @@
 // meta.json schema matches legacy Hublink-BEAM README (beam.*, device.*, hublink.*).
 // Hublink BLE sync is stubbed out this sprint — see commented block in setup().
 //
-// Power-on: init → fade LEDs until BOOT press+release → log → deep sleep.
-// Timer wake: log → deep sleep (no boot gate). loop() is empty.
+// Power-on: pre-editor init (like MetaConfigEditorHold) → maybeEnterWithFade (USB) →
+// boot wait fade → load meta once → logging init → log → deep sleep.
+// Timer wake: pre-editor init → load meta → logging init → log → deep sleep.
 
 #include <ArduinoJson.h>
 #include <HublinkNodeRaven.h>
@@ -13,7 +14,7 @@
 
 // --- meta.json defaults (overridden when keys present) ---
 static constexpr uint32_t kDefaultLogEveryMinutes = 1;
-static constexpr bool kDefaultNewFileOnBoot = true;
+static constexpr bool kDefaultNewFileOnBoot = false;
 static constexpr uint32_t kDefaultInactivityPeriodSeconds = 40;
 static constexpr char kDefaultDeviceId[] = "001";
 static constexpr char kLibraryVersion[] = "0.2.1";
@@ -21,10 +22,9 @@ static constexpr char kLibraryVersion[] = "0.2.1";
 static constexpr uint32_t kUsbSerialSettleMs = 2000;
 static constexpr uint32_t kErrorBlinkMs = 200;
 static constexpr uint32_t kBootDebounceMs = 80;
-static constexpr uint32_t kLedFadePeriodMs = 1500;
 
 raven::HublinkNode node;
-raven::DataLoggerHelper logger(node);
+raven::MetaConfigEditor metaEditor;
 
 RTC_DATA_ATTR uint32_t gSleepStartUnix = 0;
 
@@ -36,6 +36,8 @@ static String gDeviceId = kDefaultDeviceId;
 static uint32_t gSyncEveryMinutes = 3;
 static uint32_t gSyncForSeconds = 30;
 static uint32_t gRandomizeAlarmMinutes = 0;
+
+static String gActiveLogPath;
 
 static void applyMetaFromDoc(const JsonDocument &doc)
 {
@@ -72,6 +74,18 @@ static void applyMetaFromDoc(const JsonDocument &doc)
   }
 }
 
+static bool reloadMetaFromSd()
+{
+  StaticJsonDocument<2048> metaDoc;
+  if (!raven::loadMetaJson(node.sd(), metaDoc, "/meta.json", &Serial))
+  {
+    Serial.println(F("BEAMv3: /meta.json missing or invalid"));
+    return false;
+  }
+  applyMetaFromDoc(metaDoc);
+  return true;
+}
+
 static void errorBlinkForever()
 {
   pinMode(raven::PIN_LED_GREEN, OUTPUT);
@@ -86,44 +100,7 @@ static void errorBlinkForever()
   }
 }
 
-static void fadeLedsUntilBootReleased()
-{
-  pinMode(raven::PIN_LED_GREEN, OUTPUT);
-  pinMode(raven::PIN_LED_BLUE, OUTPUT);
-  ledcAttach(raven::PIN_LED_GREEN, 5000, 8);
-  ledcAttach(raven::PIN_LED_BLUE, 5000, 8);
-
-  bool seenPress = false;
-  while (true)
-  {
-    const uint32_t phase = millis() % kLedFadePeriodMs;
-    const uint8_t level =
-        phase < (kLedFadePeriodMs / 2)
-            ? static_cast<uint8_t>((phase * 255UL) / (kLedFadePeriodMs / 2))
-            : static_cast<uint8_t>(((kLedFadePeriodMs - phase) * 255UL) / (kLedFadePeriodMs / 2));
-    ledcWrite(raven::PIN_LED_GREEN, level);
-    ledcWrite(raven::PIN_LED_BLUE, level);
-
-    const bool bootLow = digitalRead(raven::PIN_BOOT_BUTTON) == LOW;
-    if (bootLow)
-    {
-      seenPress = true;
-    }
-    else if (seenPress)
-    {
-      delay(kBootDebounceMs);
-      if (digitalRead(raven::PIN_BOOT_BUTTON) != LOW)
-      {
-        ledcWrite(raven::PIN_LED_GREEN, 0);
-        ledcWrite(raven::PIN_LED_BLUE, 0);
-        return;
-      }
-    }
-    delay(10);
-  }
-}
-
-static bool initBeamHardware()
+static bool initBeamPreEditor()
 {
   node.beginHardware();
   node.setI2CPowerEnabled(true);
@@ -132,23 +109,22 @@ static bool initBeamHardware()
     Serial.println(F("BEAMv3: beginI2C failed"));
     return false;
   }
+  node.rtc().begin();
+  node.powerGauge().begin();
+  node.light().begin();
+  node.environment().begin();
   if (!node.sd().begin() || node.sd().cardType() == CARD_NONE)
   {
     Serial.println(F("BEAMv3: SD mount failed"));
     return false;
   }
+  return true;
+}
 
-  StaticJsonDocument<2048> metaDoc;
-  if (!raven::loadMetaJson(node.sd(), metaDoc, "/meta.json", &Serial))
+static bool finalizeBeamCoreAfterMeta()
+{
+  if (!reloadMetaFromSd())
   {
-    Serial.println(F("BEAMv3: /meta.json missing or invalid"));
-    return false;
-  }
-  applyMetaFromDoc(metaDoc);
-
-  if (!logger.begin())
-  {
-    Serial.println(F("BEAMv3: logger.begin failed"));
     return false;
   }
 
@@ -165,6 +141,125 @@ static bool initBeamHardware()
                 static_cast<unsigned long>(gInactivityPeriodSeconds),
                 gNewFileOnBoot ? "true" : "false");
   return true;
+}
+
+static bool initBeamLogging()
+{
+  // Sensors and SD were already initialized in initBeamPreEditor (MetaConfigEditorHold path).
+  Serial.println(F("BEAMv3: logging init"));
+  Serial.flush();
+  raven::maybeAutomaticVoltageSafeguard(node, true);
+  return true;
+}
+
+static void stepSyncedFade(int &duty, int &step)
+{
+  analogWrite(raven::PIN_LED_GREEN, duty);
+  analogWrite(raven::PIN_LED_BLUE, duty);
+  duty += step;
+  if (duty >= 255)
+  {
+    duty = 255;
+    step = -step;
+  }
+  else if (duty <= 0)
+  {
+    duty = 0;
+    step = -step;
+  }
+}
+
+static void waitBootReleaseWithFade()
+{
+  Serial.println(F("Press and release BOOT to start logging."));
+
+  pinMode(raven::PIN_LED_GREEN, OUTPUT);
+  pinMode(raven::PIN_LED_BLUE, OUTPUT);
+  pinMode(raven::PIN_BOOT_BUTTON, INPUT_PULLUP);
+
+  int duty = 0;
+  int step = 12;
+  bool seenPress = false;
+
+  while (true)
+  {
+    const bool bootLow = digitalRead(raven::PIN_BOOT_BUTTON) == LOW;
+    if (bootLow)
+    {
+      seenPress = true;
+    }
+    else if (seenPress)
+    {
+      delay(kBootDebounceMs);
+      if (digitalRead(raven::PIN_BOOT_BUTTON) != LOW)
+      {
+        analogWrite(raven::PIN_LED_GREEN, 0);
+        analogWrite(raven::PIN_LED_BLUE, 0);
+        return;
+      }
+    }
+
+    stepSyncedFade(duty, step);
+    delay(25);
+  }
+}
+
+static bool resolveActiveLogPath(bool isWakeFromSleep, String &outPath)
+{
+  const raven::RtcReading rtc = node.rtc().readSample();
+  if (rtc.status != raven::ServiceStatus::Ok || !rtc.now.isValid())
+  {
+    Serial.println(F("BEAMv3: RTC invalid — cannot resolve log path"));
+    return false;
+  }
+
+  raven::BeamFileNamingParams naming;
+  naming.deviceId = gDeviceId.c_str();
+  naming.newFileOnBoot = gNewFileOnBoot;
+  naming.isWakeFromSleep = isWakeFromSleep;
+
+  outPath = raven::resolveBeamLogFilePath(node.sd(), naming, rtc.now);
+  if (outPath.length() == 0)
+  {
+    Serial.println(F("BEAMv3: no available log filename"));
+    return false;
+  }
+  return true;
+}
+
+static bool ensureBeamLogFile(bool isWakeFromSleep)
+{
+  if (!resolveActiveLogPath(isWakeFromSleep, gActiveLogPath))
+  {
+    return false;
+  }
+
+  if (!raven::BeamCsvLogger::ensureLogFile(node.sd(), gActiveLogPath.c_str()))
+  {
+    Serial.println(F("BEAMv3: failed to create log file"));
+    return false;
+  }
+
+  Serial.printf("BEAMv3: log file ready %s\n", gActiveLogPath.c_str());
+  return true;
+}
+
+static void reportLogResult(bool ok, const String &row)
+{
+  if (!node.readUsbSense())
+  {
+    return;
+  }
+
+  Serial.println(ok ? F("BEAMv3: log write OK") : F("BEAMv3: log write FAILED"));
+  Serial.print(F("  path: "));
+  Serial.println(gActiveLogPath);
+  if (ok && row.length() > 0)
+  {
+    Serial.print(F("  row: "));
+    Serial.println(row);
+  }
+  Serial.flush();
 }
 
 static void fillBeamLogSample(raven::BeamLogSample &out, bool isWakeFromSleep, bool isRebootRow)
@@ -238,8 +333,9 @@ static void fillBeamLogSample(raven::BeamLogSample &out, bool isWakeFromSleep, b
   }
 }
 
-static bool appendBeamLogRow(bool isWakeFromSleep, bool isRebootRow)
+static bool appendBeamLogRow(bool isWakeFromSleep, bool isRebootRow, String &rowOut)
 {
+  rowOut = "";
   raven::BeamLogSample sample;
   fillBeamLogSample(sample, isWakeFromSleep, isRebootRow);
 
@@ -250,30 +346,25 @@ static bool appendBeamLogRow(bool isWakeFromSleep, bool isRebootRow)
     return false;
   }
 
-  raven::BeamFileNamingParams naming;
-  naming.deviceId = gDeviceId.c_str();
-  naming.newFileOnBoot = gNewFileOnBoot;
-  naming.isWakeFromSleep = isWakeFromSleep;
-
-  const String logPath = raven::resolveBeamLogFilePath(node.sd(), naming, rtc.now);
+  String logPath = gActiveLogPath;
   if (logPath.length() == 0)
   {
-    Serial.println(F("BEAMv3: no available log filename"));
+    if (!resolveActiveLogPath(isWakeFromSleep, logPath))
+    {
+      return false;
+    }
+    gActiveLogPath = logPath;
+  }
+
+  if (!raven::BeamCsvLogger::ensureLogFile(node.sd(), logPath.c_str()))
+  {
+    Serial.println(F("BEAMv3: failed to ensure log file before append"));
     return false;
   }
 
-  if (!node.sd().exists(logPath.c_str()))
-  {
-    if (node.sd().appendLine(logPath.c_str(), raven::BeamCsvLogger::header()) !=
-        raven::ServiceStatus::Ok)
-    {
-      Serial.println(F("BEAMv3: failed to write CSV header"));
-      return false;
-    }
-  }
+  rowOut = raven::BeamCsvLogger::formatRow(sample);
 
-  if (node.sd().appendLine(logPath.c_str(), raven::BeamCsvLogger::formatRow(sample)) !=
-      raven::ServiceStatus::Ok)
+  if (node.sd().appendLine(logPath.c_str(), rowOut) != raven::ServiceStatus::Ok)
   {
     Serial.println(F("BEAMv3: failed to append CSV row"));
     return false;
@@ -293,6 +384,8 @@ static bool appendBeamLogRow(bool isWakeFromSleep, bool isRebootRow)
 
 static void enterDeepSleep()
 {
+  Serial.println(F("BEAMv3: starting motion counter (ULP)"));
+  Serial.flush();
   node.motionCounter().setInactivityPeriod(static_cast<uint16_t>(gInactivityPeriodSeconds));
   node.motionCounter().clearCount();
   node.motionCounter().begin(static_cast<gpio_num_t>(raven::PIN_AUX_GPIO1));
@@ -325,7 +418,6 @@ static void enterDeepSleep()
 void setup()
 {
   Serial.begin(115200);
-  node.beginHardware();
   if (node.readUsbSense())
   {
     delay(kUsbSerialSettleMs);
@@ -335,15 +427,30 @@ void setup()
   const bool isPowerOnReset = (wakeCause == ESP_SLEEP_WAKEUP_UNDEFINED);
   const bool isTimerWake = node.isTimerWake();
 
-  if (!initBeamHardware())
+  if (!initBeamPreEditor())
   {
     errorBlinkForever();
   }
 
   if (isPowerOnReset)
   {
-    Serial.println(F("BEAMv3: press and release BOOT to start logging"));
-    fadeLedsUntilBootReleased();
+    if (node.readUsbSense())
+    {
+      metaEditor.maybeEnterWithFade(node.sd(), true, Serial, 3000,
+                                    raven::PIN_LED_GREEN, raven::PIN_LED_BLUE, &node);
+    }
+    waitBootReleaseWithFade();
+    Serial.println(F("BEAMv3: boot gate complete"));
+  }
+
+  if (!finalizeBeamCoreAfterMeta())
+  {
+    errorBlinkForever();
+  }
+
+  if (!initBeamLogging())
+  {
+    errorBlinkForever();
   }
 
   /*
@@ -358,14 +465,31 @@ void setup()
    *     }
    *   }
    * }
-   * (void)gRandomizeAlarmMinutes; // MAC-based boot delay when enabled
    */
 
   (void)gSyncEveryMinutes;
   (void)gSyncForSeconds;
   (void)gRandomizeAlarmMinutes;
 
-  appendBeamLogRow(isTimerWake, isPowerOnReset);
+  Serial.println(F("BEAMv3: preparing log file"));
+  Serial.flush();
+
+  if (!ensureBeamLogFile(isTimerWake))
+  {
+    if (node.readUsbSense())
+    {
+      reportLogResult(false, String());
+    }
+    errorBlinkForever();
+  }
+
+  String loggedRow;
+  Serial.println(F("BEAMv3: appending log row"));
+  Serial.flush();
+  const bool logged = appendBeamLogRow(isTimerWake, isPowerOnReset, loggedRow);
+  reportLogResult(logged, loggedRow);
+  Serial.println(F("BEAMv3: entering deep sleep"));
+  Serial.flush();
   enterDeepSleep();
 }
 

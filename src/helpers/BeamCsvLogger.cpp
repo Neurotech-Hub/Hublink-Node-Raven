@@ -9,6 +9,16 @@ String BeamCsvLogger::header() {
                   "inactivity_period_s,inactivity_count,inactivity_percent,min_free_heap,reboot"));
 }
 
+bool BeamCsvLogger::ensureLogFile(SdService &sd, const char *path) {
+  if (path == nullptr || path[0] == '\0') {
+    return false;
+  }
+  if (sd.exists(path)) {
+    return true;
+  }
+  return sd.appendLine(path, header()) == ServiceStatus::Ok;
+}
+
 String BeamCsvLogger::formatRow(const BeamLogSample &s) {
   char row[192];
   snprintf(row, sizeof(row),

@@ -49,7 +49,8 @@ ServiceStatus SdService::appendLine(const char *path, const String &line) {
     return ServiceStatus::NotFound;
   }
 
-  File f = SD.open(path, FILE_APPEND);
+  const bool exists = SD.exists(path);
+  File f = SD.open(path, exists ? FILE_APPEND : FILE_WRITE);
   if (!f) {
     return ServiceStatus::WriteFailed;
   }

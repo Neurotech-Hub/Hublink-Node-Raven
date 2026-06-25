@@ -61,6 +61,14 @@ String resolveBeamLogFilePath(SdService &sd, const BeamFileNamingParams &params,
       (params.deviceId != nullptr && params.deviceId[0] != '\0') ? params.deviceId : "001";
 
   const String storedFilename = readStoredFilename();
+
+  // Power-on with no prefs history: use slot 00 without scanning the card.
+  if (!params.isWakeFromSleep && !params.newFileOnBoot && storedFilename.length() == 0) {
+    const String candidate = buildBeamPath(deviceId, dateCompact, 0);
+    storeFilename(candidate);
+    return candidate;
+  }
+
   if (storedFilename.length() > 0) {
     int storedYear = 0;
     int storedMonth = 0;
