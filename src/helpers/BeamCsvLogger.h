@@ -26,8 +26,6 @@ struct BeamLogSample {
   uint16_t inactivityPeriodS = 0;
   uint16_t inactivityCount = 0;
   double inactivityPercent = 0.0;
-  uint32_t minFreeHeap = 0;
-  uint8_t reboot = 0;
 };
 
 class BeamCsvLogger {

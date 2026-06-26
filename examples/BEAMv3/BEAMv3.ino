@@ -292,7 +292,7 @@ static void reportLogResult(bool ok, const String &row)
   Serial.flush();
 }
 
-static void fillBeamLogSample(raven::BeamLogSample &out, bool isWakeFromSleep, bool isRebootRow)
+static void fillBeamLogSample(raven::BeamLogSample &out, bool isWakeFromSleep)
 {
   const uint16_t activityCount = node.motionCounter().motionCount();
   const uint16_t inactivityCount = node.motionCounter().inactivityCount();
@@ -303,8 +303,6 @@ static void fillBeamLogSample(raven::BeamLogSample &out, bool isWakeFromSleep, b
   out.activityCount = activityCount;
   out.inactivityPeriodS = static_cast<uint16_t>(gInactivityPeriodSeconds);
   out.inactivityCount = inactivityCount;
-  out.minFreeHeap = ESP.getMinFreeHeap();
-  out.reboot = isRebootRow ? 1 : 0;
   out.activityPercent = 0.0;
   out.inactivityPercent = 0.0;
 
@@ -363,11 +361,11 @@ static void fillBeamLogSample(raven::BeamLogSample &out, bool isWakeFromSleep, b
   }
 }
 
-static bool appendBeamLogRow(bool isWakeFromSleep, bool isRebootRow, String &rowOut)
+static bool appendBeamLogRow(bool isWakeFromSleep, String &rowOut)
 {
   rowOut = "";
   raven::BeamLogSample sample;
-  fillBeamLogSample(sample, isWakeFromSleep, isRebootRow);
+  fillBeamLogSample(sample, isWakeFromSleep);
 
   const raven::RtcReading rtc = node.rtc().readSample();
   if (rtc.status != raven::ServiceStatus::Ok || !rtc.now.isValid())
@@ -501,23 +499,27 @@ void setup()
   (void)gSyncForSeconds;
   (void)gRandomizeAlarmMinutes;
 
-  Serial.println(F("BEAMv3: preparing log file"));
-  Serial.flush();
-
-  if (!ensureBeamLogFile(isTimerWake))
+  if (isTimerWake)
   {
-    if (node.readUsbSense())
+    Serial.println(F("BEAMv3: preparing log file"));
+    Serial.flush();
+
+    if (!ensureBeamLogFile(true))
     {
-      reportLogResult(false, String());
+      if (node.readUsbSense())
+      {
+        reportLogResult(false, String());
+      }
+      errorBlinkForever();
     }
-    errorBlinkForever();
+
+    String loggedRow;
+    Serial.println(F("BEAMv3: appending log row"));
+    Serial.flush();
+    const bool logged = appendBeamLogRow(true, loggedRow);
+    reportLogResult(logged, loggedRow);
   }
 
-  String loggedRow;
-  Serial.println(F("BEAMv3: appending log row"));
-  Serial.flush();
-  const bool logged = appendBeamLogRow(isTimerWake, isPowerOnReset, loggedRow);
-  reportLogResult(logged, loggedRow);
   Serial.println(F("BEAMv3: entering deep sleep"));
   Serial.flush();
   enterDeepSleep();
