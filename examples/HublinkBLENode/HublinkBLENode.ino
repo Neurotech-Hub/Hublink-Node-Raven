@@ -31,8 +31,8 @@
 // - Hublink keeps NimBLE self-contained: it init's during hublink.begin() and deinit's after each
 //   sync window. So this sketch must independently re-init NimBLE for its scan (NimBLEDevice::init
 //   "JX_scan"), then deinit again before deep sleep. That means each wake performs TWO BT controller
-//   bring-ups; the deep-sleep cadence keeps the per-hour count low so the rare ipc0 stack pressure
-//   that previously crashed the continuous loop turns into "this wake reboots, next wake retries".
+//   bring-ups. Before scan init, quiesceBleControllerForScan() polls esp_bt_controller_get_status()
+//   until IDLE so ipc0 can finish Hublink teardown (especially after failed sync).
 //
 // Requires Neurotech-Hub Hublink library (NimBLE). Board: Tools → Bluetooth → NimBLE.
 
@@ -40,6 +40,7 @@
 #include <HublinkNodeRaven.h>
 #include <cstdarg>
 #include <cstdio>
+#include <esp_bt.h>
 #include <esp_mac.h>
 #include <esp_sleep.h>
 #include <freertos/FreeRTOS.h>
@@ -71,8 +72,14 @@ static constexpr uint32_t kHublinkWatchdogMs = 300000;
 /// LED choreography only adds ~100 ms of pre-scan blink, so this cool-down absorbs the slack
 /// (and then some) to keep the effective settle above the previously-stable ~480 ms total.
 static constexpr uint32_t kAfterHublinkBleCoolMs = 2000;
-/// Settle delay if NimBLE still reports initialized when we expected it cleared.
+/// Settle delay after NimBLE deinit or esp_bt_controller disable/deinit.
 static constexpr uint32_t kNimbleForceDeinitSettleMs = 500;
+/// Poll interval while waiting for esp_bt_controller_get_status() to reach IDLE.
+static constexpr uint32_t kBleQuiescePollMs = 50;
+/// Max wait for controller IDLE before scan init (failed sync can leave ipc0 tearing down).
+static constexpr uint32_t kBleQuiesceTimeoutMs = 5000;
+/// Extra cool-down when hublink.sync() failed (gateway connected but transfer incomplete).
+static constexpr uint32_t kAfterFailedSyncExtraCoolMs = 3000;
 /// Settle delay between NimBLEDevice::init and the first getScan/getResults call.
 static constexpr uint32_t kNimblePostInitSettleMs = 250;
 /// Extra serial settle when USB is detected so an attached host's CDC port can enumerate.
@@ -340,36 +347,116 @@ static void ensureJxbDailyHeaderOnly(const raven::RtcReading &rtc)
   }
 }
 
-/// Active-scan for kScanWindowMs after Hublink's sync window has ended. Hublink owns its own
-/// NimBLE lifecycle and deinits after each sync, so this sketch independently brings the stack
-/// up for the scan and tears it down again before returning. Max RSSI per advertised **name**
-/// (not MAC), only names starting with "JX_".
-///
-/// Stack notes: NimBLEDevice::init runs from setup() (Arduino main task) and dispatches BT
-/// controller bring-up to ipc0. The default ipc0 stack is small; on Arduino-ESP32 there's no
-/// portable knob to raise it, so the deep-sleep cadence is the primary mitigation — a rare
-/// canary trip during init becomes "this wake reboots, the next wake retries" rather than a
-/// long-running deployment hang.
-static void runBleScanWindowAndLogJbv()
+/// Fully tear down NimBLE and poll until the BT controller reports IDLE. Hublink's stopAdvertising()
+/// clears NimBLEDevice::isInitialized() before ipc0 finishes controller disable/deinit; calling
+/// init() in that window triggers ipc0 stack canary faults (seen after failed sync with a brief
+/// gateway connection).
+static bool quiesceBleControllerForScan(const __FlashStringHelper *reason)
 {
-  std::map<std::string, int> peerNameMaxRssi;
-
-  delay(kAfterHublinkBleCoolMs);
-
   if (NimBLEDevice::isInitialized())
   {
-    dbgln(F("[scan] NimBLE still initialized after Hublink sync; forcing deinit before scan init."));
+    Serial.print(F("[ble] quiesce ("));
+    Serial.print(reason);
+    Serial.println(F("): NimBLE deinit"));
+    Serial.flush();
     (void)NimBLEDevice::deinit(true);
     delay(kNimbleForceDeinitSettleMs);
+  }
+
+  for (uint8_t attempt = 0; attempt < 3; ++attempt)
+  {
+    const esp_bt_controller_status_t status = esp_bt_controller_get_status();
+    if (status == ESP_BT_CONTROLLER_STATUS_IDLE)
+    {
+      return true;
+    }
+
+    Serial.print(F("[ble] quiesce ("));
+    Serial.print(reason);
+    Serial.print(F("): controller status="));
+    Serial.print(static_cast<unsigned>(status));
+    Serial.print(F(" attempt="));
+    Serial.println(static_cast<unsigned>(attempt));
+    Serial.flush();
+
+    if (status == ESP_BT_CONTROLLER_STATUS_ENABLED)
+    {
+      (void)esp_bt_controller_disable();
+      delay(kNimbleForceDeinitSettleMs);
+    }
+    if (esp_bt_controller_get_status() != ESP_BT_CONTROLLER_STATUS_IDLE)
+    {
+      (void)esp_bt_controller_deinit();
+      delay(kNimbleForceDeinitSettleMs);
+    }
+  }
+
+  const uint32_t deadline = millis() + kBleQuiesceTimeoutMs;
+  while (millis() < deadline)
+  {
+    if (esp_bt_controller_get_status() == ESP_BT_CONTROLLER_STATUS_IDLE)
+    {
+      return true;
+    }
+    delay(kBleQuiescePollMs);
+    yield();
+  }
+
+  Serial.print(F("[ble] quiesce ("));
+  Serial.print(reason);
+  Serial.print(F("): timed out, controller status="));
+  Serial.println(static_cast<unsigned>(esp_bt_controller_get_status()));
+  Serial.flush();
+  return false;
+}
+
+static bool initNimBleForScan()
+{
+  if (!quiesceBleControllerForScan(F("pre-scan-init")))
+  {
+    dbgln(F("[scan] skip: BT controller not idle after quiesce."));
+    return false;
   }
 
   dbgln(F("[scan] NimBLEDevice::init(\"JX_scan\")..."));
   if (!NimBLEDevice::init("JX_scan"))
   {
-    dbgln(F("[scan] NimBLEDevice::init failed; skipping scan."));
-    return;
+    dbgln(F("[scan] NimBLEDevice::init failed; quiesce + retry once."));
+    if (!quiesceBleControllerForScan(F("init-retry")))
+    {
+      dbgln(F("[scan] skip: BT controller not idle before init retry."));
+      return false;
+    }
+    if (!NimBLEDevice::init("JX_scan"))
+    {
+      dbgln(F("[scan] NimBLEDevice::init retry failed; skipping scan."));
+      return false;
+    }
   }
   delay(kNimblePostInitSettleMs);
+  return true;
+}
+
+/// Active-scan for kScanWindowMs after Hublink's sync window has ended. Hublink owns its own
+/// NimBLE lifecycle and deinits after each sync, so this sketch independently brings the stack
+/// up for the scan and tears it down again before returning. Max RSSI per advertised **name**
+/// (not MAC), only names starting with "JX_".
+static void runBleScanWindowAndLogJbv(bool syncFailed)
+{
+  std::map<std::string, int> peerNameMaxRssi;
+
+  delay(kAfterHublinkBleCoolMs);
+  if (syncFailed)
+  {
+    dbgf("[scan] extra cool %lums after failed sync",
+         static_cast<unsigned long>(kAfterFailedSyncExtraCoolMs));
+    delay(kAfterFailedSyncExtraCoolMs);
+  }
+
+  if (!initNimBleForScan())
+  {
+    return;
+  }
 
   NimBLEScan *pScan = NimBLEDevice::getScan();
   if (pScan == nullptr)
@@ -667,7 +754,7 @@ void setup()
 
   // 1 quick blink then LED OFF — visual cue for entering the scan window.
   ledGreenBlinkNTimes(1, kLedQuickBlinkMs);
-  runBleScanWindowAndLogJbv();
+  runBleScanWindowAndLogJbv(!syncOk);
 
   raven::RtcReading rtc;
   if (rtcOkForLogging(rtc))
