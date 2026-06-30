@@ -1,13 +1,16 @@
 // BEAMv3 — Raven hardware BEAM-style motion logger (ULP on PIN_AUX_GPIO1 + SD CSV).
 //
 // meta.json schema matches legacy Hublink-BEAM README (beam.*, device.*, hublink.*).
-// Hublink BLE sync is stubbed out this sprint — see commented block in setup().
 //
-// Power-on: pre-editor init (like MetaConfigEditorHold) → maybeEnterWithFade (USB) →
-// boot wait fade → load meta once → logging init → log → deep sleep.
-// Timer wake: pre-editor init (incl. min battery gate) → load meta → logging → deep sleep.
+// Power-on: pre-editor init → maybeEnterWithFade (USB) → boot gate (Hublink sync until success or
+// BOOT via ISR; then fade until BOOT) → load meta → logging → deep sleep.
+// BOOT press+release is ISR-only during sync; release is verified before logging/sleep.
+// Every successful wake: 3 quick LED blinks before deep sleep.
+//
+// Requires Neurotech-Hub Hublink library (NimBLE). Board: Tools → Bluetooth → NimBLE.
 
 #include <ArduinoJson.h>
+#include <Hublink.h>
 #include <HublinkNodeRaven.h>
 #include <algorithm>
 #include <esp_sleep.h>
@@ -21,11 +24,17 @@ static constexpr char kLibraryVersion[] = "0.2.1";
 
 static constexpr uint32_t kUsbSerialSettleMs = 2000;
 static constexpr uint32_t kErrorBlinkMs = 200;
-static constexpr uint32_t kBootDebounceMs = 80;
+static constexpr uint32_t kBootHublinkSyncSeconds = 3;
+static constexpr uint32_t kBootHublinkOffDelayMs = 3000;
+static constexpr uint32_t kBootFadeTickMs = 25;
+static constexpr uint32_t kBootReleasePollMs = 10;
+static constexpr uint32_t kBootReleaseDebounceMs = 50;
+static constexpr uint32_t kPreSleepBlinkHalfMs = 50;
 static constexpr float kMinBatteryVolts = 3.7f;
 
 raven::HublinkNode node;
 raven::MetaConfigEditor metaEditor;
+Hublink hublink(raven::PIN_SD_CS);
 
 RTC_DATA_ATTR uint32_t gSleepStartUnix = 0;
 
@@ -33,12 +42,60 @@ static uint32_t gLogEveryMinutes = kDefaultLogEveryMinutes;
 static bool gNewFileOnBoot = kDefaultNewFileOnBoot;
 static uint32_t gInactivityPeriodSeconds = kDefaultInactivityPeriodSeconds;
 static String gDeviceId = kDefaultDeviceId;
-// Read from meta but unused while Hublink sync is stubbed:
+// Read from meta; used when logging-loop Hublink sync is enabled (runHublinkSyncWindow).
 static uint32_t gSyncEveryMinutes = 3;
 static uint32_t gSyncForSeconds = 30;
 static uint32_t gRandomizeAlarmMinutes = 0;
 
 static String gActiveLogPath;
+
+/// Set in BOOT GPIO ISR on press then release (active LOW). Never read during hublink.sync().
+static volatile bool gBootSeenPress = false;
+static volatile bool gBootProceed = false;
+
+static void IRAM_ATTR onBootButtonIsr()
+{
+  if (digitalRead(raven::PIN_BOOT_BUTTON) == LOW)
+  {
+    gBootSeenPress = true;
+  }
+  else if (gBootSeenPress)
+  {
+    gBootProceed = true;
+  }
+}
+
+static void attachBootButtonIsr()
+{
+  pinMode(raven::PIN_BOOT_BUTTON, INPUT_PULLUP);
+  gBootSeenPress = false;
+  gBootProceed = false;
+  attachInterrupt(digitalPinToInterrupt(raven::PIN_BOOT_BUTTON), onBootButtonIsr, CHANGE);
+}
+
+static void detachBootButtonIsr()
+{
+  detachInterrupt(digitalPinToInterrupt(raven::PIN_BOOT_BUTTON));
+  gBootSeenPress = false;
+  gBootProceed = false;
+}
+
+static void resetBootProceedFlags()
+{
+  gBootSeenPress = false;
+  gBootProceed = false;
+}
+
+/// Block until BOOT is not held (active LOW). Safe to call with ISR detached.
+static void ensureBootButtonReleased()
+{
+  pinMode(raven::PIN_BOOT_BUTTON, INPUT_PULLUP);
+  while (digitalRead(raven::PIN_BOOT_BUTTON) == LOW)
+  {
+    delay(kBootReleasePollMs);
+  }
+  delay(kBootReleaseDebounceMs);
+}
 
 static void applyMetaFromDoc(const JsonDocument &doc)
 {
@@ -182,6 +239,76 @@ static bool initBeamLogging()
   return true;
 }
 
+static void setStatusLeds(bool on)
+{
+  digitalWrite(raven::PIN_LED_GREEN, on ? HIGH : LOW);
+  digitalWrite(raven::PIN_LED_BLUE, on ? HIGH : LOW);
+}
+
+static void blinkStatusLedsNTimes(uint8_t count, uint32_t halfPeriodMs)
+{
+  pinMode(raven::PIN_LED_GREEN, OUTPUT);
+  pinMode(raven::PIN_LED_BLUE, OUTPUT);
+  setStatusLeds(false);
+  for (uint8_t i = 0; i < count; ++i)
+  {
+    delay(halfPeriodMs);
+    setStatusLeds(true);
+    delay(halfPeriodMs);
+    setStatusLeds(false);
+  }
+}
+
+static void onTimestampReceived(uint32_t timestamp)
+{
+  node.rtc().adjust(DateTime(timestamp));
+}
+
+static bool beginHublinkForBeam()
+{
+  const String advName = String(F("BEAM")) + gDeviceId;
+  if (!hublink.begin(advName))
+  {
+    Serial.println(F("BEAMv3: hublink.begin failed"));
+    return false;
+  }
+  hublink.setTimestampCallback(onTimestampReceived);
+  return true;
+}
+
+/// Push fresh battery level into Hublink before every sync (node characteristic JSON).
+static void updateHublinkBatteryLevel()
+{
+  const bool usbPresent = node.readUsbSense();
+  const raven::BatteryReading battery = node.powerGauge().readSample();
+
+  if (battery.status == raven::ServiceStatus::Ok && battery.hasCellReading &&
+      battery.stateOfChargePct > 0.0f)
+  {
+    const int batteryPct = static_cast<int>(battery.stateOfChargePct + 0.5f);
+    hublink.setBatteryLevel(static_cast<uint8_t>(constrain(batteryPct, 0, 100)));
+    Serial.print(F("BEAMv3: setBatteryLevel from gauge="));
+    Serial.println(batteryPct);
+  }
+  else if (usbPresent)
+  {
+    hublink.setBatteryLevel(100);
+    Serial.println(F("BEAMv3: setBatteryLevel fallback=100 (USB present)"));
+  }
+  else
+  {
+    hublink.setBatteryLevel(0);
+    Serial.println(F("BEAMv3: setBatteryLevel fallback=0 (no USB / no valid gauge)"));
+  }
+}
+
+/// Battery refresh + sync — use for boot gate and future logging-loop sync windows.
+static bool runHublinkSyncWindow(uint32_t syncForSeconds)
+{
+  updateHublinkBatteryLevel();
+  return hublink.sync(syncForSeconds);
+}
+
 static void stepSyncedFade(int &duty, int &step)
 {
   analogWrite(raven::PIN_LED_GREEN, duty);
@@ -199,39 +326,68 @@ static void stepSyncedFade(int &duty, int &step)
   }
 }
 
-static void waitBootReleaseWithFade()
+/// Fade both LEDs until BOOT press+release (ISR). Caller must have ISR attached.
+static void waitBootReleaseWithFadeLoop()
 {
-  Serial.println(F("Press and release BOOT to start logging."));
-
-  pinMode(raven::PIN_LED_GREEN, OUTPUT);
-  pinMode(raven::PIN_LED_BLUE, OUTPUT);
-  pinMode(raven::PIN_BOOT_BUTTON, INPUT_PULLUP);
+  Serial.println(F("BEAMv3: Hublink sync OK — press and release BOOT to start logging."));
 
   int duty = 0;
   int step = 12;
-  bool seenPress = false;
-
-  while (true)
+  while (!gBootProceed)
   {
-    const bool bootLow = digitalRead(raven::PIN_BOOT_BUTTON) == LOW;
-    if (bootLow)
+    stepSyncedFade(duty, step);
+    delay(kBootFadeTickMs);
+  }
+}
+
+/// Sync cycles until gateway success or BOOT (ISR); after success, fade until BOOT.
+static void waitBootReleaseWithHublinkSync()
+{
+  Serial.println(F("BEAMv3: Hublink sync cycling — press and release BOOT to skip to logging."));
+
+  pinMode(raven::PIN_LED_GREEN, OUTPUT);
+  pinMode(raven::PIN_LED_BLUE, OUTPUT);
+  attachBootButtonIsr();
+  setStatusLeds(false);
+
+  const bool hublinkReady = beginHublinkForBeam();
+  bool syncSucceeded = false;
+
+  while (!gBootProceed && !syncSucceeded)
+  {
+    setStatusLeds(true);
+    bool syncOk = false;
+    if (hublinkReady)
     {
-      seenPress = true;
+      syncOk = runHublinkSyncWindow(kBootHublinkSyncSeconds);
     }
-    else if (seenPress)
+    setStatusLeds(false);
+
+    if (gBootProceed)
     {
-      delay(kBootDebounceMs);
-      if (digitalRead(raven::PIN_BOOT_BUTTON) != LOW)
-      {
-        analogWrite(raven::PIN_LED_GREEN, 0);
-        analogWrite(raven::PIN_LED_BLUE, 0);
-        return;
-      }
+      break;
     }
 
-    stepSyncedFade(duty, step);
-    delay(25);
+    if (syncOk)
+    {
+      syncSucceeded = true;
+      Serial.println(F("BEAMv3: Hublink sync succeeded"));
+      break;
+    }
+
+    delay(kBootHublinkOffDelayMs);
   }
+
+  if (syncSucceeded && !gBootProceed)
+  {
+    resetBootProceedFlags();
+    waitBootReleaseWithFadeLoop();
+  }
+
+  ensureBootButtonReleased();
+  detachBootButtonIsr();
+  analogWrite(raven::PIN_LED_GREEN, 0);
+  analogWrite(raven::PIN_LED_BLUE, 0);
 }
 
 static bool resolveActiveLogPath(bool isWakeFromSleep, String &outPath)
@@ -467,7 +623,11 @@ void setup()
       metaEditor.maybeEnterWithFade(node.sd(), true, Serial, 3000,
                                     raven::PIN_LED_GREEN, raven::PIN_LED_BLUE, &node);
     }
-    waitBootReleaseWithFade();
+    if (!reloadMetaFromSd())
+    {
+      errorBlinkForever();
+    }
+    waitBootReleaseWithHublinkSync();
     Serial.println(F("BEAMv3: boot gate complete"));
   }
 
@@ -482,16 +642,10 @@ void setup()
   }
 
   /*
-   * Future Hublink sync (requires Hublink library + NimBLE):
+   * Future logging-loop Hublink sync (when enabled):
    *
-   * Hublink hublink(raven::PIN_SD_CS);
-   * if (hublink.begin(gDeviceId)) {
-   *   hublink.setTimestampCallback(...);
-   *   if (!meta hublink.disable) {
-   *     if (isPowerOn || alarmElapsed(gSyncEveryMinutes)) {
-   *       hublink.sync(gSyncForSeconds);
-   *     }
-   *   }
+   * if (!gHublinkDisable && shouldSyncThisWake) {
+   *   (void)runHublinkSyncWindow(gSyncForSeconds);
    * }
    */
 
@@ -522,6 +676,8 @@ void setup()
 
   Serial.println(F("BEAMv3: entering deep sleep"));
   Serial.flush();
+  ensureBootButtonReleased();
+  blinkStatusLedsNTimes(3, kPreSleepBlinkHalfMs);
   enterDeepSleep();
 }
 
