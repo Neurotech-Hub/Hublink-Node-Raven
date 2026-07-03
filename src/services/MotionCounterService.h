@@ -23,6 +23,8 @@ public:
 
   void setInactivityPeriod(uint16_t seconds);
   uint16_t inactivityCount() const;
+  /// Consecutive no-motion 1 s windows since last motion or completed inactivity period (debug).
+  uint16_t inactivityTracker() const;
   void clearInactivityCounters();
 
 private:

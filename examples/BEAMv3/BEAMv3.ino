@@ -517,6 +517,23 @@ static void fillBeamLogSample(raven::BeamLogSample &out, bool isWakeFromSleep)
   }
 }
 
+static void logUlpCountersIfUsb()
+{
+  if (!node.readUsbSense())
+  {
+    return;
+  }
+  Serial.print(F("BEAMv3: ULP activity_count="));
+  Serial.print(node.motionCounter().motionCount());
+  Serial.print(F(" inactivity_count="));
+  Serial.print(node.motionCounter().inactivityCount());
+  Serial.print(F(" inactivity_tracker="));
+  Serial.print(node.motionCounter().inactivityTracker());
+  Serial.print(F(" inactivity_period_s="));
+  Serial.println(gInactivityPeriodSeconds);
+  Serial.flush();
+}
+
 static bool appendBeamLogRow(bool isWakeFromSleep, String &rowOut)
 {
   rowOut = "";
@@ -670,6 +687,7 @@ void setup()
     String loggedRow;
     Serial.println(F("BEAMv3: appending log row"));
     Serial.flush();
+    logUlpCountersIfUsb();
     const bool logged = appendBeamLogRow(true, loggedRow);
     reportLogResult(logged, loggedRow);
   }

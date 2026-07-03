@@ -3,12 +3,14 @@
 
 namespace raven {
 namespace {
+// RTC_SLOW_MEM layout (must match Hublink-BEAM ULPManager.h): counters in 0–3, ULP program at 4+.
+// Loading the program at index 1 collides with kInactivityCountAddr and corrupts inactivity_count.
 enum : uint16_t {
   kMotionCountAddr = 0,
   kInactivityCountAddr = 1,
   kInactivityTrackerAddr = 2,
   kInactivityPeriodAddr = 3,
-  kProgramStart = 1,
+  kProgramStart = 4,
 };
 
 // ESP32-S3 ULP uses RTC_FAST (~17.5 MHz). Legacy ESP32 BEAM 40000/415 yields ~0.95 s windows
@@ -124,6 +126,10 @@ void MotionCounterService::setInactivityPeriod(uint16_t seconds) {
 
 uint16_t MotionCounterService::inactivityCount() const {
   return static_cast<uint16_t>(RTC_SLOW_MEM[kInactivityCountAddr] & 0xFFFF);
+}
+
+uint16_t MotionCounterService::inactivityTracker() const {
+  return static_cast<uint16_t>(RTC_SLOW_MEM[kInactivityTrackerAddr] & 0xFFFF);
 }
 
 void MotionCounterService::clearInactivityCounters() {
