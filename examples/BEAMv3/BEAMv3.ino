@@ -758,6 +758,8 @@ static void enterDeepSleep()
 void setup()
 {
   Serial.begin(115200);
+  Serial.print(F("BEAMv3 firmware "));
+  Serial.println(kLibraryVersion);
   if (node.readUsbSense())
   {
     delay(kUsbSerialSettleMs);
