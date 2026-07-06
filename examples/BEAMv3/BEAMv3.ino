@@ -20,7 +20,7 @@ static constexpr uint32_t kDefaultLogEveryMinutes = 1;
 static constexpr bool kDefaultNewFileOnBoot = false;
 static constexpr uint32_t kDefaultInactivityPeriodSeconds = 40;
 static constexpr char kDefaultDeviceId[] = "001";
-static constexpr char kLibraryVersion[] = "0.2.1";
+static constexpr char kLibraryVersion[] = "3.0.0";
 
 static constexpr uint32_t kUsbSerialSettleMs = 2000;
 static constexpr uint32_t kErrorBlinkMs = 200;
