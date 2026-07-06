@@ -3,7 +3,8 @@
 // meta.json schema matches legacy Hublink-BEAM README (beam.*, device.*, hublink.*).
 //
 // Power-on: pre-editor init → maybeEnterWithFade (USB) → boot gate (Hublink sync until success or
-// BOOT via ISR; then fade until BOOT) → load meta → logging → deep sleep.
+// BOOT via ISR; then fade until BOOT) → load meta → logging → periodic Hublink sync when due →
+// deep sleep.
 // BOOT press+release is ISR-only during sync; release is verified before logging/sleep.
 // Every successful wake: 3 quick LED blinks before deep sleep.
 //
@@ -13,6 +14,7 @@
 #include <Hublink.h>
 #include <HublinkNodeRaven.h>
 #include <algorithm>
+#include <esp_mac.h>
 #include <esp_sleep.h>
 
 // --- meta.json defaults (overridden when keys present) ---
@@ -20,7 +22,7 @@ static constexpr uint32_t kDefaultLogEveryMinutes = 1;
 static constexpr bool kDefaultNewFileOnBoot = false;
 static constexpr uint32_t kDefaultInactivityPeriodSeconds = 40;
 static constexpr char kDefaultDeviceId[] = "001";
-static constexpr char kLibraryVersion[] = "3.0.0";
+static constexpr char kLibraryVersion[] = "3.0.2";
 
 static constexpr uint32_t kUsbSerialSettleMs = 2000;
 static constexpr uint32_t kErrorBlinkMs = 200;
@@ -46,8 +48,13 @@ static String gDeviceId = kDefaultDeviceId;
 static uint32_t gSyncEveryMinutes = 3;
 static uint32_t gSyncForSeconds = 30;
 static uint32_t gRandomizeAlarmMinutes = 0;
+static bool gHublinkDisable = false;
 
 static String gActiveLogPath;
+
+/// RTC-backed sync cadence (Hublink-BEAM alarm() semantics).
+static RTC_DATA_ATTR uint32_t gSyncAlarmStartUnix = 0;
+static RTC_DATA_ATTR uint16_t gSyncAlarmIntervalMinutes = 0;
 
 /// Set in BOOT GPIO ISR on press then release (active LOW). Never read during hublink.sync().
 static volatile bool gBootSeenPress = false;
@@ -129,6 +136,10 @@ static void applyMetaFromDoc(const JsonDocument &doc)
   if (raven::metaGetString(doc, String("device.id"), id) && id.length() > 0)
   {
     gDeviceId = id;
+  }
+  if (raven::metaGetBool(doc, String("hublink.disable"), b))
+  {
+    gHublinkDisable = b;
   }
 }
 
@@ -227,6 +238,10 @@ static bool finalizeBeamCoreAfterMeta()
                 gDeviceId.c_str(), static_cast<unsigned long>(gLogEveryMinutes),
                 static_cast<unsigned long>(gInactivityPeriodSeconds),
                 gNewFileOnBoot ? "true" : "false");
+  Serial.printf("  sync_every_minutes=%lu sync_for_seconds=%lu hublink.disable=%s\n",
+                static_cast<unsigned long>(gSyncEveryMinutes),
+                static_cast<unsigned long>(gSyncForSeconds),
+                gHublinkDisable ? "true" : "false");
   return true;
 }
 
@@ -302,11 +317,135 @@ static void updateHublinkBatteryLevel()
   }
 }
 
-/// Battery refresh + sync — use for boot gate and future logging-loop sync windows.
+/// Battery refresh + sync — boot gate and logging-loop sync windows.
 static bool runHublinkSyncWindow(uint32_t syncForSeconds)
 {
   updateHublinkBatteryLevel();
   return hublink.sync(syncForSeconds);
+}
+
+static uint32_t currentUnixTime()
+{
+  const raven::RtcReading rtc = node.rtc().readSample();
+  if (rtc.status == raven::ServiceStatus::Ok && rtc.now.isValid())
+  {
+    return rtc.now.unixtime();
+  }
+  return 0;
+}
+
+/// Spread wake times across devices (Hublink-BEAM randomize_alarm_minutes).
+static void applyRandomWakeDelay()
+{
+  if (gRandomizeAlarmMinutes == 0)
+  {
+    return;
+  }
+
+  uint8_t mac[6] = {};
+  esp_read_mac(mac, ESP_MAC_BT);
+  uint32_t hash = 0;
+  for (int i = 0; i < 6; ++i)
+  {
+    hash = hash * 31U + mac[i];
+  }
+
+  const uint32_t maxDelaySeconds =
+      static_cast<uint32_t>(gRandomizeAlarmMinutes) * 2U * 60U + 1U;
+  const uint32_t delaySeconds = hash % maxDelaySeconds;
+  Serial.printf("BEAMv3: random wake delay %lu s (%.1f min)\n",
+                static_cast<unsigned long>(delaySeconds), delaySeconds / 60.0);
+  delay(delaySeconds * 1000UL);
+}
+
+/// Returns true when beam.sync_every_minutes interval has elapsed (legacy Hublink-BEAM alarm()).
+static bool syncAlarmDue(uint16_t minutes)
+{
+  const uint32_t currentTime = currentUnixTime();
+  if (currentTime == 0)
+  {
+    Serial.println(F("BEAMv3: sync alarm skipped — RTC invalid"));
+    return false;
+  }
+
+  if (minutes > 0)
+  {
+    if (gSyncAlarmStartUnix == 0)
+    {
+      gSyncAlarmIntervalMinutes = minutes;
+      gSyncAlarmStartUnix = currentTime;
+      Serial.printf("BEAMv3: sync alarm armed — every %u min from unix %lu\n",
+                    static_cast<unsigned>(minutes),
+                    static_cast<unsigned long>(gSyncAlarmStartUnix));
+      return false;
+    }
+    if (gSyncAlarmIntervalMinutes != minutes)
+    {
+      gSyncAlarmIntervalMinutes = minutes;
+      Serial.printf("BEAMv3: sync alarm interval updated to %u min\n",
+                    static_cast<unsigned>(minutes));
+    }
+  }
+
+  if (gSyncAlarmIntervalMinutes == 0)
+  {
+    return false;
+  }
+
+  const uint32_t intervalSeconds =
+      static_cast<uint32_t>(gSyncAlarmIntervalMinutes) * 60U;
+  uint32_t nextAlarm = gSyncAlarmStartUnix + intervalSeconds;
+
+  if (currentTime >= nextAlarm)
+  {
+    gSyncAlarmStartUnix = nextAlarm;
+    if (nextAlarm <= currentTime)
+    {
+      Serial.println(F("BEAMv3: RTC jump detected — resetting sync alarm"));
+      gSyncAlarmStartUnix = currentTime;
+      nextAlarm = gSyncAlarmStartUnix + intervalSeconds;
+    }
+    Serial.printf("BEAMv3: sync alarm due (next at unix %lu)\n",
+                  static_cast<unsigned long>(nextAlarm));
+    return true;
+  }
+
+  Serial.printf("BEAMv3: sync alarm not due (%lu s remaining)\n",
+                static_cast<unsigned long>(nextAlarm - currentTime));
+  return false;
+}
+
+/// Timer wakes: begin Hublink, sync when alarm due. Power-on: arm alarm only (boot gate synced).
+static void runPeriodicHublinkSyncIfDue(bool isPowerOnReset)
+{
+  const uint16_t syncEveryMinutes = static_cast<uint16_t>(gSyncEveryMinutes);
+
+  if (isPowerOnReset)
+  {
+    (void)syncAlarmDue(syncEveryMinutes);
+    return;
+  }
+
+  const bool hublinkReady = beginHublinkForBeam();
+  if (!syncAlarmDue(syncEveryMinutes))
+  {
+    return;
+  }
+
+  if (gHublinkDisable)
+  {
+    Serial.println(F("BEAMv3: periodic sync skipped (hublink.disable=true)"));
+    return;
+  }
+  if (!hublinkReady)
+  {
+    Serial.println(F("BEAMv3: periodic sync skipped (hublink.begin failed)"));
+    return;
+  }
+
+  const bool synced = runHublinkSyncWindow(gSyncForSeconds);
+  Serial.println(synced ? F("BEAMv3: periodic sync OK")
+                        : F("BEAMv3: periodic sync failed/timeout"));
 }
 
 static void stepSyncedFade(int &duty, int &step)
@@ -658,17 +797,7 @@ void setup()
     errorBlinkForever();
   }
 
-  /*
-   * Future logging-loop Hublink sync (when enabled):
-   *
-   * if (!gHublinkDisable && shouldSyncThisWake) {
-   *   (void)runHublinkSyncWindow(gSyncForSeconds);
-   * }
-   */
-
-  (void)gSyncEveryMinutes;
-  (void)gSyncForSeconds;
-  (void)gRandomizeAlarmMinutes;
+  applyRandomWakeDelay();
 
   if (isTimerWake)
   {
@@ -691,6 +820,8 @@ void setup()
     const bool logged = appendBeamLogRow(true, loggedRow);
     reportLogResult(logged, loggedRow);
   }
+
+  runPeriodicHublinkSyncIfDue(isPowerOnReset);
 
   Serial.println(F("BEAMv3: entering deep sleep"));
   Serial.flush();
