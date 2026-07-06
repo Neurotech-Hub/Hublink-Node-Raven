@@ -30,7 +30,7 @@ static constexpr uint32_t kBootFadeTickMs = 25;
 static constexpr uint32_t kBootReleasePollMs = 10;
 static constexpr uint32_t kBootReleaseDebounceMs = 50;
 static constexpr uint32_t kPreSleepBlinkHalfMs = 50;
-static constexpr float kMinBatteryVolts = 3.7f;
+static constexpr float kMinBatteryVolts = 3.6f;
 
 raven::HublinkNode node;
 raven::MetaConfigEditor metaEditor;
