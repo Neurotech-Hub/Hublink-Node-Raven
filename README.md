@@ -16,12 +16,16 @@ It exposes low-level board controls plus optional higher-level helpers for monit
 - Built-in ULP magnet edge counting service for deep-sleep wheel applications
 - `MetaConfigEditor` for USB Serial `meta.json` and SD file maintenance (used by wheel examples and `MetaConfigEditorHold`)
 
+
+
 ## Dependencies
 
 Install via Arduino Library Manager (or equivalent) before building examples:
 
 - **Required (library.properties):** RTClib, Adafruit MAX1704X, Adafruit BusIO, Adafruit VEML7700 Library, Adafruit BME680 Library, ArduinoJson
 - **Hublink examples only:** [Neurotech-Hub Hublink](https://github.com/Neurotech-Hub/Hublink) — set board **Tools → Bluetooth → NimBLE** for `HublinkBLENode` and `HubWheelHublink`
+
+
 
 ## Arduino IDE Setup
 
@@ -32,6 +36,8 @@ Install via Arduino Library Manager (or equivalent) before building examples:
   - briefly press `Reset`
   - release `Boot`
 - After flashing completes, press `Reset` once to start the new firmware.
+
+
 
 ## Quick start
 
@@ -60,16 +66,20 @@ void loop() {
 
 ## Examples
 
-| Sketch | Purpose |
-| --- | --- |
-| `examples/BasicHardware/BasicHardware.ino` | Minimal bring-up; optional low-battery safeguard demo |
-| `examples/SensorSnapshot/SensorSnapshot.ino` | One-shot sensor readout over Serial |
-| `examples/DataLogging/DataLogging.ino` | Masked CSV logging to SD with `LogFilePolicy` |
-| `examples/HubWheelMinimal/HubWheelMinimal.ino` | Deep-sleep wheel logger (no Hublink) |
-| `examples/HubWheelHublink/HubWheelHublink.ino` | Wheel logger + Hublink gateway (NimBLE) |
-| `examples/HublinkBLENode/HublinkBLENode.ino` | Hublink gateway + local JX observer logs (NimBLE) — see below |
-| `examples/MetaConfigEditorHold/MetaConfigEditorHold.ino` | USB startup hold + `MetaConfigEditor` shell only |
-| `examples/AlertPinTest/AlertPinTest.ino` | DS3231 + optional MAX17048, `PIN_ALERT` exercise |
+
+| Sketch                                                   | Purpose                                                       |
+| -------------------------------------------------------- | ------------------------------------------------------------- |
+| `examples/BasicHardware/BasicHardware.ino`               | Minimal bring-up; optional low-battery safeguard demo         |
+| `examples/SensorSnapshot/SensorSnapshot.ino`             | One-shot sensor readout over Serial                           |
+| `examples/DataLogging/DataLogging.ino`                   | Masked CSV logging to SD with `LogFilePolicy`                 |
+| `examples/HubWheelMinimal/HubWheelMinimal.ino`           | Deep-sleep wheel logger (no Hublink)                          |
+| `examples/HubWheelHublink/HubWheelHublink.ino`           | Wheel logger + Hublink gateway (NimBLE)                       |
+| `examples/HublinkBLENode/HublinkBLENode.ino`             | Hublink gateway + local JX observer logs (NimBLE) — see below |
+| `examples/MetaConfigEditorHold/MetaConfigEditorHold.ino` | USB startup hold + `MetaConfigEditor` shell only              |
+| `examples/AlertPinTest/AlertPinTest.ino`                 | DS3231 + optional MAX17048, `PIN_ALERT` exercise              |
+
+
+
 
 ## Notes
 
@@ -78,18 +88,24 @@ void loop() {
 - ULP magnet counting is core hardware functionality; wake cadence and logging policy remain sketch-controlled in `HubWheelMinimal.ino`/`HubWheelHublink.ino`.
 - `PIN_ALERT` is a shared hardware interrupt line created by combining `~RTC_INT` and `~FUEL_ALERT` through an AND gate. Because both upstream signals are active-low, if either source asserts LOW, `PIN_ALERT` goes LOW (LOW-level interrupt behavior). This lets sketches monitor one GPIO for either source, but the library does not currently expose APIs to configure specific RTC or fuel-gauge alert thresholds/masks.
 
+
+
 ## Battery and low-voltage safeguard (voltage-only, millis-based)
 
-- **Defaults:** [`kSafeguardTripVoltsDefault`](src/helpers/LowBatteryBoot.h) (**2.0 V**), `kSafeguardRecoverVoltsDefault` (**2.6 V**), `kSafeguardPollIntervalSecondsDefault` (**600** s), `kSafeguardShutdownWakeupSecondsDefault` (**600** s). No **`meta.json`** keys.
-- **Automatic path:** [`maybeAutomaticVoltageSafeguard(node, true)`](src/helpers/LowBatteryBoot.h)—internal millis spacing and **`LowBatteryGateConfig`** defaults (**USB** blocks sleep); same behavior as **[`DataLoggerHelper::begin()`](src/helpers/DataLoggerHelper.cpp)** after **`beginI2C()`**. Call from **`setup()`/`loop()`** on your cadence—the helper still throttles gauge reads. **`maybeAutomaticVoltageSafeguard(node, false)`** is a no-op.
-- **Manual path:** [`isCellBelowTripVoltage(node[, tripVolts])`](src/helpers/LowBatteryBoot.h); then optionally [`safeguardShutdown(node, wakeupInSeconds)`](src/helpers/LowBatteryBoot.h) (**LEDs off**, timer deep sleep, does **not** return). USB and policy are sketch-controlled. Example: [`examples/BasicHardware/BasicHardware.ino`](examples/BasicHardware/BasicHardware.ino).
-- **Diagnostics:** [`diagnoseVoltageSafeguard(Stream, node, usbPresent)`](src/helpers/LowBatteryBoot.h)—optional fourth argument **`LowBatteryGateConfig`** if you tune reporting.
+- **Defaults:** `[kSafeguardTripVoltsDefault](src/helpers/LowBatteryBoot.h)` (**2.0 V**), `kSafeguardRecoverVoltsDefault` (**2.6 V**), `kSafeguardPollIntervalSecondsDefault` (**600** s), `kSafeguardShutdownWakeupSecondsDefault` (**600** s). No `meta.json` keys.
+- **Automatic path:** `[maybeAutomaticVoltageSafeguard(node, true)](src/helpers/LowBatteryBoot.h)`—internal millis spacing and `LowBatteryGateConfig` defaults (**USB** blocks sleep); same behavior as `[DataLoggerHelper::begin()](src/helpers/DataLoggerHelper.cpp)` after `beginI2C()`. Call from `setup()`**/**`loop()` on your cadence—the helper still throttles gauge reads. `maybeAutomaticVoltageSafeguard(node, false)` is a no-op.
+- **Manual path:** `[isCellBelowTripVoltage(node[, tripVolts])](src/helpers/LowBatteryBoot.h)`; then optionally `[safeguardShutdown(node, wakeupInSeconds)](src/helpers/LowBatteryBoot.h)` (**LEDs off**, timer deep sleep, does **not** return). USB and policy are sketch-controlled. Example: `[examples/BasicHardware/BasicHardware.ino](examples/BasicHardware/BasicHardware.ino)`.
+- **Diagnostics:** `[diagnoseVoltageSafeguard(Stream, node, usbPresent)](src/helpers/LowBatteryBoot.h)`—optional fourth argument `LowBatteryGateConfig` if you tune reporting.
 - **Meta editor:** `sensor safeguard` runs diagnose when `HublinkNode` is passed into `maybeEnterWithFade` / `enterNow`.
+
+
 
 ## Data Logger
 
 - `RtcService::begin()` now performs a best-effort RTC-to-system-time sync when RTC data is valid. If RTC is unavailable or invalid, initialization continues without failing.
 - In the API and examples, `SampleFields` means a single combined sensor reading (time + power + light + environment + GPIO states).
+
+
 
 ### Selectable CSV Fields
 
@@ -127,6 +143,8 @@ if (raven::resolveLogFilePath(node.sd(), gLogFilePolicy, sample.rtc, logPath) ==
 }
 ```
 
+
+
 ### Filename Modes
 
 - Base name is required and should use only letters, numbers, `_`, or `-`.
@@ -158,6 +176,8 @@ raven::LogFilePolicy gLogFilePolicy = {
 };
 ```
 
+
+
 ### meta.json programmatic access
 
 - Firmware can read `/meta.json` without going through `Hublink::getMeta` by using Raven helpers (`MetaConfigEditor` already shares the load path internally):
@@ -165,6 +185,8 @@ raven::LogFilePolicy gLogFilePolicy = {
   - Typed dot-path accessors: `metaGetUInt32`, `metaGetLong`, `metaGetBool`, `metaGetString`, `metaGetJsonArray` (`wheel.sleep_time_seconds`, `logger.log_fields`, etc.).
   - Arbitrary lookups: `raven::resolveMetaDotPath(doc.as<JsonVariantConst>(), "<dot.path>", &ok)`.
 - Hublink still owns BLE/upload configuration from `meta.json` via `hublink.begin()`. Sketch-owned namespaces (such as `wheel.*` / `logger.*`) can instead use the Raven APIs so tooling matches the Serial meta editor paths.
+
+
 
 ### HublinkBLENode (JX observer)
 
@@ -180,11 +202,13 @@ Use `examples/HublinkBLENode/HublinkBLENode.ino` for a **stationary Hublink gate
 
 **Daily SD files** (prefix + `YYYYMMDD`, root path `/JX…csv`). At boot (and each loop when RTC is valid), missing files are created with headers so append paths are ready:
 
-| File | Role | Header / first row |
-| --- | --- | --- |
-| `/JXVyyyymmdd.csv` | Observer vitals (~60 s) | Masked columns from `DataLoggerHelper` (`unix`, `datetime`, `batt_v`, `batt_per`, `lux`, `temp_c`, `humidity_pct`, `gas_kohm` in the sketch default) |
-| `/JXSyyyymmdd.csv` | Settings snapshot (once per day) | `fw_version,scan_interval_s,adv_interval_s,vitals_interval,ble_name` then one data row (`adv_interval_s` from `hublink.advertise_every`) |
-| `/JXByyyymmdd.csv` | Nearby JX BLE peers per scan window | `unix,observer_id,peer_id,rssi` — `peer_id` is the advertised **name** (not MAC); only names starting with `JX_`; max RSSI per name per window |
+
+| File               | Role                                | Header / first row                                                                                                                                   |
+| ------------------ | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/JXVyyyymmdd.csv` | Observer vitals (~60 s)             | Masked columns from `DataLoggerHelper` (`unix`, `datetime`, `batt_v`, `batt_per`, `lux`, `temp_c`, `humidity_pct`, `gas_kohm` in the sketch default) |
+| `/JXSyyyymmdd.csv` | Settings snapshot (once per day)    | `fw_version,scan_interval_s,adv_interval_s,vitals_interval,ble_name` then one data row (`adv_interval_s` from `hublink.advertise_every`)             |
+| `/JXByyyymmdd.csv` | Nearby JX BLE peers per scan window | `unix,observer_id,peer_id,rssi` — `peer_id` is the advertised **name** (not MAC); only names starting with `JX_`; max RSSI per name per window       |
+
 
 Sketch constants (`kScanWindowMs`, `kVitalsIntervalMs`, `kFwVersion`, CSV field mask) are defined at the top of `HublinkBLENode.ino`. NimBLE scan runs only from `loop()` with cool-down / forced-deinit guards after Hublink may have torn down the stack. This sketch does **not** use `LogFilePolicy`; filenames are the fixed `JXV` / `JXS` / `JXB` daily prefixes above.
 
@@ -211,22 +235,9 @@ Sketch constants (`kScanWindowMs`, `kVitalsIntervalMs`, `kFwVersion`, CSV field 
   - `file rm 2`
   - `file rm all`
 
+
+
 ### MetaConfigEditorHold
 
 - `examples/MetaConfigEditorHold/MetaConfigEditorHold.ino` isolates the USB startup hold used by the wheel sketches: after cold boot with USB connected, press `e` during the fade window to enter the same `meta` / `file` / `sensor` shell without running wheel or Hublink logic.
 
-## Hardware Power Profile
-
-- Measured low-power modes on Raven:
-  - Deep sleep baseline: `50 uA` (`0.05 mA`)
-  - `examples/HubWheelMinimal/HubWheelMinimal.ino` (ULP enabled): `236 uA` (`0.236 mA`)
-- Estimated battery life:
-
-| Battery    | Deep sleep baseline (`50 uA`) | HubWheel ULP mode (`236 uA`) |
-| ---------- | ----------------------------- | ---------------------------- |
-| `100 mAh`  | ~`2000` hours (~`83` days)    | ~`424` hours (~`18` days)    |
-| `500 mAh`  | ~`10000` hours (~`417` days)  | ~`2119` hours (~`88` days)   |
-| `1000 mAh` | ~`20000` hours (~`833` days)  | ~`4237` hours (~`177` days)  |
-| `2000 mAh` | ~`40000` hours (~`1667` days) | ~`8475` hours (~`353` days)  |
-- Magnet sensor (Allegro Microsystems `APS11753KMDALX-3PL1`): about `56 uA` with a `1.5 ms` sampling period—a reasonable tradeoff between higher-frequency magnetic sensing and low power. The part may be removed or replaced with other common magnet sensors (including latching types); higher bandwidth and latching types often draw upwards of `1 mA` constantly.
-- Active current is workload-dependent and typically ranges from about `20-50 mA` depending on clock speed and sensor/SD card utilization.
