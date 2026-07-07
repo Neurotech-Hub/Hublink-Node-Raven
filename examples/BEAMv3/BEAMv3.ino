@@ -2,11 +2,12 @@
 //
 // meta.json schema matches legacy Hublink-BEAM README (beam.*, device.*, hublink.*).
 //
-// Power-on: pre-editor init → maybeEnterWithFade (USB) → boot gate (Hublink sync until success or
-// BOOT via ISR; then fade until BOOT) → load meta → logging → periodic Hublink sync when due →
-// deep sleep.
-// BOOT press+release is ISR-only during sync; release is verified before logging/sleep.
-// Every successful wake: 3 quick LED blinks before deep sleep.
+// Power-on: init → meta → battery LED indicator → preflight (sync 120 s, editor 10 s if
+// hublink.disable+USB, or skip if disabled without USB; same LED cycle on active paths) →
+// BOOT wait (light-sleep chirp, 5 min timeout → shelf mode) → logging → periodic sync → sleep.
+// 'e' meta editor: USB only, during preflight off-slots (sync path) or editor window (disabled).
+// BOOT press+release is ISR-only during hublink.sync(); release verified before logging/sleep.
+// Logging path: 3 quick LED blinks before deep sleep (not after shelf-mode timeout).
 //
 // Requires Neurotech-Hub Hublink library (NimBLE). Board: Tools → Bluetooth → NimBLE.
 
@@ -14,6 +15,7 @@
 #include <Hublink.h>
 #include <HublinkNodeRaven.h>
 #include <algorithm>
+#include <driver/gpio.h>
 #include <esp_mac.h>
 #include <esp_sleep.h>
 
@@ -22,13 +24,21 @@ static constexpr uint32_t kDefaultLogEveryMinutes = 1;
 static constexpr bool kDefaultNewFileOnBoot = false;
 static constexpr uint32_t kDefaultInactivityPeriodSeconds = 40;
 static constexpr char kDefaultDeviceId[] = "001";
-static constexpr char kLibraryVersion[] = "3.0.2";
+static constexpr char kLibraryVersion[] = "3.0.4";
 
 static constexpr uint32_t kUsbSerialSettleMs = 2000;
 static constexpr uint32_t kErrorBlinkMs = 200;
+static constexpr uint32_t kBootIndicatorHoldMs = 2000;
+static constexpr uint32_t kBootIndicatorOffMs = 2000;
+static constexpr uint32_t kBootBatteryBlinkOnMs = 50;
+static constexpr uint32_t kBootBatteryBlinkGapMs = 500;
 static constexpr uint32_t kBootHublinkSyncSeconds = 3;
 static constexpr uint32_t kBootHublinkOffDelayMs = 3000;
-static constexpr uint32_t kBootFadeTickMs = 25;
+static constexpr uint32_t kBootHublinkMaxSeconds = 120;
+static constexpr uint32_t kBootEditorWindowSeconds = 10;
+static constexpr uint32_t kBootWaitTimeoutMs = 5U * 60U * 1000U;
+static constexpr uint32_t kBootChirpLightSleepMs = 950;
+static constexpr uint32_t kBootChirpBlinkMs = 50;
 static constexpr uint32_t kBootReleasePollMs = 10;
 static constexpr uint32_t kBootReleaseDebounceMs = 50;
 static constexpr uint32_t kPreSleepBlinkHalfMs = 50;
@@ -59,6 +69,20 @@ static RTC_DATA_ATTR uint16_t gSyncAlarmIntervalMinutes = 0;
 /// Set in BOOT GPIO ISR on press then release (active LOW). Never read during hublink.sync().
 static volatile bool gBootSeenPress = false;
 static volatile bool gBootProceed = false;
+
+enum class BootPreflightMode : uint8_t
+{
+  Skip,
+  EditorWindow,
+  SyncLoop,
+};
+
+struct BootPreflightConfig
+{
+  BootPreflightMode mode;
+  uint32_t budgetMs;
+  bool pollEditor;
+};
 
 static void IRAM_ATTR onBootButtonIsr()
 {
@@ -448,85 +472,250 @@ static void runPeriodicHublinkSyncIfDue(bool isPowerOnReset)
                         : F("BEAMv3: periodic sync failed/timeout"));
 }
 
-static void stepSyncedFade(int &duty, int &step)
+static uint8_t batteryBootBlinkCount()
 {
-  analogWrite(raven::PIN_LED_GREEN, duty);
-  analogWrite(raven::PIN_LED_BLUE, duty);
-  duty += step;
-  if (duty >= 255)
+  if (node.readUsbSense())
   {
-    duty = 255;
-    step = -step;
+    return 10;
   }
-  else if (duty <= 0)
+
+  const raven::BatteryReading batt = node.powerGauge().readSample();
+  if (batt.status != raven::ServiceStatus::Ok || !batt.hasCellReading ||
+      batt.stateOfChargePct <= 0.0f)
   {
-    duty = 0;
-    step = -step;
+    return 10;
+  }
+
+  const int pct = static_cast<int>(batt.stateOfChargePct + 0.5f);
+  return static_cast<uint8_t>(constrain((pct + 9) / 10, 1, 10));
+}
+
+static void showBatteryBootIndicator()
+{
+  pinMode(raven::PIN_LED_GREEN, OUTPUT);
+  pinMode(raven::PIN_LED_BLUE, OUTPUT);
+
+  setStatusLeds(true);
+  delay(kBootIndicatorHoldMs);
+  setStatusLeds(false);
+  delay(kBootBatteryBlinkGapMs);
+
+  const uint8_t blinks = batteryBootBlinkCount();
+  Serial.printf("BEAMv3: battery indicator %u blinks\n", static_cast<unsigned>(blinks));
+  for (uint8_t i = 0; i < blinks; ++i)
+  {
+    setStatusLeds(true);
+    delay(kBootBatteryBlinkOnMs);
+    setStatusLeds(false);
+    delay(kBootBatteryBlinkGapMs);
+  }
+
+  delay(kBootIndicatorOffMs);
+}
+
+/// Path chosen once at boot from hublink.disable + USB (editor reload does not switch path).
+static BootPreflightConfig resolveBootPreflightMode()
+{
+  const bool usbPresent = node.readUsbSense();
+  if (gHublinkDisable)
+  {
+    if (!usbPresent)
+    {
+      return {BootPreflightMode::Skip, 0, false};
+    }
+    return {BootPreflightMode::EditorWindow, kBootEditorWindowSeconds * 1000UL, true};
+  }
+  return {BootPreflightMode::SyncLoop, kBootHublinkMaxSeconds * 1000UL, usbPresent};
+}
+
+static bool pollSerialMetaEditor(bool &hublinkReady, bool rebeginHublink)
+{
+  if (!node.readUsbSense() || !Serial.available())
+  {
+    return false;
+  }
+
+  const char c = static_cast<char>(Serial.read());
+  if (c != 'e' && c != 'E')
+  {
+    return false;
+  }
+
+  while (Serial.available())
+  {
+    const char trailing = static_cast<char>(Serial.read());
+    if (trailing != '\r' && trailing != '\n')
+    {
+      break;
+    }
+  }
+
+  metaEditor.enterNow(node.sd(), Serial, &node);
+  (void)reloadMetaFromSd();
+  if (rebeginHublink)
+  {
+    hublinkReady = beginHublinkForBeam();
+  }
+  return true;
+}
+
+static void waitInterSyncDelayWithMetaPoll(bool &hublinkReady, uint32_t delayMs, bool pollEditor,
+                                           bool rebeginHublink)
+{
+  const uint32_t startMs = millis();
+  while (!gBootProceed && (millis() - startMs) < delayMs)
+  {
+    if (pollEditor)
+    {
+      pollSerialMetaEditor(hublinkReady, rebeginHublink);
+    }
+    delay(10);
   }
 }
 
-/// Fade both LEDs until BOOT press+release (ISR). Caller must have ISR attached.
-static void waitBootReleaseWithFadeLoop()
+/// LED-on slot: BLE sync on SyncLoop path, timed hold on EditorWindow (same duration).
+static bool runBootPreflightActiveSlot(BootPreflightMode mode, bool hublinkReady)
 {
-  Serial.println(F("BEAMv3: Hublink sync OK — press and release BOOT to start logging."));
+  setStatusLeds(true);
+  if (mode == BootPreflightMode::SyncLoop && hublinkReady)
+  {
+    return runHublinkSyncWindow(kBootHublinkSyncSeconds);
+  }
+  delay(static_cast<uint32_t>(kBootHublinkSyncSeconds) * 1000UL);
+  return false;
+}
 
-  int duty = 0;
-  int step = 12;
+static void runBootPreflightCycle(BootPreflightMode mode, bool pollEditor, bool rebeginHublink,
+                                  bool &hublinkReady, bool &syncSucceeded)
+{
+  const bool syncOk = runBootPreflightActiveSlot(mode, hublinkReady);
+  setStatusLeds(false);
+
+  if (mode == BootPreflightMode::SyncLoop && syncOk)
+  {
+    syncSucceeded = true;
+    Serial.println(F("BEAMv3: Hublink sync succeeded"));
+  }
+  else if (!gBootProceed)
+  {
+    waitInterSyncDelayWithMetaPoll(hublinkReady, kBootHublinkOffDelayMs, pollEditor, rebeginHublink);
+  }
+}
+
+static void powerDownPeripherals()
+{
+  setStatusLeds(false);
+  node.sd().end();
+  node.setExternalRailsEnabled(false);
+}
+
+static void enterShelfMode()
+{
+  Serial.println(F("BEAMv3: shelf mode — deep sleep until reset"));
+  Serial.flush();
+  detachBootButtonIsr();
+  powerDownPeripherals();
+  esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_TIMER);
+  esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_GPIO);
+  esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_EXT0);
+  esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_EXT1);
+  esp_deep_sleep_start();
+}
+
+static void configureBootLightSleepWake()
+{
+  esp_sleep_enable_timer_wakeup(static_cast<uint64_t>(kBootChirpLightSleepMs) * 1000ULL);
+  gpio_wakeup_enable(static_cast<gpio_num_t>(raven::PIN_BOOT_BUTTON), GPIO_INTR_LOW_LEVEL);
+  esp_sleep_enable_gpio_wakeup();
+}
+
+static void disableLightSleepWakeSources()
+{
+  esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_TIMER);
+  esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_GPIO);
+}
+
+static void waitBootReleaseForLogging()
+{
+  Serial.println(F("BEAMv3: press and release BOOT to start logging."));
+
+  const uint32_t startMs = millis();
   while (!gBootProceed)
   {
-    stepSyncedFade(duty, step);
-    delay(kBootFadeTickMs);
+    if ((millis() - startMs) >= kBootWaitTimeoutMs)
+    {
+      enterShelfMode();
+    }
+
+    setStatusLeds(true);
+    delay(kBootChirpBlinkMs);
+    setStatusLeds(false);
+
+    configureBootLightSleepWake();
+    esp_light_sleep_start();
+    disableLightSleepWakeSources();
   }
 }
 
-/// Sync cycles until gateway success or BOOT (ISR); after success, fade until BOOT.
+/// Preflight (sync / editor / skip), then BOOT wait (chirp + shelf on timeout). BOOT ISR throughout.
 static void waitBootReleaseWithHublinkSync()
 {
-  Serial.println(F("BEAMv3: Hublink sync cycling — press and release BOOT to skip to logging."));
-
   pinMode(raven::PIN_LED_GREEN, OUTPUT);
   pinMode(raven::PIN_LED_BLUE, OUTPUT);
   attachBootButtonIsr();
   setStatusLeds(false);
 
-  const bool hublinkReady = beginHublinkForBeam();
+  const BootPreflightConfig preflight = resolveBootPreflightMode();
+  bool hublinkReady = false;
   bool syncSucceeded = false;
 
-  while (!gBootProceed && !syncSucceeded)
+  if (preflight.mode == BootPreflightMode::Skip)
   {
-    setStatusLeds(true);
-    bool syncOk = false;
-    if (hublinkReady)
-    {
-      syncOk = runHublinkSyncWindow(kBootHublinkSyncSeconds);
-    }
-    setStatusLeds(false);
-
-    if (gBootProceed)
-    {
-      break;
-    }
-
-    if (syncOk)
-    {
-      syncSucceeded = true;
-      Serial.println(F("BEAMv3: Hublink sync succeeded"));
-      break;
-    }
-
-    delay(kBootHublinkOffDelayMs);
+    Serial.println(F("BEAMv3: preflight skipped (hublink disabled, no USB)"));
+  }
+  else if (preflight.mode == BootPreflightMode::EditorWindow)
+  {
+    Serial.println(F("BEAMv3: editor window (10s) — press BOOT to skip to logging."));
+  }
+  else
+  {
+    Serial.println(F("BEAMv3: Hublink sync — press and release BOOT to skip to logging."));
+    hublinkReady = beginHublinkForBeam();
   }
 
-  if (syncSucceeded && !gBootProceed)
+  const bool rebeginHublink = preflight.mode == BootPreflightMode::SyncLoop;
+  const uint32_t phaseStartMs = millis();
+
+  while (!gBootProceed && !syncSucceeded &&
+         preflight.budgetMs > 0 && (millis() - phaseStartMs) < preflight.budgetMs)
+  {
+    runBootPreflightCycle(preflight.mode, preflight.pollEditor, rebeginHublink, hublinkReady,
+                          syncSucceeded);
+    if (gBootProceed || syncSucceeded)
+    {
+      break;
+    }
+    if ((millis() - phaseStartMs) >= preflight.budgetMs)
+    {
+      break;
+    }
+  }
+
+  if (!gBootProceed && !syncSucceeded && preflight.mode == BootPreflightMode::SyncLoop &&
+      (millis() - phaseStartMs) >= preflight.budgetMs)
+  {
+    Serial.println(F("BEAMv3: Hublink sync timed out (120s)"));
+  }
+
+  if (!gBootProceed)
   {
     resetBootProceedFlags();
-    waitBootReleaseWithFadeLoop();
+    waitBootReleaseForLogging();
   }
 
   ensureBootButtonReleased();
   detachBootButtonIsr();
-  analogWrite(raven::PIN_LED_GREEN, 0);
-  analogWrite(raven::PIN_LED_BLUE, 0);
+  setStatusLeds(false);
 }
 
 static bool resolveActiveLogPath(bool isWakeFromSleep, String &outPath)
@@ -727,10 +916,7 @@ static void enterDeepSleep()
   node.motionCounter().setInactivityPeriod(static_cast<uint16_t>(gInactivityPeriodSeconds));
   node.motionCounter().begin(static_cast<gpio_num_t>(raven::PIN_AUX_GPIO1));
 
-  digitalWrite(raven::PIN_LED_GREEN, LOW);
-  digitalWrite(raven::PIN_LED_BLUE, LOW);
-  node.sd().end();
-  node.setExternalRailsEnabled(false);
+  powerDownPeripherals();
 
   const uint64_t sleepUs = static_cast<uint64_t>(gLogEveryMinutes) * 60ULL * 1000000ULL;
   esp_sleep_enable_timer_wakeup(sleepUs);
@@ -776,15 +962,11 @@ void setup()
 
   if (isPowerOnReset)
   {
-    if (node.readUsbSense())
-    {
-      metaEditor.maybeEnterWithFade(node.sd(), true, Serial, 3000,
-                                    raven::PIN_LED_GREEN, raven::PIN_LED_BLUE, &node);
-    }
     if (!reloadMetaFromSd())
     {
       errorBlinkForever();
     }
+    showBatteryBootIndicator();
     waitBootReleaseWithHublinkSync();
     Serial.println(F("BEAMv3: boot gate complete"));
   }
