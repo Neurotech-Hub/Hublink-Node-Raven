@@ -24,6 +24,7 @@ Install via Arduino Library Manager (or equivalent) before building examples:
 
 - **Required (library.properties):** RTClib, Adafruit MAX1704X, Adafruit BusIO, Adafruit VEML7700 Library, Adafruit BME680 Library, ArduinoJson
 - **Hublink examples only:** [Neurotech-Hub Hublink](https://github.com/Neurotech-Hub/Hublink) — set board **Tools → Bluetooth → NimBLE** for `HublinkBLENode` and `HubWheelHublink`
+- **LSM303MagPlotter:** no extra libraries (self-contained I2C helper in the example folder)
 
 
 
@@ -77,6 +78,7 @@ void loop() {
 | `examples/HublinkBLENode/HublinkBLENode.ino`             | Hublink gateway + local JX observer logs (NimBLE) — see below |
 | `examples/MetaConfigEditorHold/MetaConfigEditorHold.ino` | USB startup hold + `MetaConfigEditor` shell only              |
 | `examples/AlertPinTest/AlertPinTest.ino`                 | DS3231 + optional MAX17048, `PIN_ALERT` exercise              |
+| `examples/LSM303MagPlotter/LSM303MagPlotter.ino`         | LSM303AGR magnetometer raw XYZ over I2C → Serial Plotter (200 ms, HR mode) |
 
 
 
