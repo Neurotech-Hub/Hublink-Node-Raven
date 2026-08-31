@@ -6,7 +6,7 @@
 // hublink.disable+USB, or skip if disabled without USB; same LED cycle on active paths) →
 // BOOT wait (light-sleep chirp, 5 min timeout → shelf mode) → logging → periodic sync → sleep.
 // 'e' meta editor: USB only, during preflight off-slots (sync path) or editor window (disabled).
-// BOOT press+release is ISR-only during hublink.sync(); release verified before logging/sleep.
+// BOOT: ISR press+release during preflight/sync; chirp wait uses GPIO wake + poll for release.
 // Logging path: 3 quick LED blinks before deep sleep (not after shelf-mode timeout).
 //
 // Requires Neurotech-Hub Hublink library (NimBLE). Board: Tools → Bluetooth → NimBLE.
@@ -24,7 +24,7 @@ static constexpr uint32_t kDefaultLogEveryMinutes = 1;
 static constexpr bool kDefaultNewFileOnBoot = false;
 static constexpr uint32_t kDefaultInactivityPeriodSeconds = 40;
 static constexpr char kDefaultDeviceId[] = "001";
-static constexpr char kLibraryVersion[] = "3.0.4";
+static constexpr char kLibraryVersion[] = "3.0.5";
 
 static constexpr uint32_t kUsbSerialSettleMs = 2000;
 static constexpr uint32_t kErrorBlinkMs = 200;
@@ -107,12 +107,6 @@ static void attachBootButtonIsr()
 static void detachBootButtonIsr()
 {
   detachInterrupt(digitalPinToInterrupt(raven::PIN_BOOT_BUTTON));
-  gBootSeenPress = false;
-  gBootProceed = false;
-}
-
-static void resetBootProceedFlags()
-{
   gBootSeenPress = false;
   gBootProceed = false;
 }
@@ -635,12 +629,15 @@ static void disableLightSleepWakeSources()
   esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_GPIO);
 }
 
+/// Chirp wait: light sleep between blinks; GPIO wake or LOW read = press, then poll for release.
+/// Does not use the CHANGE ISR (edges are unreliable across light sleep).
 static void waitBootReleaseForLogging()
 {
   Serial.println(F("BEAMv3: press and release BOOT to start logging."));
+  pinMode(raven::PIN_BOOT_BUTTON, INPUT_PULLUP);
 
   const uint32_t startMs = millis();
-  while (!gBootProceed)
+  for (;;)
   {
     if ((millis() - startMs) >= kBootWaitTimeoutMs)
     {
@@ -651,13 +648,27 @@ static void waitBootReleaseForLogging()
     delay(kBootChirpBlinkMs);
     setStatusLeds(false);
 
+    if (digitalRead(raven::PIN_BOOT_BUTTON) == LOW)
+    {
+      ensureBootButtonReleased();
+      return;
+    }
+
     configureBootLightSleepWake();
     esp_light_sleep_start();
     disableLightSleepWakeSources();
+
+    // GPIO wake counts as press even if the release already happened during wake latency.
+    if (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_GPIO ||
+        digitalRead(raven::PIN_BOOT_BUTTON) == LOW)
+    {
+      ensureBootButtonReleased();
+      return;
+    }
   }
 }
 
-/// Preflight (sync / editor / skip), then BOOT wait (chirp + shelf on timeout). BOOT ISR throughout.
+/// Preflight (sync / editor / skip) with BOOT ISR; chirp wait polls BOOT after GPIO wake.
 static void waitBootReleaseWithHublinkSync()
 {
   pinMode(raven::PIN_LED_GREEN, OUTPUT);
@@ -709,7 +720,8 @@ static void waitBootReleaseWithHublinkSync()
 
   if (!gBootProceed)
   {
-    resetBootProceedFlags();
+    // Chirp wait polls BOOT; detach ISR so CHANGE edges across light sleep cannot race.
+    detachBootButtonIsr();
     waitBootReleaseForLogging();
   }
 
