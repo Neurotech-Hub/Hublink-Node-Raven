@@ -39,10 +39,6 @@ namespace raven
     pinMode(PIN_USB_SENSE, INPUT_PULLUP);
     pinMode(PIN_BOOT_BUTTON, INPUT_PULLUP);
 
-    pinMode(PIN_SPI_MOSI, INPUT);
-    pinMode(PIN_SPI_SCK, INPUT);
-    pinMode(PIN_SPI_MISO, INPUT);
-
     pinMode(PIN_UART_RX, INPUT);
     pinMode(PIN_UART_TX, OUTPUT);
     digitalWrite(PIN_UART_TX, LOW);
@@ -50,10 +46,20 @@ namespace raven
     pinMode(PIN_TXDO, OUTPUT);
     digitalWrite(PIN_TXDO, LOW);
 
-    pinMode(PIN_SD_EN, OUTPUT);
-    digitalWrite(PIN_SD_EN, HIGH);
-    pinMode(PIN_SD_CS, OUTPUT);
-    digitalWrite(PIN_SD_CS, HIGH);
+    // Leave SPI pins and the SD power rail untouched when the card is already
+    // mounted; re-running pinMode(PIN_SPI_*, INPUT) detaches GPSPI2 via the
+    // ESP32 peripheral manager and driving PIN_SD_EN HIGH cuts card power.
+    if (!sd_.isMounted())
+    {
+      pinMode(PIN_SPI_MOSI, INPUT);
+      pinMode(PIN_SPI_SCK, INPUT);
+      pinMode(PIN_SPI_MISO, INPUT);
+
+      pinMode(PIN_SD_EN, OUTPUT);
+      digitalWrite(PIN_SD_EN, HIGH);
+      pinMode(PIN_SD_CS, OUTPUT);
+      digitalWrite(PIN_SD_CS, HIGH);
+    }
 
     hardwareInitialized_ = true;
     return true;

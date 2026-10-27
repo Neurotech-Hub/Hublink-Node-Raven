@@ -15,6 +15,8 @@ struct RtcReading {
 
 class RtcService {
 public:
+  // `setOnLostPower` is retained so existing call sites compile. A stopped oscillator
+  // is left stopped; `DataLoggerHelper::begin()` may apply meta.json `rtc.datetime`.
   bool begin(TwoWire &wire = Wire, bool setOnLostPower = true);
   RtcReading readSample();
   bool adjust(const DateTime &dt);
