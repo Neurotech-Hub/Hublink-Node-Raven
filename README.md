@@ -104,7 +104,7 @@ void loop() {
 
 ## Data Logger
 
-- `RtcService::begin()` now performs a best-effort RTC-to-system-time sync when RTC data is valid. If RTC is unavailable or invalid, initialization continues without failing.
+- `RtcService::begin()` performs a best-effort RTC-to-system-time sync when RTC data is valid. If RTC is unavailable or invalid, initialization continues without failing. A stopped oscillator is left stopped. `DataLoggerHelper::begin()` then applies `/meta.json` `rtc.datetime` only when that oscillator-stop flag is set, so a running clock is not rewound to the saved instant.
 - In the API and examples, `SampleFields` means a single combined sensor reading (time + power + light + environment + GPIO states).
 
 
@@ -224,7 +224,9 @@ Sketch constants (`kScanWindowMs`, `kVitalsIntervalMs`, `kFwVersion`, CSV field 
 - `HubWheelHublink.ino` includes an optional USB Serial `meta.json` editor: press `e` during a ~5s startup hold window to enter command mode.
 - Top-level commands: `help`, `reboot`, `exit`
   - Sensor commands (when `HublinkNode*` is passed into the editor): `sensor`, `sensor list`, `sensor fuel`, `sensor safeguard`, etc.
+  - RTC commands (when `HublinkNode*` is passed into the editor): `rtc`, `rtc set <YYYY-MM-DD> <HH:MM:SS> <±HH:MM|Z>`
   - Meta commands: `meta show`, `meta get <path>`, `meta set <path> <value>`, `meta setjson <path> <json_literal>`, `meta del <path>`, `meta save`, `meta reload`
+- `rtc set` writes that wall-clock time into the DS3231 and atomically saves `rtc.datetime` plus `rtc.timezone` in `/meta.json`. The offset is a label (`Z` or `±HH:MM`, hours 00–14) and is not added to the registers, so the CSV `datetime` column matches the time you typed. Use this when no Hublink gateway is present. A later gateway timestamp still replaces the chip time. A dead backup cell sets the oscillator-stop flag on every wake, so each wake reapplies the last `rtc.datetime` until the cell can hold time. `HubWheelHublink` skips the CSV row when the RTC sample is missing or not a valid date.
 - File commands (root-only): `file help`, `file list`, `file cat <name>`, `file rm <n>`, `file rm all`
   - `file rm` never allows deleting `meta.json`; saves use atomic temp-file replacement (`/meta.tmp` -> `/meta.json`).
 - Example session:
@@ -233,6 +235,8 @@ Sketch constants (`kScanWindowMs`, `kVitalsIntervalMs`, `kFwVersion`, CSV field 
   - `meta set logger.inc_on_reboot true`
   - `meta setjson logger.log_fields ["unix","datetime","ulp_edges","magnet_passes","passes_min"]`
   - `meta save`
+  - `rtc`
+  - `rtc set 2026-10-26 13:19:00 -05:00`
   - `file list`
   - `file rm 2`
   - `file rm all`
@@ -241,5 +245,5 @@ Sketch constants (`kScanWindowMs`, `kVitalsIntervalMs`, `kFwVersion`, CSV field 
 
 ### MetaConfigEditorHold
 
-- `examples/MetaConfigEditorHold/MetaConfigEditorHold.ino` isolates the USB startup hold used by the wheel sketches: after cold boot with USB connected, press `e` during the fade window to enter the same `meta` / `file` / `sensor` shell without running wheel or Hublink logic.
+- `examples/MetaConfigEditorHold/MetaConfigEditorHold.ino` isolates the USB startup hold used by the wheel sketches: after cold boot with USB connected, press `e` during the fade window to enter the same `meta` / `file` / `sensor` / `rtc` shell without running wheel or Hublink logic.
 

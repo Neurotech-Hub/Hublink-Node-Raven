@@ -1,5 +1,7 @@
 #include "DataLoggerHelper.h"
 #include "LowBatteryBoot.h"
+#include "MetaConfigReader.h"
+#include "RtcWallTime.h"
 
 namespace raven
 {
@@ -172,6 +174,42 @@ namespace raven
       return line;
     }
 
+    void restoreRtcFromMetaIfOscillatorStopped(HublinkNode &node)
+    {
+      const RtcReading reading = node.rtc().readSample();
+      if (!reading.hadLostPower)
+      {
+        return;
+      }
+      if (!node.sd().isMounted())
+      {
+        Serial.println(F("RTC oscillator stopped; SD is not mounted"));
+        return;
+      }
+
+      JsonDocument doc;
+      String saved;
+      if (!loadMetaJson(node.sd(), doc) || !metaGetString(doc, String("rtc.datetime"), saved))
+      {
+        Serial.println(F("RTC oscillator stopped; meta.json has no rtc.datetime"));
+        return;
+      }
+
+      DateTime wall;
+      if (!parseWallDateTime(saved.c_str(), wall))
+      {
+        Serial.println(F("RTC oscillator stopped; rtc.datetime is not YYYY-MM-DD HH:MM:SS"));
+        return;
+      }
+      if (!node.rtc().adjust(wall))
+      {
+        Serial.println(F("RTC oscillator stopped; adjust failed"));
+        return;
+      }
+      Serial.print(F("RTC restored from meta.json "));
+      Serial.println(saved);
+    }
+
   } // namespace
 
   bool DataLoggerHelper::begin()
@@ -193,6 +231,7 @@ namespace raven
     node_.light().begin();
     node_.environment().begin();
     node_.sd().begin();
+    restoreRtcFromMetaIfOscillatorStopped(node_);
     return true;
   }
 

@@ -1,6 +1,6 @@
 #include <Hublink.h>
 #include <HublinkNodeRaven.h>
-#include <esp_sleep.h>
+#include <esp_sleep.h> 
 
 // HubWheelHublink:
 // - Wheel logging + deep-sleep loop
@@ -42,6 +42,10 @@
 //   },
 //   "device": {
 //     "id": "001"
+//   },
+//   "rtc": {
+//     "datetime": "2026-10-26 13:19:00",
+//     "timezone": "-05:00"
 //   }
 // }
 //
@@ -49,11 +53,14 @@
 // - hublink.disable (skip gateway sync window when true; still read by Hublink library in begin())
 // - wheel.sleep_time_seconds, wheel.sync_every_seconds, wheel.sync_for_seconds
 // - logger.log_base_name, logger.log_file_mode, logger.inc_on_reboot, logger.log_fields
+// - rtc.datetime, rtc.timezone (written by the meta editor `rtc set` command).
+//   On boot, DataLoggerHelper applies rtc.datetime only when the DS3231 oscillator-stop
+//   flag is set. The timezone string is a label and is not added to the clock.
 // Power-on / reset wake uses kHublinkSyncSecondsOnReset for sync duration; timer wakes use
 // wheel.sync_for_seconds (meta) / gSyncForSeconds default. Before that long reset sync, a short
 // LED hold polls PIN_BOOT_BUTTON — holding boot skips the long sync for this wake only.
 // These wheel/logger/hublink.disable keys are read from /meta.json by this library via raven::loadMetaJson
-// (typed getters in MetaConfigReader), so sketches do not rely on Hublink for namespaces the
+// (typed getters in MetaConfigReader), so sketches do not rely on Hublink for n mespaces the
 // device firmware owns here.
 //
 // hublink.* and device.* are still handled inside the Hublink library via hublink.begin().
@@ -386,6 +393,12 @@ static void appendWheelLogRow()
   sample = logger.captureSample();
   sample.passesPerMin =
       raven::computePassesPerMinute(sample.magnetPassCount, gSleepTimeSeconds);
+
+  if (sample.rtc.status != raven::ServiceStatus::Ok || !sample.rtc.now.isValid())
+  {
+    Serial.println(F("HubWheelHublink: skip log — RTC time is not valid. Use meta editor `rtc set`."));
+    return;
+  }
 
   String logPath;
   const raven::ServiceStatus pathStatus =

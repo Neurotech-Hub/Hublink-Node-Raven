@@ -40,8 +40,11 @@ namespace raven
     void printMetaHelp(Stream &io) const;
     void printFileHelp(Stream &io) const;
     void printSensorHelp(Stream &io) const;
+    void printRtcHelp(Stream &io) const;
 
     bool cmdSensor(Stream &io, HublinkNode *node, const String &rest);
+    bool cmdRtc(Stream &io, SdService &sd, HublinkNode *node, JsonDocument &doc,
+                const String &rest);
 
     bool cmdMeta(Stream &io, SdService &sd, const String &rest);
     bool cmdFile(Stream &io, SdService &sd, const String &rest);

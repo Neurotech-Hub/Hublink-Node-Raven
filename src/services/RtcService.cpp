@@ -26,9 +26,8 @@ bool RtcService::begin(TwoWire &wire, bool setOnLostPower) {
     if (!rtc_.begin(wire_)) {
       return false;
     }
-    if (setOnLostPower_ && rtc_.lostPower()) {
-      rtc_.adjust(DateTime(F(__DATE__), F(__TIME__)));
-    }
+    // Leave the oscillator-stop flag set. Recovery is an explicit adjust()
+    // (meta.json rtc.datetime, the meta editor, or a gateway timestamp).
     initialized_ = true;
   }
 
@@ -61,9 +60,10 @@ RtcReading RtcService::readSample() {
 }
 
 bool RtcService::adjust(const DateTime &dt) {
-  if (!initialized_) {
+  if (!initialized_ || wire_ == nullptr) {
     return false;
   }
+  wire_->setTimeOut(50);
   rtc_.adjust(dt);
   syncSystemTimeFromRtc(dt);
   return true;

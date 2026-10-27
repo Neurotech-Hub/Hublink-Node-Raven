@@ -3,6 +3,7 @@
 #include "LowBatteryBoot.h"
 #include "MetaConfigReader.h"
 #include "MetaJsonPath.h"
+#include "RtcWallTime.h"
 #include <SD.h>
 #include <stdio.h>
 
@@ -69,7 +70,10 @@ namespace raven
 
     void ensureNodeSensorsReady(HublinkNode &node)
     {
-      node.beginHardware();
+      // Do not call beginHardware() unconditionally while the editor has SD mounted:
+      // beginI2C() runs beginHardware() if needed, and setI2CPowerEnabled(true)
+      // ensures the aux I2C rail is on without disturbing SPI or PIN_SD_EN.
+      node.setI2CPowerEnabled(true);
       node.beginI2C();
       node.rtc().begin();
       node.powerGauge().begin();
@@ -180,6 +184,31 @@ namespace raven
       io.print(node.readMagnet() ? F("HIGH") : F("LOW"));
       io.print(F(" usb="));
       io.println(node.readUsbSense() ? F("present") : F("absent"));
+    }
+
+    // Assign through JsonObject. A JsonVariant copied out of operator[] does not
+    // create missing keys, and set() on that copy leaves the document unchanged.
+    bool assignRtcMetaFields(JsonDocument &doc, const char *datetime, const char *zone)
+    {
+      if (datetime == nullptr || zone == nullptr || !doc.is<JsonObject>())
+      {
+        return false;
+      }
+      JsonObject root = doc.as<JsonObject>();
+      if (!root["rtc"].is<JsonObject>())
+      {
+        root["rtc"].to<JsonObject>();
+      }
+      JsonObject rtc = root["rtc"].as<JsonObject>();
+      if (rtc.isNull())
+      {
+        return false;
+      }
+      if (!rtc["datetime"].set(datetime) || !rtc["timezone"].set(zone))
+      {
+        return false;
+      }
+      return !doc.overflowed();
     }
 
   } // namespace
@@ -411,6 +440,12 @@ namespace raven
         continue;
       }
 
+      if (rootCmd == "rtc")
+      {
+        cmdRtc(io, sd, node, doc, rest);
+        continue;
+      }
+
       io.println(F("Unknown command. Type: help"));
     }
 
@@ -459,6 +494,7 @@ namespace raven
     io.println(F("  meta del <path> | meta save | meta reload"));
     io.println(F("  file help | file list | file cat <name> | file rm <n> | file rm all"));
     io.println(F("  sensor help | sensor | sensor list | sensor fuel | sensor safeguard | ..."));
+    io.println(F("  rtc | rtc set <YYYY-MM-DD> <HH:MM:SS> <±HH:MM|Z>"));
     io.println(F("  exit"));
   }
 
@@ -653,6 +689,129 @@ namespace raven
     return false;
   }
 
+  void MetaConfigEditor::printRtcHelp(Stream &io) const
+  {
+    io.println(F("RTC commands (need HublinkNode when opening editor):"));
+    io.println(F("  rtc"));
+    io.println(F("  rtc set 2026-10-26 13:19:00 -05:00"));
+    io.println(F("  rtc set 2026-10-26 13:19:00 Z"));
+    io.println(F("Writes that wall-clock time into the DS3231 and saves"));
+    io.println(F("rtc.datetime and rtc.timezone in /meta.json."));
+    io.println(F("The offset is a label; it is not added to the clock."));
+  }
+
+  bool MetaConfigEditor::cmdRtc(Stream &io, SdService &sd, HublinkNode *node, JsonDocument &doc,
+                                const String &rest)
+  {
+    const String op = trimCopy(rest);
+    if (op == "help")
+    {
+      printRtcHelp(io);
+      return true;
+    }
+    if (node == nullptr)
+    {
+      io.println(F("rtc: no HublinkNode (pass node into maybeEnterWithFade / enterNow)."));
+      return false;
+    }
+
+    ensureNodeSensorsReady(*node);
+
+    if (op.length() == 0)
+    {
+      const RtcReading rtc = node->rtc().readSample();
+      printRtcLine(io, "rtc", rtc);
+      io.print(F("oscillatorStopped="));
+      io.println(rtc.hadLostPower ? F("yes") : F("no"));
+
+      String savedDt;
+      String savedTz;
+      if (metaGetString(doc, String("rtc.datetime"), savedDt))
+      {
+        io.print(F("meta rtc.datetime="));
+        io.println(savedDt);
+      }
+      else
+      {
+        io.println(F("meta rtc.datetime=(unset)"));
+      }
+      if (metaGetString(doc, String("rtc.timezone"), savedTz))
+      {
+        io.print(F("meta rtc.timezone="));
+        io.println(savedTz);
+      }
+      else
+      {
+        io.println(F("meta rtc.timezone=(unset)"));
+      }
+      return true;
+    }
+
+    if (op != "set" && !op.startsWith("set "))
+    {
+      io.println(F("Unknown rtc command. Try: rtc help"));
+      return false;
+    }
+
+    String dateText;
+    String timeAndZone;
+    String timeText;
+    String zoneText;
+    const String args = op == "set" ? String("") : trimCopy(op.substring(4));
+    if (!splitTwoArgs(args, dateText, timeAndZone) || !splitTwoArgs(timeAndZone, timeText, zoneText))
+    {
+      io.println(F("Usage: rtc set <YYYY-MM-DD> <HH:MM:SS> <±HH:MM|Z>"));
+      return false;
+    }
+
+    DateTime wall;
+    const String wallText = dateText + " " + timeText;
+    if (!parseWallDateTime(wallText.c_str(), wall))
+    {
+      io.println(F("Invalid date-time. Use YYYY-MM-DD HH:MM:SS."));
+      return false;
+    }
+    if (!isTimezoneOffsetLabel(zoneText.c_str()))
+    {
+      io.println(F("Invalid timezone label. Use Z or ±HH:MM (hours 00-14)."));
+      return false;
+    }
+
+    char stored[20];
+    char zoneStored[8];
+    snprintf(stored, sizeof(stored), "%04u-%02u-%02u %02u:%02u:%02u",
+             static_cast<unsigned>(wall.year()), static_cast<unsigned>(wall.month()),
+             static_cast<unsigned>(wall.day()), static_cast<unsigned>(wall.hour()),
+             static_cast<unsigned>(wall.minute()), static_cast<unsigned>(wall.second()));
+    snprintf(zoneStored, sizeof(zoneStored), "%s", (zoneText == "z") ? "Z" : zoneText.c_str());
+
+    // Chip first, and no Serial.flush(): HWCDC flush can wait forever while the
+    // COM port stays open, so the editor never reads another command.
+    io.println(F("Setting DS3231..."));
+    if (!node->rtc().adjust(wall))
+    {
+      io.println(F("RTC adjust failed. meta.json was not changed."));
+      return false;
+    }
+    io.print(F("RTC set to "));
+    io.print(stored);
+    io.print(F(" timezone "));
+    io.println(zoneStored);
+
+    if (!assignRtcMetaFields(doc, stored, zoneStored))
+    {
+      io.println(F("RTC chip was updated; could not update rtc fields in meta.json."));
+      return false;
+    }
+    io.println(F("Saving /meta.json..."));
+    if (!saveMetaDocAtomic(sd, doc, io))
+    {
+      io.println(F("RTC chip was updated; /meta.json was not saved."));
+      return false;
+    }
+    return true;
+  }
+
   bool MetaConfigEditor::loadMetaDoc(SdService &sd, JsonDocument &doc, Stream &io)
   {
     return loadMetaJson(sd, doc, kMetaPath, &io);
@@ -660,6 +819,17 @@ namespace raven
 
   bool MetaConfigEditor::saveMetaDocAtomic(SdService &sd, const JsonDocument &doc, Stream &io)
   {
+    String body;
+    if (serializeJsonPretty(doc, body) == 0 || body.length() == 0)
+    {
+      io.println(F("Failed to format /meta.json."));
+      return false;
+    }
+    if (body.charAt(body.length() - 1) != '\n')
+    {
+      body += '\n';
+    }
+
     if (!sd.begin())
     {
       io.println(F("SD not mounted."));
@@ -672,19 +842,25 @@ namespace raven
       io.println(F("Failed to open /meta.tmp"));
       return false;
     }
-    serializeJsonPretty(doc, out);
-    out.println();
+    const size_t written =
+        out.write(reinterpret_cast<const uint8_t *>(body.c_str()), body.length());
     out.close();
+    if (written != body.length())
+    {
+      io.println(F("Failed to write /meta.tmp"));
+      SD.remove(kTempPath);
+      return false;
+    }
 
-    File verifyFile = SD.open(kTempPath, FILE_READ);
-    if (!verifyFile)
+    String verifyText;
+    if (sd.readText(kTempPath, verifyText) != ServiceStatus::Ok)
     {
       io.println(F("Failed to verify /meta.tmp"));
+      SD.remove(kTempPath);
       return false;
     }
     JsonDocument verifyDoc;
-    DeserializationError err = deserializeJson(verifyDoc, verifyFile);
-    verifyFile.close();
+    const DeserializationError err = deserializeJson(verifyDoc, verifyText);
     if (err)
     {
       io.print(F("Temp parse failed: "));
